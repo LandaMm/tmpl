@@ -1,0 +1,13 @@
+require"npm_api"
+require"shell"
+require"fs"
+
+npm_api.ensure_installed(["passport", "@nestjs/passport"])
+
+if shell.available("nest") {
+	shell.exec("nest g mo auth")
+	shell.exec("nest g s auth")
+} else {
+	// create files from scratch
+}
+
