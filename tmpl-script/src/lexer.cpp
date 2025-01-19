@@ -149,7 +149,7 @@ namespace Compiler
 				break;
 			default:
 				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("LexerError: Unexpected character met: '" + std::to_string(ch) + "'");
+				errorManager.UnexpectedCharacter(ch, m_line, m_col);
 				break;
 			}
 
@@ -157,7 +157,7 @@ namespace Compiler
 			if (ch == '\n')
 			{
 				m_line++;
-				m_col = 0;
+				m_col = 1;
 			}
 			else if (ch != '\r' && ch != '\t')
 			{
@@ -195,7 +195,7 @@ namespace Compiler
 			}
 			else if (id->empty()) {
 				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("LexerError: Unexpected end of code while parsing id");
+				errorManager.UnexpectedEOF(m_line, m_col);
 				break;
 			}
 			else {
@@ -275,7 +275,7 @@ namespace Compiler
 			{
 				if (already_met_point) {
 					Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-					errorManager.RaiseError("LexerError: Unexpected additional point while parsing decimal");
+					errorManager.UnexpectedCharacter(ch, m_line, m_col);
 					break;
 				}
 				else {
@@ -287,7 +287,7 @@ namespace Compiler
 			}
 			else if (number->empty()) {
 				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("LexerError: Unexpected end of code while parsing id");
+				errorManager.UnexpectedEOF(m_line, m_col);
 				break;
 			}
 			else {

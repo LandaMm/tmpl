@@ -254,7 +254,8 @@ namespace Compiler
 		// unknown
 		else
 		{
-			Error("Unexpected token for factor met: " + std::to_string((int)token->GetType()));
+			Prelude::ErrorManager& errManager = GetErrorManager();
+			errManager.UnexpectedToken(token);
 			return nullptr;
 		}
 	}

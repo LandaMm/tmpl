@@ -34,7 +34,7 @@ namespace Compiler
 			}
 			else
 			{
-				Error("Unexpected token for object member parsing");
+				GetErrorManager().UnexpectedToken(m_lexer->GetToken());
 			}
 		} while (m_lexer->GetToken()->GetType() == TokenType::Point || m_lexer->GetToken()->GetType() == TokenType::OpenSquareBracket);
 

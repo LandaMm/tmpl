@@ -9,10 +9,10 @@
 
 namespace Compiler
 {
-	void Parser::Error(std::string message)
+	Prelude::ErrorManager& Parser::GetErrorManager()
 	{
 		Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-		errorManager.RaiseError("ParseError: " + message);
+		return errorManager;
 	}
 
 	void Parser::Eat(TokenType type)
@@ -25,12 +25,13 @@ namespace Compiler
 		{
 			if (m_lexer->GetToken()->GetType() == TokenType::_EOF)
 			{
-				Error("Unexpected end of code while requiring token of type " + std::to_string((int)type));
+				auto token = m_lexer->GetToken();
+				GetErrorManager().UnexpectedEofWhileToken(type, token->GetLine(), token->GetColumn());
 			}
 			else
 			{
 				// TODO: provide better display of met token
-				Error("Expected token of type " + std::to_string((int)type));
+				GetErrorManager().UnexpectedToken(m_lexer->GetToken(), type);
 			}
 		}
 	}
@@ -51,13 +52,17 @@ namespace Compiler
 	std::shared_ptr<Node> Parser::Statement()
 	{
 		auto token = m_lexer->GetToken();
+		std::shared_ptr<Node> stmt = nullptr;
 		switch (token->GetType())
 		{
 		case TokenType::If:
-			return IfElseStatement();
+			stmt = IfElseStatement();
+			break;
 		default:
-			return Ternary();
+			stmt = Ternary();
+			Eat(TokenType::Semicolon);
+			break;
 		}
-		Eat(TokenType::Semicolon);
+		return stmt;
 	}
 }
