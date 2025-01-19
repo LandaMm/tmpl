@@ -49,103 +49,103 @@ namespace Compiler
 				//m_tokens.push_back(std::make_shared<Token>(TokenType::Whitespace));
 				break;
 			case '.':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Point));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Point, m_line, m_col));
 				break;
 			case ',':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Comma));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Comma, m_line, m_col));
 				break;
 			case '(':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::OpenBracket));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::OpenBracket, m_line, m_col));
 				break;
 			case ')':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseBracket));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseBracket, m_line, m_col));
 				break;
 			case '{':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::OpenCurly));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::OpenCurly, m_line, m_col));
 				break;
 			case '}':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseCurly));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseCurly, m_line, m_col));
 				break;
 			case '[':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::OpenSquareBracket));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::OpenSquareBracket, m_line, m_col));
 				break;
 			case ']':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseSquareBracket));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseSquareBracket, m_line, m_col));
 				break;
 			case '+':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Plus));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Plus, m_line, m_col));
 				break;
 			case '-':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Minus));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Minus, m_line, m_col));
 				break;
 			case '*':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Multiply));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Multiply, m_line, m_col));
 				break;
 			case '/':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Divide));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Divide, m_line, m_col));
 				break;
 			case ';':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Semicolon));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Semicolon, m_line, m_col));
 				break;
 			case '=':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Compare));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Compare, m_line, m_col));
 					m_pos++;
 				}
 				else
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Equal));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Equal, m_line, m_col));
 				break;
 			case '!':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.push_back(std::make_shared<Token>(TokenType::NotEqual));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::NotEqual, m_line, m_col));
 					m_pos++;
 				}
 				else
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Not));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Not, m_line, m_col));
 				break;
 			case '&':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '&')
 				{
-					m_tokens.push_back(std::make_shared<Token>(TokenType::And));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::And, m_line, m_col));
 					m_pos++;
 				}
 				else
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Ampersand));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Ampersand, m_line, m_col));
 				break;
 			case '|':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '|')
 				{
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Or));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Or, m_line, m_col));
 					m_pos++;
 				}
 				else
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Bind));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Bind, m_line, m_col));
 				break;
 			case '<':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.push_back(std::make_shared<Token>(TokenType::LessEqual));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::LessEqual, m_line, m_col));
 					m_pos++;
 				}
 				else
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Less));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Less, m_line, m_col));
 				break;
 			case '>':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.push_back(std::make_shared<Token>(TokenType::GreaterEqual));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::GreaterEqual, m_line, m_col));
 					m_pos++;
 				}
 				else
-					m_tokens.push_back(std::make_shared<Token>(TokenType::Greater));
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Greater, m_line, m_col));
 				break;
 			case '?':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Question));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Question, m_line, m_col));
 				break;
 			case ':':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Colon));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
 				break;
 			default:
 				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
@@ -154,9 +154,18 @@ namespace Compiler
 			}
 
 			m_pos++;
+			if (ch == '\n')
+			{
+				m_line++;
+				m_col = 0;
+			}
+			else
+			{
+				m_col++;
+			}
 		}
 
-		m_tokens.push_back(std::make_shared<Token>(TokenType::_EOF));
+		m_tokens.push_back(std::make_shared<Token>(TokenType::_EOF, m_line, m_col));
 	}
 
 	void Lexer::Id()
@@ -170,16 +179,19 @@ namespace Compiler
 			{
 				id->push_back(ch);
 				m_pos++;
+				m_col++;
 			}
 			else if (ch == '_')
 			{
 				id->push_back(ch);
 				m_pos++;
+				m_col++;
 			}
 			else if (isdigit(ch) && !id->empty())
 			{
 				id->push_back(ch);
 				m_pos++;
+				m_col++;
 			}
 			else if (id->empty()) {
 				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
@@ -192,15 +204,15 @@ namespace Compiler
 		}
 
 		if (*id == "require")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Require));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col - id->size()));
 		else if (*id == "if")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::If));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::If, m_line, m_col - id->size()));
 		else if (*id == "else")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Else));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Else, m_line, m_col - id->size()));
 		else if (*id == "require")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Require));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col - id->size()));
 		else
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, id));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, id, m_line, m_col - id->size()));
 	}
 
 	void Lexer::String()
@@ -217,15 +229,17 @@ namespace Compiler
 			if (ch != '"') {
 				id->push_back(ch);
 				m_pos++;
+				m_col++;
 			}
 			else {
 				m_pos++;
+				m_col++;
 				string_closed = true;
 				break;
 			}
 		}
 
-		m_tokens.push_back(std::make_shared<Token>(TokenType::String, id));
+		m_tokens.push_back(std::make_shared<Token>(TokenType::String, id, m_line, m_col - id->size()));
 	}
 
 	void Lexer::Comment()
@@ -238,6 +252,8 @@ namespace Compiler
 			{
 				break;
 			}
+			m_pos++;
+			m_col++;
 		}
 	}
 
@@ -253,6 +269,7 @@ namespace Compiler
 			{
 				number->push_back(ch);
 				m_pos++;
+				m_col++;
 			}
 			else if (ch == '.')
 			{
@@ -265,6 +282,7 @@ namespace Compiler
 					already_met_point = true;
 					number->push_back(ch);
 					m_pos++;
+					m_col++;
 				}
 			}
 			else if (number->empty()) {
@@ -283,16 +301,16 @@ namespace Compiler
 			if (digitstr.size() <= 7)
 			{
 				float* num = new float(std::stof(*number));
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, num));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, num, m_line, m_col - number->size()));
 			}
 			else {
 				double* num = new double(std::stod(*number));
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, num));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, num, m_line, m_col - number->size()));
 			}
 		}
 		else {
 			int* num = new int(std::stoi(*number));
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, num));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, num, m_line, m_col - number->size()));
 		}
 	}
 
@@ -300,7 +318,7 @@ namespace Compiler
 	{
 		if (m_index >= m_tokens.size())
 		{
-			return std::make_shared<Token>(TokenType::_EOF);
+			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
 		}
 		return m_tokens[m_index];
 	}
@@ -309,7 +327,7 @@ namespace Compiler
 	{
 		if (m_index + 1 >= m_tokens.size())
 		{
-			return std::make_shared<Token>(TokenType::_EOF);
+			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
 		}
 		return m_tokens[m_index + 1];
 	}
@@ -318,7 +336,7 @@ namespace Compiler
 	{
 		if (m_index + 1 >= m_tokens.size())
 		{
-			return std::make_shared<Token>(TokenType::_EOF);
+			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
 		}
 		return m_tokens[m_index++];
 	}
