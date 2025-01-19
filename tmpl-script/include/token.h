@@ -1,6 +1,7 @@
 #pragma once
 #ifndef TOKEN_H
 #define TOKEN_H
+#include<vector>
 
 namespace Compiler
 {
@@ -46,6 +47,48 @@ namespace Compiler
 		_EOF,
 	};
 
+	static const std::vector<std::string> TokenTypeCharacters = {
+		"identifier",
+		"integer",
+		"float",
+		"double",
+		"string",
+		"whitespace",
+		"newline",
+		"point",
+		"comma",
+		"'('",
+		"')'",
+		"'{'",
+		"'}'",
+		"'['",
+		"']'",
+		"'+'",
+		"'-'",
+		"'*'",
+		"'/'",
+		"'='",
+		"'=='",
+		"'<'",
+		"'>'",
+		"'<='",
+		"'>='",
+		"'?'",
+		"':'",
+		"'!'",
+		"'!='",
+		"'&&'",
+		"'||'",
+		"'|'",
+		"'&'",
+		"semicolon",
+		// Keywords
+		"require",
+		"if",
+		"else",
+		"EOF",
+	};
+
 	class Token
 	{
 	private:
@@ -66,6 +109,14 @@ namespace Compiler
 			{
 				delete m_value;
 			}
+		}
+	public:
+		inline size_t GetLine() const { return m_line; }
+		inline size_t GetColumn() const { return m_col; }
+	public:
+		static std::string GetTokenTypeCharacter(TokenType type)
+		{
+			return TokenTypeCharacters[(size_t)type];
 		}
 	public:
 		friend std::ostream& operator<<(std::ostream& stream, const Token& token);
