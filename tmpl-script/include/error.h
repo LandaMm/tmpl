@@ -3,6 +3,9 @@
 #define ERROR_H
 #include<iostream>
 #include<string>
+#include"token.h"
+
+using namespace Compiler;
 
 namespace Prelude
 {
@@ -23,6 +26,13 @@ namespace Prelude
 		}
 	public:
 		void RaiseError(std::string errorMessage);
+	public: // Lexer (Tokenizer)
+		void UnexpectedCharacter(char ch, size_t line, size_t col);
+		void UnexpectedEOF(size_t line, size_t col);
+	public: // Parser
+		void UnexpectedEofWhileToken(TokenType tokenType, size_t line, size_t col);
+		void UnexpectedToken(std::shared_ptr<Token> token);
+		void UnexpectedToken(std::shared_ptr<Token> token, TokenType expectedTokenType);
 	};
 }
 
