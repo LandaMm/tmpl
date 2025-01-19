@@ -45,16 +45,6 @@ namespace Compiler
 		while (m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
 			m_root->AddStatement(Statement());
-			auto closingToken = m_lexer->GetToken()->GetType();
-			if (closingToken == TokenType::Newline)
-			{
-				Eat(TokenType::Newline);
-			}
-			else if (closingToken != TokenType::_EOF)
-			{
-				Error("Unexpected continious statement");
-				break;
-			}
 		}
 	}
 
@@ -68,5 +58,6 @@ namespace Compiler
 		default:
 			return Ternary();
 		}
+		Eat(TokenType::Semicolon);
 	}
 }
