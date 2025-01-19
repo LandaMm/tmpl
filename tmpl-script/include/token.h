@@ -38,6 +38,7 @@ namespace Compiler
 		Or,
 		Bind,
 		Ampersand,
+		Semicolon,
 		// Keywords
 		Require,
 		If,

@@ -39,9 +39,11 @@ namespace Compiler
 			switch (ch)
 			{
 			case '\n':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Newline));
+				// skip newline
+				//m_tokens.push_back(std::make_shared<Token>(TokenType::Newline));
 				break;
 			case ' ':
+			case '\t':
 			case '\r':
 				// skip those characters
 				//m_tokens.push_back(std::make_shared<Token>(TokenType::Whitespace));
@@ -81,6 +83,9 @@ namespace Compiler
 				break;
 			case '/':
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Divide));
+				break;
+			case ';':
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Semicolon));
 				break;
 			case '=':
 				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
