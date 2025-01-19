@@ -51,9 +51,11 @@ namespace Compiler
 	private:
 		TokenType m_type;
 		void* m_value;
+		size_t m_line;
+		size_t m_col;
 	public:
-		Token(TokenType type) : m_type(type), m_value(nullptr) { }
-		Token(TokenType type, void* value) : m_type(type), m_value(value) { }
+		Token(TokenType type, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(nullptr) {}
+		Token(TokenType type, void* value, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(value) {}
 	public:
 		inline TokenType GetType() const { return m_type; }
 		template<typename T>
