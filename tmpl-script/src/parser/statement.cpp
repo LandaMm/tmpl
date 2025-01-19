@@ -25,16 +25,6 @@ namespace Compiler
 			{
 				std::shared_ptr<Node> statement = Statement();
 				ifElse->AddItem(statement);
-				auto closingToken = m_lexer->GetToken()->GetType();
-				if (closingToken == TokenType::Newline)
-				{
-					Eat(TokenType::Newline);
-				}
-				else if (closingToken != TokenType::CloseCurly)
-				{
-					Error("Unexpected token met inside a statement");
-					break;
-				}
 			}
 			Eat(TokenType::CloseCurly);
 		}
@@ -62,16 +52,6 @@ namespace Compiler
 					{
 						std::shared_ptr<Node> statement = Statement();
 						stmts->AddItem(statement);
-						auto closingToken = m_lexer->GetToken()->GetType();
-						if (closingToken == TokenType::Newline)
-						{
-							Eat(TokenType::Newline);
-						}
-						else if (closingToken != TokenType::CloseCurly)
-						{
-							Error("Unexpected token met inside a statement");
-							break;
-						}
 					}
 					Eat(TokenType::CloseCurly);
 				}
