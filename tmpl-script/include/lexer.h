@@ -28,7 +28,7 @@ namespace Compiler
 			m_index = 0;
 			m_pos = 0;
 			m_line = 1;
-			m_col = 0;
+			m_col = 1;
 		}
 	public:
 		std::vector<std::shared_ptr<Token>>& GetTokens() { return m_tokens; };
