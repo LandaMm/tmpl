@@ -159,7 +159,7 @@ namespace Compiler
 				m_line++;
 				m_col = 0;
 			}
-			else
+			else if (ch != '\r' && ch != '\t')
 			{
 				m_col++;
 			}
