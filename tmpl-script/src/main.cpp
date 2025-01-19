@@ -7,7 +7,13 @@
 int main()
 {
 	using namespace Compiler;
-	std::string code = "if 5 == 5 { print(true) } else print(false)";
+	std::string code = R"(
+	print(5);
+	if 5 + 5 == 10
+		print("hello world!");
+	else
+		shell.exit(-1);
+)";
 	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(code);
 	lexer->Tokenize();
 	std::vector<std::shared_ptr<Token>>& tokens = lexer->GetTokens();
