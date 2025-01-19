@@ -8,21 +8,14 @@ int main()
 {
 	using namespace Compiler;
 	std::string code = R"(
-	print(5);
+	print(5)
 	if 5 + 5 == 10
 		print("hello world!");
 	else
-		shell.exit(-1);
+		shell.exit(-1)
 )";
 	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(code);
 	lexer->Tokenize();
-	std::vector<std::shared_ptr<Token>>& tokens = lexer->GetTokens();
-	std::cout << "tokenized code and got " << tokens.size() << std::endl;
-	for (size_t i = 0; i < tokens.size(); i++)
-	{
-		std::shared_ptr<Token> token = tokens[i];
-		std::cout << *token << std::endl;
-	}
 	Parser parser(lexer);
 	parser.Parse();
 	std::cout << "finished parsing" << std::endl;
