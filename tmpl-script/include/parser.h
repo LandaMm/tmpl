@@ -7,6 +7,7 @@
 #include"node/identifier.h"
 #include"node/function.h"
 #include"node/list.h"
+#include"error.h"
 #include<memory>
 
 namespace Compiler
@@ -17,12 +18,12 @@ namespace Compiler
 		std::shared_ptr<Nodes::ProgramNode> m_root;
 		std::shared_ptr<Lexer> m_lexer;
 	public:
-		Parser(std::shared_ptr<Lexer> lexer) : m_lexer(lexer), m_root(std::make_shared<Nodes::ProgramNode>()) { }
+		Parser(std::shared_ptr<Lexer> lexer) : m_lexer(lexer), m_root(std::make_shared<Nodes::ProgramNode>()) {}
 		~Parser() { }
 	public:
 		void Parse();
 	private:
-		void Error(std::string message);
+		Prelude::ErrorManager& GetErrorManager();
 		void Eat(TokenType type);
 		TokenType Peek();
 	private: // Common
