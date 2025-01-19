@@ -15,6 +15,8 @@ namespace Compiler
 	private: // tokenizer
 		size_t m_pos;
 		std::string m_code;
+		size_t m_line;
+		size_t m_col;
 	private: // token manager
 		size_t m_index;
 	public:
@@ -25,6 +27,8 @@ namespace Compiler
 
 			m_index = 0;
 			m_pos = 0;
+			m_line = 1;
+			m_col = 0;
 		}
 	public:
 		std::vector<std::shared_ptr<Token>>& GetTokens() { return m_tokens; };
