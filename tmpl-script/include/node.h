@@ -34,7 +34,7 @@ namespace Compiler
 		virtual std::string Format() const = 0;
 	public:
 		template<typename T>
-		inline T* Get() const { return (T*)&this; };
+		inline T* Get() const { return static_cast<T*>(this); };
 
 	public:
 		friend std::ostream& operator<<(std::ostream& stream, const Node& node);
