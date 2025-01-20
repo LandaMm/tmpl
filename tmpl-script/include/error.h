@@ -3,6 +3,7 @@
 #define ERROR_H
 #include<iostream>
 #include<string>
+#include<memory>
 #include"token.h"
 
 using namespace Compiler;
