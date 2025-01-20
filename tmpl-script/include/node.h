@@ -6,7 +6,7 @@
 #include<vector>
 #include<memory>
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes { }
 

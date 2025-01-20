@@ -1,7 +1,7 @@
 
 #include"../../include/node/expression.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

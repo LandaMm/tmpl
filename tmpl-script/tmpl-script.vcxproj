@@ -152,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\error.h" />
+    <ClInclude Include="include\interpreter.h" />
     <ClInclude Include="include\lexer.h" />
     <ClInclude Include="include\node.h" />
     <ClInclude Include="include\node\expression.h" />

@@ -5,7 +5,7 @@
 #include<memory>
 #include"../node.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

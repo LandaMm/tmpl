@@ -2,7 +2,7 @@
 #include"../include/error.h"
 #include"../include/lexer.h"
 
-namespace Compiler
+namespace AST
 {
 	void Lexer::Tokenize()
 	{

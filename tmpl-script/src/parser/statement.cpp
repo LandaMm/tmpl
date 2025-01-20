@@ -2,7 +2,7 @@
 #include"../../include/parser.h"
 #include"../../include/node/statement.h"
 
-namespace Compiler
+namespace AST
 {
 	std::shared_ptr<Node> Parser::IfElseStatement()
 	{

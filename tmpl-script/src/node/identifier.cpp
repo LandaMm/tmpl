@@ -1,7 +1,7 @@
 
 #include"../../include/node/identifier.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

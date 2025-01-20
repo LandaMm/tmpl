@@ -6,7 +6,7 @@
 #include<memory>
 #include"token.h"
 
-namespace Compiler
+namespace AST
 {
 	class Lexer
 	{

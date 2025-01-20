@@ -1,7 +1,7 @@
 
 #include"../include/error.h"
 
-using namespace Compiler;
+using namespace AST;
 
 namespace Prelude
 {
@@ -22,7 +22,7 @@ namespace Prelude
 		std::cout << "LexerError: Unexpected end of file while tokenizing at line " << line << " and " << col << " column." << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UnexpectedEofWhileToken(Compiler::TokenType tokenType, size_t line, size_t col)
+	void ErrorManager::UnexpectedEofWhileToken(AST::TokenType tokenType, size_t line, size_t col)
 	{
 		// TODO: show character by token type instead of token type itself
 		std::cout << "ParseError: Expected '" << Token::GetTokenTypeCharacter(tokenType) <<"' character but got eof at line " << line << " and " << col << " column." << std::endl;

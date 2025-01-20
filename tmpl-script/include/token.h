@@ -3,7 +3,7 @@
 #define TOKEN_H
 #include<vector>
 
-namespace Compiler
+namespace AST
 {
 	enum class TokenType {
 		Id,

@@ -2,7 +2,7 @@
 #include<iostream>
 #include"../include/token.h"
 
-namespace Compiler
+namespace AST
 {
 	std::ostream& operator<<(std::ostream& stream, const Token& token)
 	{

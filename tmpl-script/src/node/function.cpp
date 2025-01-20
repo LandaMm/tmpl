@@ -2,7 +2,7 @@
 
 #include"../../include/node/function.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

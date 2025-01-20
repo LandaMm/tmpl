@@ -6,7 +6,7 @@
 
 int main()
 {
-	using namespace Compiler;
+	using namespace AST;
 	std::string code = R"(
 	print(5)
 	if 5 + 5 == 10

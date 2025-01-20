@@ -4,7 +4,7 @@
 #define OBJECT_MEMBER_H
 #include"../node.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

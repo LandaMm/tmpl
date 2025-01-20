@@ -1,7 +1,7 @@
 
 #include"../include/node.h"
 
-namespace Compiler
+namespace AST
 {
 	std::ostream& operator<<(std::ostream& stream, const Node& node)
 	{

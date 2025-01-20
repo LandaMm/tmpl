@@ -7,7 +7,7 @@
 #include"../../include/node/logical.h"
 #include"../../include/node/unary.h"
 
-namespace Compiler
+namespace AST
 {
 	std::shared_ptr<Node> Parser::Ternary()
 	{

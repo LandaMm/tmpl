@@ -6,7 +6,7 @@
 #include<memory>
 #include"token.h"
 
-using namespace Compiler;
+using namespace AST;
 
 namespace Prelude
 {

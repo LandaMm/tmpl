@@ -7,7 +7,7 @@
 #include"../include/node/function.h"
 #include"../include/node/expression.h"
 
-namespace Compiler
+namespace AST
 {
 	Prelude::ErrorManager& Parser::GetErrorManager()
 	{

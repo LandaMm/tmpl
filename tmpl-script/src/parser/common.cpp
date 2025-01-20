@@ -2,7 +2,7 @@
 #include"../../include/parser.h"
 #include"../../include/node/identifier.h"
 
-namespace Compiler
+namespace AST
 {
 	std::shared_ptr<Nodes::IdentifierNode> Parser::Id()
 	{

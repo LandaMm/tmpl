@@ -1,7 +1,7 @@
 
 #include"../../include/node/program.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

@@ -10,7 +10,7 @@
 #include"error.h"
 #include<memory>
 
-namespace Compiler
+namespace AST
 {
 	class Parser
 	{

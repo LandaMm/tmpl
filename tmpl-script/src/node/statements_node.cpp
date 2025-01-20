@@ -1,7 +1,7 @@
 
 #include"../../include/node/statement.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Statements
 	{

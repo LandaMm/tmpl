@@ -3,7 +3,7 @@
 #define STATEMENT_H
 #include"../node.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Statements
 	{

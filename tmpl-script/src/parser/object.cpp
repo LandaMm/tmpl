@@ -3,7 +3,7 @@
 #include"../../include/parser.h"
 #include"../../include/node/object_member.h"
 
-namespace Compiler
+namespace AST
 {
 	std::shared_ptr<Node> Parser::ObjectMember(std::shared_ptr<Node> obj)
 	{

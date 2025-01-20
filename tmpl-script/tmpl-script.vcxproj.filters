@@ -117,5 +117,8 @@
     <ClInclude Include="include\node\statement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\interpreter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

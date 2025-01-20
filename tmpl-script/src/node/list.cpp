@@ -1,6 +1,6 @@
 #include"../../include/node/list.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{

@@ -2,7 +2,7 @@
 #include<string>
 #include"../../include/node/literal.h"
 
-namespace Compiler
+namespace AST
 {
 	namespace Nodes
 	{
