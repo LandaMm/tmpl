@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="include\node\logical.h" />
     <ClCompile Include="src\error.cpp" />
+    <ClCompile Include="src\interpreter.cpp" />
     <ClCompile Include="src\lexer.cpp" />
     <ClCompile Include="src\node\expression.cpp" />
     <ClCompile Include="src\node\function.cpp" />
