@@ -22,6 +22,8 @@ namespace AST
 		~Parser() { }
 	public:
 		void Parse();
+	public:
+		inline std::shared_ptr<Node> GetRoot() const { return m_root; }
 	private:
 		Prelude::ErrorManager& GetErrorManager();
 		void Eat(TokenType type);
