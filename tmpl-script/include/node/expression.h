@@ -28,6 +28,8 @@ namespace AST
 			public:
 				Operator(OperatorType type) : m_type(type) {}
 				~Operator() {}
+			public:
+				inline OperatorType GetType() const { return m_type; }
 			};
 		private:
 			std::shared_ptr<Node> m_left;
@@ -45,6 +47,7 @@ namespace AST
 		public:
 			inline std::shared_ptr<Node> GetLeft() const { return m_left; }
 			inline std::shared_ptr<Node> GetRight() const { return m_right; }
+			inline Operator GetOperator() const { return m_operator; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetOperator(Operator op) { m_operator = op; }
