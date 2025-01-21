@@ -25,6 +25,8 @@ namespace AST
 		public:
 			void AddStatement(std::shared_ptr<Node> statement);
 		public:
+			std::shared_ptr<Node> operator[](size_t index) { return m_statements[index]; }
+		public:
 			inline size_t Size() { return m_statements.size(); }
 			std::shared_ptr<Node> Next();
 			void Reset();
