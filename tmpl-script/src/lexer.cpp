@@ -75,8 +75,17 @@ namespace AST
 			case '+':
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Plus, m_line, m_col));
 				break;
+			case '@':
+				m_tokens.push_back(std::make_shared<Token>(TokenType::At, m_line, m_col));
+				break;
 			case '-':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Minus, m_line, m_col));
+				if (m_pos < m_code.size() && m_code[m_pos + 1] == '>')
+				{
+					m_tokens.push_back(std::make_shared<Token>(TokenType::SingleArrow, m_line, m_col));
+					m_pos++;
+				}
+				else
+					m_tokens.push_back(std::make_shared<Token>(TokenType::Minus, m_line, m_col));
 				break;
 			case '*':
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Multiply, m_line, m_col));
@@ -211,6 +220,10 @@ namespace AST
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Else, m_line, m_col - id->size()));
 		else if (*id == "require")
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col - id->size()));
+		else if (*id == "var")
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Var, m_line, m_col - id->size()));
+		else if (*id == "const")
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Const, m_line, m_col - id->size()));
 		else
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, id, m_line, m_col - id->size()));
 	}
