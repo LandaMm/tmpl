@@ -58,6 +58,11 @@ namespace AST
 		case TokenType::If:
 			stmt = IfElseStatement();
 			break;
+		case TokenType::Var:
+		case TokenType::Const:
+			stmt = VariableDeclaration();
+			Eat(TokenType::Semicolon);
+			break;
 		default:
 			stmt = Ternary();
 			Eat(TokenType::Semicolon);
