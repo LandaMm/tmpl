@@ -75,6 +75,12 @@
     <ClCompile Include="include\node\var_declaration.h">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\interpreter\environment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\interpreter\value.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.tmpl" />
@@ -124,6 +130,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\interpreter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interpreter\environment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

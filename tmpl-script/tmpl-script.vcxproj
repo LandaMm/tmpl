@@ -127,10 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\interpreter\value.h" />
     <ClCompile Include="include\node\logical.h" />
     <ClCompile Include="include\node\var_declaration.h" />
     <ClCompile Include="src\error.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
+    <ClCompile Include="src\interpreter\environment.cpp" />
     <ClCompile Include="src\lexer.cpp" />
     <ClCompile Include="src\node\expression.cpp" />
     <ClCompile Include="src\node\function.cpp" />
@@ -155,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="include\error.h" />
     <ClInclude Include="include\interpreter.h" />
+    <ClInclude Include="include\interpreter\environment.h" />
     <ClInclude Include="include\lexer.h" />
     <ClInclude Include="include\node.h" />
     <ClInclude Include="include\node\expression.h" />
