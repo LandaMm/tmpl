@@ -34,6 +34,7 @@ namespace Prelude
 		void UnexpectedEofWhileToken(TokenType tokenType, size_t line, size_t col);
 		void UnexpectedToken(std::shared_ptr<Token> token);
 		void UnexpectedToken(std::shared_ptr<Token> token, TokenType expectedTokenType);
+		void MissingConstantDefinition(std::shared_ptr<Token> token);
 	};
 }
 
