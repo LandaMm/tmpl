@@ -24,6 +24,7 @@ namespace AST
 		Unary,
 		IfElse,
 		Block,
+		VarDecl,
 	};
 
 	class Node
