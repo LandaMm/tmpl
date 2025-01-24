@@ -5,6 +5,7 @@
 #include<string>
 #include<memory>
 #include"token.h"
+#include"interpreter/value.h"
 
 using namespace AST;
 
@@ -35,6 +36,9 @@ namespace Prelude
 		void UnexpectedToken(std::shared_ptr<Token> token);
 		void UnexpectedToken(std::shared_ptr<Token> token, TokenType expectedTokenType);
 		void MissingConstantDefinition(std::shared_ptr<Token> token);
+	public: // Interpreter
+		void VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType);
+		void UndefinedType(std::string name);
 	};
 }
 

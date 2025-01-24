@@ -45,4 +45,14 @@ namespace Prelude
 			<< token->GetLine() << " and " << token->GetColumn() << " column but got unexpected '" << Token::GetTokenTypeCharacter(token->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
+	void ErrorManager::VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType)
+	{
+		std::cout << "RuntimeError: Type mismatch for variable '" << name << "'. Expected type '" << (int)expectedType << "' but got '" << (int)type << "'" << std::endl;
+		std::exit(-1);
+	}
+	void ErrorManager::UndefinedType(std::string name)
+	{
+		std::cout << "RuntimeError: Undefined type '" << name << "'" << std::endl;
+		std::exit(-1);
+	}
 }
