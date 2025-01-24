@@ -20,6 +20,8 @@ namespace Runtime
 	public:
 		Variable(ValueType type, std::shared_ptr<Value> value, bool editable)
 			: m_type(type), m_value(value), m_editable(editable) { }
+	public:
+		inline std::shared_ptr<Value> GetValue() { return m_value; }
 	};
 
 	class Environment
@@ -34,6 +36,7 @@ namespace Runtime
 			: m_parent(parentEnv) { }
 	public:
 		std::shared_ptr<Variable> LookUp(std::string name);
+		bool HasVariable(std::string name);
 		void AddVariable(std::string name, std::shared_ptr<Variable> var);
 	};
 }
