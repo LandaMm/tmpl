@@ -25,11 +25,10 @@ namespace AST
 			Eat(TokenType::Equal);
 			value = Ternary();
 		}
-		else if (editable)
+		else if (!editable)
 		{
 			Prelude::ErrorManager& manager = GetErrorManager();
-			// TODO:
-			manager.RaiseError("Cannot create constant without value");
+			manager.MissingConstantDefinition(m_lexer->GetToken());
 			return nullptr;
 		}
 
