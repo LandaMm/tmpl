@@ -3,6 +3,19 @@
 
 namespace Runtime
 {
+	bool Environment::HasVariable(std::string name)
+	{
+		if (m_variables.find(name) == m_variables.end())
+		{
+			if (m_parent != nullptr)
+				return m_parent->HasVariable(name);
+			else
+				return false;
+		}
+
+		return true;
+	}
+
 	std::shared_ptr<Variable> Environment::LookUp(std::string name)
 	{
 		if (m_variables.find(name) == m_variables.end())
