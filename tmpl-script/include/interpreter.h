@@ -6,6 +6,7 @@
 #include"node/expression.h"
 #include"node/literal.h"
 #include"node/var_declaration.h"
+#include"node/identifier.h"
 #include"interpreter/environment.h"
 #include"interpreter/value.h"
 
@@ -24,6 +25,7 @@ namespace Runtime
 		std::shared_ptr<Value> EvaluateExpression(std::shared_ptr<ExpressionNode> expr);
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
 		std::shared_ptr<Value> EvaluateLiteral(std::shared_ptr<LiteralNode> literal);
+		std::shared_ptr<Value> EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier);
 		ValueType EvaluateType(std::shared_ptr<Node> typeNode);
 	};
 }

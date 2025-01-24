@@ -5,6 +5,18 @@ namespace Runtime
 {
 	using namespace AST::Nodes;
 
+	std::shared_ptr<Value> Interpreter::EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier)
+	{
+		if (!m_env->HasVariable(identifier->GetName()))
+		{
+			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.UndeclaredVariable(identifier);
+			return nullptr;
+		}
+		std::shared_ptr<Variable> var = m_env->LookUp(identifier->GetName());
+		return var->GetValue();
+	}
+
 	ValueType Interpreter::EvaluateType(std::shared_ptr<Node> typeNode)
 	{
 		if (typeNode->GetType() == NodeType::Identifier)
@@ -189,6 +201,8 @@ namespace Runtime
 		case NodeType::VarDecl:
 			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
 			return nullptr;
+		case NodeType::Identifier:
+			return EvaluateIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
 		default:
 			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)node->GetType()));
