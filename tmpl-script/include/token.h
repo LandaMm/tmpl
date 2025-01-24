@@ -40,10 +40,14 @@ namespace AST
 		Bind,
 		Ampersand,
 		Semicolon,
+		SingleArrow,
+		At,
 		// Keywords
 		Require,
 		If,
 		Else,
+		Var,
+		Const,
 		_EOF,
 	};
 
@@ -82,10 +86,14 @@ namespace AST
 		"'|'",
 		"'&'",
 		"semicolon",
+		"->",
+		"@",
 		// Keywords
 		"require",
 		"if",
 		"else",
+		"var",
+		"const",
 		"EOF",
 	};
 
