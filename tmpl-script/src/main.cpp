@@ -11,6 +11,8 @@ int main()
 	using namespace Runtime;
 	std::string code = R"(
 	var string test = 5478.0 * (2375.0 / 2200.0 + 1.0) - 5000.0;
+	const string VERSION = "3.14";
+	var pointer ptr;
 	5478.0 * (2375.0 / 2200.0 + 1.0) - 5000.0;
 )";
 	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(code);
