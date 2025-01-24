@@ -1,9 +1,44 @@
 
 #include"../../include/parser.h"
 #include"../../include/node/statement.h"
+#include"../../include/node/var_declaration.h"
 
 namespace AST
 {
+	std::shared_ptr<Node> Parser::VariableDeclaration()
+	{
+		bool editable = m_lexer->GetToken()->GetType() == TokenType::Var;
+		if (editable)
+			Eat(TokenType::Var);
+		else
+			Eat(TokenType::Const);
+
+		std::shared_ptr<Node> type = Id();
+
+		std::shared_ptr<Nodes::IdentifierNode> nameNode = Id();
+		std::shared_ptr<std::string> name = std::make_shared<std::string>(nameNode->GetName());
+
+		std::shared_ptr<Node> value = nullptr;
+		
+		if (m_lexer->GetToken()->GetType() == TokenType::Equal)
+		{
+			Eat(TokenType::Equal);
+			value = Ternary();
+		}
+		else if (editable)
+		{
+			Prelude::ErrorManager& manager = GetErrorManager();
+			// TODO:
+			manager.RaiseError("Cannot create constant without value");
+			return nullptr;
+		}
+
+		if (value != nullptr)
+			return std::make_shared<Nodes::VarDeclaration>(type, name, value, editable);
+		else
+			return std::make_shared<Nodes::VarDeclaration>(type, name);
+	}
+
 	std::shared_ptr<Node> Parser::IfElseStatement()
 	{
 		// if (5 == 5 ? true : false) {} else {}

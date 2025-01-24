@@ -43,6 +43,7 @@ namespace AST
 	private: // Statements
 		std::shared_ptr<Node> Statement();
 		std::shared_ptr<Node> IfElseStatement();
+		std::shared_ptr<Node> VariableDeclaration();
 	};
 }
 
