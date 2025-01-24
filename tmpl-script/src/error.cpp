@@ -55,4 +55,9 @@ namespace Prelude
 		std::cout << "RuntimeError: Undefined type '" << name << "'" << std::endl;
 		std::exit(-1);
 	}
+	void ErrorManager::UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id)
+	{
+		std::cout << "RuntimeError: Undeclared variable '" << id->GetName() << "'" << std::endl;
+		std::exit(-1);
+	}
 }

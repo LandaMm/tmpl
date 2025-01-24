@@ -6,6 +6,7 @@
 #include<memory>
 #include"token.h"
 #include"interpreter/value.h"
+#include"node/identifier.h"
 
 using namespace AST;
 
@@ -39,6 +40,7 @@ namespace Prelude
 	public: // Interpreter
 		void VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType);
 		void UndefinedType(std::string name);
+		void UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id);
 	};
 }
 
