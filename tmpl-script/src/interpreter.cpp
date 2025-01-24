@@ -4,7 +4,61 @@
 namespace Runtime
 {
 	using namespace AST::Nodes;
-	std::shared_ptr<Interpreter::Value> Interpreter::EvaluateLiteral(std::shared_ptr<LiteralNode> literal)
+
+	ValueType Interpreter::EvaluateType(std::shared_ptr<Node> typeNode)
+	{
+		if (typeNode->GetType() == NodeType::Identifier)
+		{
+			auto id = std::dynamic_pointer_cast<IdentifierNode>(typeNode);
+			if (id->GetName() == "string")
+			{
+				return ValueType::String;
+			}
+			else if (id->GetName() == "double")
+			{
+				return ValueType::Double;
+			}
+			else if (id->GetName() == "float")
+			{
+				return ValueType::Float;
+			}
+			else if (id->GetName() == "int")
+			{
+				return ValueType::Integer;
+			}
+			else {
+				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+				errorManager.UndefinedType(id->GetName());
+			}
+		}
+		else
+		{
+			// TODO: support for complex types, e.g. inline objects, generic types
+			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Unsupported node type for type: " + std::to_string((int)typeNode->GetType()));
+		}
+
+		return ValueType::Null;
+	}
+
+	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
+	{
+		ValueType varType = EvaluateType(varDecl->GetType());
+		std::string varName = *varDecl->GetName();
+		std::shared_ptr<Value> varValue = Evaluate(varDecl->GetValue());
+
+		if (varType != varValue->GetType())
+		{
+			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.VarMismatchType(varName, varValue->GetType(), varType);
+			return;
+		}
+
+		std::shared_ptr<Variable> var = std::make_shared<Variable>(varType, varValue, varDecl->Editable());
+		m_env->AddVariable(varName, var);
+	}
+
+	std::shared_ptr<Value> Interpreter::EvaluateLiteral(std::shared_ptr<LiteralNode> literal)
 	{
 		switch (literal->GetLiteralType())
 		{
@@ -21,9 +75,12 @@ namespace Runtime
 			errorManager.RaiseError("Unsupported literal type: " + std::to_string((int)literal->GetLiteralType()));
 			break;
 		}
+
+		// TODO: return a NullValue?
+		return nullptr;
 	}
 
-	std::shared_ptr<Interpreter::Value> Interpreter::EvaluateExpression(std::shared_ptr<ExpressionNode> expr)
+	std::shared_ptr<Value> Interpreter::EvaluateExpression(std::shared_ptr<ExpressionNode> expr)
 	{
 		std::shared_ptr<Value> left = Evaluate(expr->GetLeft());
 		std::shared_ptr<Value> right = Evaluate(expr->GetRight());
@@ -111,11 +168,11 @@ namespace Runtime
 			errorManager.RaiseError("Unsupported value type: " + std::to_string((int)valueType));
 			break;
 		}
-		
+
 		return nullptr;
 	}
 
-	std::shared_ptr<Interpreter::Value> Interpreter::Evaluate(std::shared_ptr<Node> node)
+	std::shared_ptr<Value> Interpreter::Evaluate(std::shared_ptr<Node> node)
 	{
 		switch (node->GetType())
 		{
@@ -123,12 +180,15 @@ namespace Runtime
 			return EvaluateExpression(std::dynamic_pointer_cast<ExpressionNode>(node));
 		case NodeType::Literal:
 			return EvaluateLiteral(std::dynamic_pointer_cast<LiteralNode>(node));
-		/*case NodeType::Program:
-			std::shared_ptr<Nodes::ProgramNode> program = std::dynamic_pointer_cast<Nodes::ProgramNode>(node);
-			while (auto stmt = program->Next())
-			{
+			/*case NodeType::Program:
+				std::shared_ptr<Nodes::ProgramNode> program = std::dynamic_pointer_cast<Nodes::ProgramNode>(node);
+				while (auto stmt = program->Next())
+				{
 
-			}*/
+				}*/
+		case NodeType::VarDecl:
+			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
+			return nullptr;
 		default:
 			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)node->GetType()));
