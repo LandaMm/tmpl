@@ -28,6 +28,7 @@ namespace AST
 		public:
 			inline std::shared_ptr<Node> GetType() { return m_type; }
 			inline std::shared_ptr<Node> GetValue() { return m_value; }
+			inline std::shared_ptr<std::string> GetName() { return m_name; }
 			inline bool HasValue() { return m_value != nullptr; }
 			inline bool Editable() { return m_editable; }
 		};
