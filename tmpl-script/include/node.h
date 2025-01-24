@@ -27,6 +27,7 @@ namespace AST
 		VarDecl,
 	};
 
+	// TODO: add line & column fields
 	class Node
 	{
 	public:
