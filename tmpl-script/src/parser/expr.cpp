@@ -188,7 +188,7 @@ namespace AST
 		// double literal
 		else if (token->GetType() == TokenType::Double)
 		{
-			Eat(TokenType::Float);
+			Eat(TokenType::Double);
 			double* value = token->GetValue<double>();
 			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, value);
 		}
