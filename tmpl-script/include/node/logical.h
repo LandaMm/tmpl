@@ -34,6 +34,10 @@ namespace AST
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
 			void SetOp(ConditionType op) { m_operator = op; }
+		public:
+			inline std::shared_ptr<Node> GetLeft() { return m_left; }
+			inline std::shared_ptr<Node> GetRight() { return m_right; }
+			inline ConditionType GetOperator() { return m_operator; }
 		};
 
 		class TernaryNode : public Node
@@ -51,6 +55,10 @@ namespace AST
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
 			void SetCondition(std::shared_ptr<Node> condition) { m_condition = condition; }
+		public:
+			inline std::shared_ptr<Node> GetLeft() { return m_left; }
+			inline std::shared_ptr<Node> GetRight() { return m_right; }
+			inline std::shared_ptr<Node> GetCondition() { return m_condition; }
 		};
 	}
 }
