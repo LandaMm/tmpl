@@ -50,6 +50,11 @@ namespace Prelude
 		std::cout << "RuntimeError: Type mismatch for variable '" << name << "'. Expected type '" << (int)expectedType << "' but got '" << (int)type << "'" << std::endl;
 		std::exit(-1);
 	}
+	void ErrorManager::OperandMismatchType(Runtime::ValueType leftType, Runtime::ValueType rightType)
+	{
+		std::cout << "RuntimeError: Mismatch type of left and right operands '" << (int)leftType << "' != '" << (int)rightType << "'" << std::endl;
+		std::exit(-1);
+	}
 	void ErrorManager::UndefinedType(std::string name)
 	{
 		std::cout << "RuntimeError: Undefined type '" << name << "'" << std::endl;
