@@ -41,6 +41,7 @@ namespace Prelude
 		void VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType);
 		void UndefinedType(std::string name);
 		void UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id);
+		void OperandMismatchType(Runtime::ValueType leftType, Runtime::ValueType rightType);
 	};
 }
 
