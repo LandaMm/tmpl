@@ -1,6 +1,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 #include<vector>
+#include<memory>
 
 namespace AST
 {
@@ -98,24 +99,38 @@ namespace AST
 
 	class Token
 	{
+	public:
+		class ValueHolder
+		{
+		public:
+			virtual ~ValueHolder() = default;
+		};
+
+		template<typename T>
+		class TypedValueHolder : public ValueHolder
+		{
+		private:
+			std::shared_ptr<T> m_value;
+		public:
+			TypedValueHolder(std::shared_ptr<T> value) : m_value(value) { }
+		public:
+			inline std::shared_ptr<T> GetValue() const { return m_value; }
+		};
 	private:
 		TokenType m_type;
-		void* m_value;
+		std::shared_ptr<ValueHolder> m_value;
 		size_t m_line;
 		size_t m_col;
 	public:
 		Token(TokenType type, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(nullptr) {}
-		Token(TokenType type, void* value, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(value) {}
+		Token(TokenType type, std::shared_ptr<ValueHolder> value, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(value) {}
 	public:
 		inline TokenType GetType() const { return m_type; }
 		template<typename T>
-		T* GetValue() const { return (T*)m_value; }
-		~Token()
-		{
-			if (m_value != nullptr)
-			{
-				delete m_value;
-			}
+		std::shared_ptr<T> GetValue() const {
+			if (!m_value) return nullptr;
+			std::shared_ptr<TypedValueHolder<T>> holder = std::dynamic_pointer_cast<TypedValueHolder<T>>(m_value);
+			return holder ? holder->GetValue() : nullptr;
 		}
 	public:
 		inline size_t GetLine() const { return m_line; }

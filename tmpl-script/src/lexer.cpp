@@ -225,7 +225,10 @@ namespace AST
 		else if (*id == "const")
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Const, m_line, m_col - id->size()));
 		else
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, id, m_line, m_col - id->size()));
+		{
+			std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, value, m_line, m_col - id->size()));
+		}
 	}
 
 	void Lexer::String()
@@ -252,7 +255,8 @@ namespace AST
 			}
 		}
 
-		m_tokens.push_back(std::make_shared<Token>(TokenType::String, id, m_line, m_col - id->size()));
+		std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));
+		m_tokens.push_back(std::make_shared<Token>(TokenType::String, value, m_line, m_col - id->size()));
 	}
 
 	void Lexer::Comment()
@@ -313,17 +317,20 @@ namespace AST
 			std::string digitstr = number->substr(pos + 1);
 			if (digitstr.size() <= 7)
 			{
-				float* num = new float(std::stof(*number));
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, num, m_line, m_col - number->size()));
+				std::shared_ptr<Token::TypedValueHolder<float>> value
+					= std::make_shared<Token::TypedValueHolder<float>>(std::make_shared<float>(std::stof(*number)));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, value, m_line, m_col - number->size()));
 			}
 			else {
-				double* num = new double(std::stod(*number));
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, num, m_line, m_col - number->size()));
+				std::shared_ptr<Token::TypedValueHolder<double>> value
+					= std::make_shared<Token::TypedValueHolder<double>>(std::make_shared<double>(std::stod(*number)));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, value, m_line, m_col - number->size()));
 			}
 		}
 		else {
-			int* num = new int(std::stoi(*number));
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, num, m_line, m_col - number->size()));
+				std::shared_ptr<Token::TypedValueHolder<int>> value
+					= std::make_shared<Token::TypedValueHolder<int>>(std::make_shared<int>(std::stoi(*number)));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, value, m_line, m_col - number->size()));
 		}
 	}
 

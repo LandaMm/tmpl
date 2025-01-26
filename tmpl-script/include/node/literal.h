@@ -1,7 +1,6 @@
 #ifndef LITERAL_H
 #define LITERAL_H
-#include"../node.h"
-
+#include "../node.h"
 
 namespace AST
 {
@@ -17,21 +16,52 @@ namespace AST
 			BOOL,
 		};
 
-		class LiteralNode : public Node {
+		class LiteralNode : public Node
+		{
+		public:
+			class ValueHolder
+			{
+			public:
+				virtual ~ValueHolder() = default;
+			};
+
+			template <typename T>
+			class TypedValueHolder : public ValueHolder
+			{
+			private:
+				std::shared_ptr<T> m_value;
+
+			public:
+				TypedValueHolder(std::shared_ptr<T> value) : m_value(value) {}
+
+			public:
+				inline std::shared_ptr<T> GetValue() const { return m_value; }
+			};
+
 		private:
 			LiteralType m_type;
-			void* m_value;
+			std::shared_ptr<ValueHolder> m_value;
+
 		public:
-			LiteralNode(LiteralType type, void* value) : m_type(type), m_value(value) { }
-			~LiteralNode() { }
+			LiteralNode(LiteralType type, std::shared_ptr<ValueHolder> value) : m_type(type), m_value(value) {}
+			~LiteralNode() {}
+
 		public:
 			inline NodeType GetType() const override { return NodeType::Literal; }
+
 		private:
 			std::string Format() const override;
+
 		public:
 			inline LiteralType GetLiteralType() const { return m_type; }
-			template<typename T>
-			inline T* GetValue() const { return (T*)m_value; }
+			template <typename T>
+			std::shared_ptr<T> GetValue() const
+			{
+				if (!m_value)
+					return nullptr;
+				std::shared_ptr<TypedValueHolder<T>> holder = std::dynamic_pointer_cast<TypedValueHolder<T>>(m_value);
+				return holder ? holder->GetValue() : nullptr;
+			}
 		};
 	}
 }

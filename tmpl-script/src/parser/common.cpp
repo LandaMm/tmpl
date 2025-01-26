@@ -8,7 +8,7 @@ namespace AST
 	{
 		auto token = m_lexer->GetToken();
 		Eat(TokenType::Id);
-		std::string* name = token->GetValue<std::string>();
+		std::shared_ptr<std::string> name = token->GetValue<std::string>();
 		return std::make_shared<Nodes::IdentifierNode>(name->c_str());
 	}
 

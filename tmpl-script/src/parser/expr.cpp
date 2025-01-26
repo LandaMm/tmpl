@@ -1,11 +1,11 @@
 
-#include"../../include/parser.h"
-#include"../../include/node/expression.h"
-#include"../../include/node/identifier.h"
-#include"../../include/node/literal.h"
-#include"../../include/node/function.h"
-#include"../../include/node/logical.h"
-#include"../../include/node/unary.h"
+#include "../../include/parser.h"
+#include "../../include/node/expression.h"
+#include "../../include/node/identifier.h"
+#include "../../include/node/literal.h"
+#include "../../include/node/function.h"
+#include "../../include/node/logical.h"
+#include "../../include/node/unary.h"
 
 namespace AST
 {
@@ -41,8 +41,8 @@ namespace AST
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Less || m_lexer->GetToken()->GetType() == TokenType::Greater ||
-			m_lexer->GetToken()->GetType() == TokenType::LessEqual || m_lexer->GetToken()->GetType() == TokenType::GreaterEqual ||
-			m_lexer->GetToken()->GetType() == TokenType::Compare || m_lexer->GetToken()->GetType() == TokenType::NotEqual)
+			   m_lexer->GetToken()->GetType() == TokenType::LessEqual || m_lexer->GetToken()->GetType() == TokenType::GreaterEqual ||
+			   m_lexer->GetToken()->GetType() == TokenType::Compare || m_lexer->GetToken()->GetType() == TokenType::NotEqual)
 		{
 			auto token = m_lexer->GetToken();
 			if (token->GetType() == TokenType::Greater)
@@ -175,29 +175,41 @@ namespace AST
 		if (token->GetType() == TokenType::Integer)
 		{
 			Eat(TokenType::Integer);
-			int* value = token->GetValue<int>();
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::INT, value);
+			std::shared_ptr<int> value = token->GetValue<int>();
+			using Holder = Nodes::LiteralNode::TypedValueHolder<int>;
+			std::shared_ptr<Holder> v =
+				std::make_shared<Holder>(std::make_shared<int>(*value));
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::INT, v);
 		}
 		// float literal
 		else if (token->GetType() == TokenType::Float)
 		{
 			Eat(TokenType::Float);
-			float* value = token->GetValue<float>();
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::FLOAT, value);
+			std::shared_ptr<float> value = token->GetValue<float>();
+			using Holder = Nodes::LiteralNode::TypedValueHolder<float>;
+			std::shared_ptr<Holder> v =
+				std::make_shared<Holder>(std::make_shared<float>(*value));
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::FLOAT, v);
 		}
 		// double literal
 		else if (token->GetType() == TokenType::Double)
 		{
 			Eat(TokenType::Double);
-			double* value = token->GetValue<double>();
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, value);
+			std::shared_ptr<double> value = token->GetValue<double>();
+			using Holder = Nodes::LiteralNode::TypedValueHolder<double>;
+			std::shared_ptr<Holder> v =
+				std::make_shared<Holder>(std::make_shared<double>(*value));
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, v);
 		}
 		// string literal
 		else if (token->GetType() == TokenType::String)
 		{
 			Eat(TokenType::String);
-			std::string* value = token->GetValue<std::string>();
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::STRING, value);
+			std::shared_ptr<std::string> value = token->GetValue<std::string>();
+			using Holder = Nodes::LiteralNode::TypedValueHolder<std::string>;
+			std::shared_ptr<Holder> v =
+				std::make_shared<Holder>(std::make_shared<std::string>(*value));
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v);
 		}
 		// id || function call with args | object member | obj_member + call | call + obj_member
 		else if (token->GetType() == TokenType::Id)
@@ -254,7 +266,7 @@ namespace AST
 		// unknown
 		else
 		{
-			Prelude::ErrorManager& errManager = GetErrorManager();
+			Prelude::ErrorManager &errManager = GetErrorManager();
 			errManager.UnexpectedToken(token);
 			return nullptr;
 		}
