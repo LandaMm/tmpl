@@ -2,6 +2,8 @@
 #define RUNTIME_VALUE_H
 #include<memory>
 #include<string>
+#include"../node/logical.h"
+#include"../node/expression.h"
 
 namespace Runtime
 {
@@ -20,6 +22,11 @@ namespace Runtime
 	public:
 		template<typename T>
 		inline T* Get() { return static_cast<T*>(this); }
+	public:
+		virtual std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) = 0;
+		virtual std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) = 0;
+	public:
+		virtual ~Value() = default;
 	};
 	class IntegerValue : public Value
 	{
@@ -32,6 +39,9 @@ namespace Runtime
 		inline ValueType GetType() const override { return ValueType::Integer; }
 	public:
 		inline std::shared_ptr<int> GetValue() const { return m_value; }
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 	};
 	class FloatValue : public Value
 	{
@@ -44,6 +54,9 @@ namespace Runtime
 		inline ValueType GetType() const override { return ValueType::Float; }
 	public:
 		inline std::shared_ptr<float> GetValue() const { return m_value; }
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 	};
 	class DoubleValue : public Value
 	{
@@ -56,6 +69,9 @@ namespace Runtime
 		inline ValueType GetType() const override { return ValueType::Double; }
 	public:
 		inline std::shared_ptr<double> GetValue() const { return m_value; }
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 	};
 	class StringValue : public Value
 	{
@@ -68,6 +84,9 @@ namespace Runtime
 		inline ValueType GetType() const override { return ValueType::String; }
 	public:
 		inline std::shared_ptr<std::string> GetValue() const { return m_value; }
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 	};
 }
 
