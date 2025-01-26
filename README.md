@@ -3,6 +3,62 @@
 
 Templify is a **CLI tool** and **scripting language** designed to help developers and anyone working with files and projects streamline their workflow. It allows users to record, create, publish, and reuse development patterns, making coding faster, easier, and more efficient. Say goodbye to repetitive tasks and wasted time!
 
+## Flow
+
+The first step is to write tmpl script itself.
+
+Here is an example:
+
+```
+// HelloWorld.tmpl
+// prints message to stdout
+
+->main {
+    @arg string message;
+
+    print(message);
+}
+```
+
+After you wrote your tmpl script you create a folder in project root called `.tmpl`.
+
+```
+.
+├── rest
+│   ├── get_password.http
+│   ├── get_single_password.http
+│   ├── save_password.http
+│   └── setup.http
+├── src
+│   ├── bin
+│   │   └── configure.rs
+│   ├── db.rs
+│   ├── main.rs
+│   ├── middleware.rs
+│   ├── models.rs
+│   ├── routes.rs
+│   ├── schema.rs
+│   ├── server.rs
+│   ├── service.rs
+│   └── settings.rs
+├── .tmpl                           < -- folder you should create
+├── Cargo.lock
+├── Cargo.toml
+├── config.yml
+├── diesel.toml
+├── docker-compose.yml
+└── README.md
+
+```
+
+Now put your script inside that `.tmpl` folder.
+
+After that you can run your script inside your project using
+
+```sh
+$ tmpl HelloWorld --message "Hi, everyone!"
+```
+
 ## 🌱 Current Features (Development Phase)
 
 Templify is still in its development phase, but it already includes a basic scripting language (`.tmpl`) that allows you to execute various instructions for automating tasks and managing projects. The following features are available:

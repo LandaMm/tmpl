@@ -1,9 +1,22 @@
 
-#include"../include/error.h"
-#include"../include/lexer.h"
+#include "../include/error.h"
+#include "../include/lexer.h"
 
 namespace AST
 {
+	Lexer::Lexer(std::ifstream &input)
+	{
+		m_pos = 0;
+
+		input.seekg(0, std::ios::end);
+		m_code.reserve(input.tellg());
+		input.seekg(0, std::ios::beg);
+
+		m_code.assign((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+
+		input.close();
+	}
+
 	void Lexer::Tokenize()
 	{
 		while (m_pos < m_code.size())
@@ -40,13 +53,13 @@ namespace AST
 			{
 			case '\n':
 				// skip newline
-				//m_tokens.push_back(std::make_shared<Token>(TokenType::Newline));
+				// m_tokens.push_back(std::make_shared<Token>(TokenType::Newline));
 				break;
 			case ' ':
 			case '\t':
 			case '\r':
 				// skip those characters
-				//m_tokens.push_back(std::make_shared<Token>(TokenType::Whitespace));
+				// m_tokens.push_back(std::make_shared<Token>(TokenType::Whitespace));
 				break;
 			case '.':
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Point, m_line, m_col));
@@ -157,7 +170,7 @@ namespace AST
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
 				break;
 			default:
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.UnexpectedCharacter(ch, m_line, m_col);
 				break;
 			}
@@ -179,7 +192,7 @@ namespace AST
 
 	void Lexer::Id()
 	{
-		std::string* id = new std::string();
+		std::string *id = new std::string();
 
 		while (m_pos < m_code.size())
 		{
@@ -202,12 +215,14 @@ namespace AST
 				m_pos++;
 				m_col++;
 			}
-			else if (id->empty()) {
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			else if (id->empty())
+			{
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.UnexpectedEOF(m_line, m_col);
 				break;
 			}
-			else {
+			else
+			{
 				break;
 			}
 		}
@@ -233,7 +248,7 @@ namespace AST
 
 	void Lexer::String()
 	{
-		std::string* id = new std::string();
+		std::string *id = new std::string();
 		bool string_closed = false;
 
 		// Skip opening string quote
@@ -242,12 +257,14 @@ namespace AST
 		while (m_pos < m_code.size())
 		{
 			char ch = m_code[m_pos];
-			if (ch != '"') {
+			if (ch != '"')
+			{
 				id->push_back(ch);
 				m_pos++;
 				m_col++;
 			}
-			else {
+			else
+			{
 				m_pos++;
 				m_col++;
 				string_closed = true;
@@ -276,7 +293,7 @@ namespace AST
 
 	void Lexer::Number()
 	{
-		std::string* number = new std::string();
+		std::string *number = new std::string();
 		bool already_met_point = false;
 
 		while (m_pos < m_code.size())
@@ -290,46 +307,50 @@ namespace AST
 			}
 			else if (ch == '.')
 			{
-				if (already_met_point) {
-					Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+				if (already_met_point)
+				{
+					Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 					errorManager.UnexpectedCharacter(ch, m_line, m_col);
 					break;
 				}
-				else {
+				else
+				{
 					already_met_point = true;
 					number->push_back(ch);
 					m_pos++;
 					m_col++;
 				}
 			}
-			else if (number->empty()) {
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			else if (number->empty())
+			{
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.UnexpectedEOF(m_line, m_col);
 				break;
 			}
-			else {
+			else
+			{
 				break;
 			}
 		}
 
-		if (already_met_point) {
+		if (already_met_point)
+		{
 			size_t pos = number->find('.');
 			std::string digitstr = number->substr(pos + 1);
 			if (digitstr.size() <= 7)
 			{
-				std::shared_ptr<Token::TypedValueHolder<float>> value
-					= std::make_shared<Token::TypedValueHolder<float>>(std::make_shared<float>(std::stof(*number)));
+				std::shared_ptr<Token::TypedValueHolder<float>> value = std::make_shared<Token::TypedValueHolder<float>>(std::make_shared<float>(std::stof(*number)));
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, value, m_line, m_col - number->size()));
 			}
-			else {
-				std::shared_ptr<Token::TypedValueHolder<double>> value
-					= std::make_shared<Token::TypedValueHolder<double>>(std::make_shared<double>(std::stod(*number)));
+			else
+			{
+				std::shared_ptr<Token::TypedValueHolder<double>> value = std::make_shared<Token::TypedValueHolder<double>>(std::make_shared<double>(std::stod(*number)));
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, value, m_line, m_col - number->size()));
 			}
 		}
-		else {
-				std::shared_ptr<Token::TypedValueHolder<int>> value
-					= std::make_shared<Token::TypedValueHolder<int>>(std::make_shared<int>(std::stoi(*number)));
+		else
+		{
+			std::shared_ptr<Token::TypedValueHolder<int>> value = std::make_shared<Token::TypedValueHolder<int>>(std::make_shared<int>(std::stoi(*number)));
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, value, m_line, m_col - number->size()));
 		}
 	}

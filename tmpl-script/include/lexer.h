@@ -1,9 +1,10 @@
 #ifndef LEXER_H
 #define LEXER_H
-#include<vector>
-#include<string>
-#include<memory>
-#include"token.h"
+#include <vector>
+#include <string>
+#include <memory>
+#include <fstream>
+#include "token.h"
 
 namespace AST
 {
@@ -11,13 +12,16 @@ namespace AST
 	{
 	private:
 		std::vector<std::shared_ptr<Token>> m_tokens;
+
 	private: // tokenizer
 		size_t m_pos;
 		std::string m_code;
 		size_t m_line;
 		size_t m_col;
+
 	private: // token manager
 		size_t m_index;
+
 	public:
 		Lexer(std::string code) : m_code(code), m_pos(0)
 		{
@@ -29,14 +33,18 @@ namespace AST
 			m_line = 1;
 			m_col = 1;
 		}
+		Lexer(std::ifstream &input);
+
 	public:
-		std::vector<std::shared_ptr<Token>>& GetTokens() { return m_tokens; };
+		std::vector<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
+
 	public:
 		void Tokenize();
 		void Id();
 		void String();
 		void Number();
 		void Comment();
+
 	public:
 		std::shared_ptr<Token> GetToken();
 		std::shared_ptr<Token> SeekToken();
