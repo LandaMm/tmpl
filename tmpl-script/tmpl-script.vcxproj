@@ -131,6 +131,7 @@
     <ClCompile Include="include\node\logical.h" />
     <ClCompile Include="include\node\var_declaration.h" />
     <ClCompile Include="src\error.cpp" />
+    <ClCompile Include="src\interpreter\value.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
     <ClCompile Include="src\interpreter\environment.cpp" />
     <ClCompile Include="src\lexer.cpp" />
@@ -171,6 +172,9 @@
     <ClInclude Include="include\node\unary.h" />
     <ClInclude Include="include\parser.h" />
     <ClInclude Include="include\token.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

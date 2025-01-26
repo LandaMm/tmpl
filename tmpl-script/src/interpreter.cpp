@@ -40,118 +40,19 @@ namespace Runtime
 
 		if (left->GetType() != right->GetType() && (left->GetType() == ValueType::Null || right->GetType() == ValueType::Null))
 		{
-			if (condition->GetOperator() != Condition::ConditionType::Compare)
+			if (condition->GetOperator() != Condition::ConditionType::Compare && condition->GetOperator() != Condition::ConditionType::NotEqual)
 			{
 				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.RaiseError("Unsupported condition operator for null values: " + std::to_string((int)condition->GetOperator()));
 				return nullptr;
 			}
-			return std::make_shared<IntegerValue>(std::make_shared<int>(0));
+			if (condition->GetOperator() == Condition::ConditionType::Compare)
+				return std::make_shared<IntegerValue>(std::make_shared<int>(0));
+			else
+				return std::make_shared<IntegerValue>(std::make_shared<int>(1));
 		}
 
-		switch (left->GetType())
-		{
-		case ValueType::Integer:
-		{
-			std::shared_ptr<IntegerValue> livv = std::dynamic_pointer_cast<IntegerValue>(left);
-			std::shared_ptr<int> liv = livv->GetValue();
-			std::shared_ptr<IntegerValue> rivv = std::dynamic_pointer_cast<IntegerValue>(right);
-			std::shared_ptr<int> riv = rivv->GetValue();
-			switch (condition->GetOperator())
-			{
-			case Condition::ConditionType::Compare:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) == (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::Greater:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) > (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::Less:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) < (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::NotEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) != (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::GreaterEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) >= (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::LessEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) <= (*(riv)) ? 1 : 0));
-			}
-		}
-		case ValueType::Float:
-		{
-			std::shared_ptr<FloatValue> livv = std::dynamic_pointer_cast<FloatValue>(left);
-			std::shared_ptr<float> liv = livv->GetValue();
-			std::shared_ptr<FloatValue> rivv = std::dynamic_pointer_cast<FloatValue>(right);
-			std::shared_ptr<float> riv = rivv->GetValue();
-			switch (condition->GetOperator())
-			{
-			case Condition::ConditionType::Compare:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) == (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::Greater:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) > (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::Less:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) < (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::NotEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) != (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::GreaterEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) >= (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::LessEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) <= (*(riv)) ? 1 : 0));
-			}
-		}
-		case ValueType::Double:
-		{
-			std::shared_ptr<DoubleValue> livv = std::dynamic_pointer_cast<DoubleValue>(left);
-			std::shared_ptr<double> liv = livv->GetValue();
-			std::shared_ptr<DoubleValue> rivv = std::dynamic_pointer_cast<DoubleValue>(right);
-			std::shared_ptr<double> riv = rivv->GetValue();
-			switch (condition->GetOperator())
-			{
-			case Condition::ConditionType::Compare:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) == (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::Greater:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) > (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::Less:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) < (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::NotEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) != (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::GreaterEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) >= (*(riv)) ? 1 : 0));
-			case Condition::ConditionType::LessEqual:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) <= (*(riv)) ? 1 : 0));
-			}
-		}
-		case ValueType::String:
-		{
-			std::shared_ptr<StringValue> livv = std::dynamic_pointer_cast<StringValue>(left);
-			std::shared_ptr<std::string> liv = livv->GetValue();
-			std::shared_ptr<StringValue> rivv = std::dynamic_pointer_cast<StringValue>(right);
-			std::shared_ptr<std::string> riv = rivv->GetValue();
-			if (condition->GetOperator() != Condition::ConditionType::Compare)
-			{
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("Unsupported condition operator for string literals: " + std::to_string((int)condition->GetOperator()));
-				return nullptr;
-			}
-			return std::make_shared<IntegerValue>(std::make_shared<int>(*(liv)==*(riv) ? 1 : 0));
-		}
-		case ValueType::Null:
-		{
-			std::shared_ptr<StringValue> livv = std::dynamic_pointer_cast<StringValue>(left);
-			std::shared_ptr<std::string> liv = livv->GetValue();
-			std::shared_ptr<StringValue> rivv = std::dynamic_pointer_cast<StringValue>(right);
-			std::shared_ptr<std::string> riv = rivv->GetValue();
-			if (condition->GetOperator() != Condition::ConditionType::Compare)
-			{
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("Unsupported condition operator for string literals: " + std::to_string((int)condition->GetOperator()));
-				return nullptr;
-			}
-			return std::make_shared<IntegerValue>(std::make_shared<int>(*(liv) == *(riv) ? 1 : 0));
-		}
-		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported value type: " + std::to_string((int)left->GetType()));
-			break;
-		}
-
-		return nullptr;
+		return left->Compare(right, condition->GetOperator());
 	}
 
 	std::shared_ptr<Value> Interpreter::EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier)
@@ -254,83 +155,7 @@ namespace Runtime
 			return nullptr;
 		}
 
-		switch (valueType)
-		{
-		case ValueType::Integer:
-		{
-			std::shared_ptr<IntegerValue> livv = std::dynamic_pointer_cast<IntegerValue>(left);
-			std::shared_ptr<int> liv = livv->GetValue();
-			std::shared_ptr<IntegerValue> rivv = std::dynamic_pointer_cast<IntegerValue>(right);
-			std::shared_ptr<int> riv = rivv->GetValue();
-			switch (expr->GetOperator().GetType())
-			{
-			case ExpressionNode::OperatorType::PLUS:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) + (*(riv))));
-			case ExpressionNode::OperatorType::MINUS:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) - (*(riv))));
-			case ExpressionNode::OperatorType::DIVIDE:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) / (*(riv))));
-			case ExpressionNode::OperatorType::MULTIPLY:
-				return std::make_shared<IntegerValue>(std::make_shared<int>((*(liv)) * (*(riv))));
-			}
-		}
-		case ValueType::Float:
-		{
-			std::shared_ptr<FloatValue> livv = std::dynamic_pointer_cast<FloatValue>(left);
-			std::shared_ptr<float> liv = livv->GetValue();
-			std::shared_ptr<FloatValue> rivv = std::dynamic_pointer_cast<FloatValue>(right);
-			std::shared_ptr<float> riv = rivv->GetValue();
-			switch (expr->GetOperator().GetType())
-			{
-			case ExpressionNode::OperatorType::PLUS:
-				return std::make_shared<FloatValue>(std::make_shared<float>((*(liv)) + (*(riv))));
-			case ExpressionNode::OperatorType::MINUS:
-				return std::make_shared<FloatValue>(std::make_shared<float>((*(liv)) - (*(riv))));
-			case ExpressionNode::OperatorType::DIVIDE:
-				return std::make_shared<FloatValue>(std::make_shared<float>((*(liv)) / (*(riv))));
-			case ExpressionNode::OperatorType::MULTIPLY:
-				return std::make_shared<FloatValue>(std::make_shared<float>((*(liv)) * (*(riv))));
-			}
-		}
-		case ValueType::Double:
-		{
-			std::shared_ptr<DoubleValue> livv = std::dynamic_pointer_cast<DoubleValue>(left);
-			std::shared_ptr<double> liv = livv->GetValue();
-			std::shared_ptr<DoubleValue> rivv = std::dynamic_pointer_cast<DoubleValue>(right);
-			std::shared_ptr<double> riv = rivv->GetValue();
-			switch (expr->GetOperator().GetType())
-			{
-			case ExpressionNode::OperatorType::PLUS:
-				return std::make_shared<DoubleValue>(std::make_shared<double>((*(liv)) + (*(riv))));
-			case ExpressionNode::OperatorType::MINUS:
-				return std::make_shared<DoubleValue>(std::make_shared<double>((*(liv)) - (*(riv))));
-			case ExpressionNode::OperatorType::DIVIDE:
-				return std::make_shared<DoubleValue>(std::make_shared<double>((*(liv)) / (*(riv))));
-			case ExpressionNode::OperatorType::MULTIPLY:
-				return std::make_shared<DoubleValue>(std::make_shared<double>((*(liv)) * (*(riv))));
-			}
-		}
-		case ValueType::String:
-		{
-			std::shared_ptr<StringValue> livv = std::dynamic_pointer_cast<StringValue>(left);
-			std::shared_ptr<std::string> liv = livv->GetValue();
-			std::shared_ptr<StringValue> rivv = std::dynamic_pointer_cast<StringValue>(right);
-			std::shared_ptr<std::string> riv = rivv->GetValue();
-			if (expr->GetOperator().GetType() != ExpressionNode::OperatorType::PLUS)
-			{
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)expr->GetOperator().GetType()));
-				return nullptr;
-			}
-			return std::make_shared<StringValue>(std::make_shared<std::string>(*(liv)+*(riv)));
-		}
-		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported value type: " + std::to_string((int)valueType));
-			break;
-		}
-
-		return nullptr;
+		return left->Operate(right, expr->GetOperator().GetType());
 	}
 
 	std::shared_ptr<Value> Interpreter::Evaluate(std::shared_ptr<Node> node)
@@ -342,7 +167,7 @@ namespace Runtime
 		case NodeType::Literal:
 			return EvaluateLiteral(std::dynamic_pointer_cast<LiteralNode>(node));
 			/*case NodeType::Program:
-				std::shared_ptr<Nodes::ProgramNode> program = std::dynamic_pointer_cast<Nodes::ProgramNode>(node);
+				std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(node);
 				while (auto stmt = program->Next())
 				{
 

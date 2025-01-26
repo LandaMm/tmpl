@@ -1,4 +1,3 @@
-#pragma once
 #ifndef STATEMENT_H
 #define STATEMENT_H
 #include"../node.h"

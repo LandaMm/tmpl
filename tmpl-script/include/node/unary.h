@@ -1,4 +1,3 @@
-#pragma once
 #ifndef UNARY_H
 #define UNARY_H
 #include"../node.h"

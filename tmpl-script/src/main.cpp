@@ -17,7 +17,7 @@ int main()
 	5478.0 * (2375.0 / 2200.0 + 1.0) - 5000.0;
 )";*/
 	std::string code = R"(
-	var string result = 1 != 1 ? "hell yeah!" : "whaat?";
+	var string result = 1 + 1 != 1 ? "hell yeah!" : "whaat?";
 )";
 	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(code);
 	lexer->Tokenize();

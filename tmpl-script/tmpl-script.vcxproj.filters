@@ -81,6 +81,9 @@
     <ClCompile Include="include\interpreter\value.h">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\interpreter\value.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.tmpl" />
@@ -135,5 +138,8 @@
     <ClInclude Include="include\interpreter\environment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
 </Project>

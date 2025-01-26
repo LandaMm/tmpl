@@ -1,4 +1,3 @@
-#pragma once
 
 #ifndef OBJECT_MEMBER_H
 #define OBJECT_MEMBER_H

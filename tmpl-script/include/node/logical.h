@@ -1,4 +1,5 @@
-
+#ifndef LOGICAL_H
+#define LOGICAL_H
 #include"../node.h"
 
 namespace AST
@@ -62,3 +63,5 @@ namespace AST
 		};
 	}
 }
+
+#endif

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef IDENTIFIER_H
 #define IDENTIFIER_H
 #include<string>

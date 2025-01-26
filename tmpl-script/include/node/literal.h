@@ -1,4 +1,3 @@
-#pragma once
 #ifndef LITERAL_H
 #define LITERAL_H
 #include"../node.h"

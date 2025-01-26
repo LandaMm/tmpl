@@ -1,4 +1,3 @@
-#pragma once
 #ifndef FUNCTION_CALL_H
 #define FUNCTION_CALL_H
 #include<vector>
