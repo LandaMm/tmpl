@@ -1,9 +1,35 @@
-#include"../../include/interpreter/value.h"
-#include"../../include/error.h"
+#include "../../include/interpreter/value.h"
+#include "../../include/error.h"
 
 namespace Runtime
 {
+	// Common
+
+	std::ostream &operator<<(std::ostream &stream, const Value &value)
+	{
+		stream << value.format();
+		return stream;
+	}
+
+	std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<Value> &value)
+	{
+		if (!value)
+		{
+			stream << "<EmptyValue>";
+		}
+		else
+		{
+			stream << value->format();
+		}
+		return stream;
+	}
+
 	// Integer Value
+
+	std::string IntegerValue::format() const
+	{
+		return "IntegerValue(" + std::to_string(*m_value.get()) + ")";
+	}
 
 	std::shared_ptr<Value> Runtime::IntegerValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
 	{
@@ -57,6 +83,11 @@ namespace Runtime
 
 	// Float Value
 
+	std::string FloatValue::format() const
+	{
+		return "FloatValue(" + std::to_string(*m_value) + ")";
+	}
+
 	std::shared_ptr<Value> Runtime::FloatValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
 	{
 		std::shared_ptr<FloatValue> iright = std::dynamic_pointer_cast<FloatValue>(right);
@@ -108,6 +139,11 @@ namespace Runtime
 	}
 
 	// Double Value
+
+	std::string DoubleValue::format() const
+	{
+		return "DoubleValue(" + std::to_string(*m_value) + ")";
+	}
 
 	std::shared_ptr<Value> Runtime::DoubleValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
 	{
@@ -161,6 +197,11 @@ namespace Runtime
 
 	// String Value
 
+	std::string StringValue::format() const
+	{
+		return "StringValue(\"" + *m_value + "\")";
+	}
+
 	std::shared_ptr<Value> Runtime::StringValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
 	{
 		std::shared_ptr<StringValue> iright = std::dynamic_pointer_cast<StringValue>(right);
@@ -174,7 +215,7 @@ namespace Runtime
 		case AST::Nodes::Condition::ConditionType::NotEqual:
 			return std::make_shared<IntegerValue>(vleft != vright);
 		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)condition));
 			return nullptr;
 		}
@@ -195,7 +236,7 @@ namespace Runtime
 		case AST::Nodes::ExpressionNode::OperatorType::PLUS:
 			return std::make_shared<StringValue>(vleft + vright);
 		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)opType));
 			return nullptr;
 		}
