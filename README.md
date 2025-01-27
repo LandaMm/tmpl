@@ -1,4 +1,3 @@
-
 # Templify (tmpl) 🚀
 
 Templify is a **CLI tool** and **scripting language** designed to help developers and anyone working with files and projects streamline their workflow. It allows users to record, create, publish, and reuse development patterns, making coding faster, easier, and more efficient. Say goodbye to repetitive tasks and wasted time!
@@ -59,6 +58,43 @@ After that you can run your script inside your project using
 $ tmpl HelloWorld --message "Hi, everyone!"
 ```
 
+Expected Output:
+
+```
+Hi everyone
+```
+
+### Defining multiple subcommands
+
+Update `HelloWorld.tmpl` by adding new procedure:
+
+```
+// HelloWorld.tmpl
+// prints message to stdout
+
+->main {
+    @arg string message;
+
+    print(message);
+}
+
+->bye {
+    print("Bye!");
+}
+```
+
+Now run that procedure using following command:
+
+```sh
+$ tmpl HelloWorld bye"
+```
+
+Expected Output:
+
+```
+Bye!
+```
+
 ## 🌱 Current Features (Development Phase)
 
 Templify is still in its development phase, but it already includes a basic scripting language (`.tmpl`) that allows you to execute various instructions for automating tasks and managing projects. The following features are available:
@@ -91,7 +127,7 @@ Templify is being built with **future scalability** in mind, and we aim to make 
 
 ## 🙌 Contribution
 
-We welcome contributions from anyone who shares the vision of making development easier, faster, and more efficient. Whether you're a seasoned developer or just starting out, you can help make Templify better. 
+We welcome contributions from anyone who shares the vision of making development easier, faster, and more efficient. Whether you're a seasoned developer or just starting out, you can help make Templify better.
 
 Here’s how you can contribute:
 
