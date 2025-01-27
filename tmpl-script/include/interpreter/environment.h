@@ -26,6 +26,25 @@ namespace Runtime
 		inline std::shared_ptr<Value> GetValue() { return m_value; }
 	};
 
+	class Procedure
+	{
+	private:
+		std::shared_ptr<Node> m_body;
+
+	public:
+		Procedure(std::shared_ptr<Node> body)
+			: m_body(body) {}
+
+	public:
+		inline std::shared_ptr<Node> GetBody() { return m_body; }
+
+		friend std::ostream &operator<<(std::ostream &stream, const Procedure &procedure)
+		{
+			stream << "Procedure(" << procedure.m_body << ")" << std::endl;
+			return stream;
+		}
+	};
+
 	template <typename T>
 	class Environment
 	{
@@ -40,12 +59,12 @@ namespace Runtime
 			: m_parent(parentEnv) {}
 
 	public:
-		bool HasVariable(std::string name)
+		bool HasItem(std::string name)
 		{
 			if (m_declarations.find(name) == m_declarations.end())
 			{
 				if (m_parent != nullptr)
-					return m_parent->HasVariable(name);
+					return m_parent->HasItem(name);
 				else
 					return false;
 			}
@@ -66,11 +85,15 @@ namespace Runtime
 				return m_declarations.at(name);
 		}
 
-		void AddVariable(std::string name, std::shared_ptr<T> var)
+		void AddItem(std::string name, std::shared_ptr<T> var)
 		{
 			// TODO: raise error when var exists already
 			m_declarations.insert(std::make_pair(name, var));
 		}
+
+		auto Begin() const { return m_declarations.begin(); }
+		auto End() const { return m_declarations.end(); }
+		size_t Size() const { return m_declarations.size(); }
 	};
 }
 
