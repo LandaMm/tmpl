@@ -20,12 +20,16 @@ namespace Runtime
 	private:
 		std::shared_ptr<Parser> m_parser;
 		std::shared_ptr<Environment<Variable>> m_variables;
+		std::shared_ptr<Environment<Procedure>> m_procedures;
 
 	public:
-		Interpreter(std::shared_ptr<Parser> parser, std::shared_ptr<Environment<Variable>> env_vars) : m_parser(parser), m_variables(env_vars) {}
+		Interpreter(std::shared_ptr<Parser> parser, std::shared_ptr<Environment<Variable>> env_vars, std::shared_ptr<Environment<Procedure>> env_procedures)
+			: m_parser(parser), m_variables(env_vars), m_procedures(env_procedures) {}
 
 	public:
 		std::shared_ptr<Value> Evaluate(std::shared_ptr<Node> node);
+
+	private:
 		std::shared_ptr<Value> EvaluateExpression(std::shared_ptr<ExpressionNode> expr);
 		std::shared_ptr<Value> EvaluateLiteral(std::shared_ptr<LiteralNode> literal);
 		std::shared_ptr<Value> EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier);
