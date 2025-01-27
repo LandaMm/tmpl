@@ -57,7 +57,7 @@ namespace Runtime
 
 	std::shared_ptr<Value> Interpreter::EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier)
 	{
-		if (!m_variables->HasVariable(identifier->GetName()))
+		if (!m_variables->HasItem(identifier->GetName()))
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.UndeclaredVariable(identifier);
@@ -106,6 +106,11 @@ namespace Runtime
 
 	void Interpreter::EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl)
 	{
+		std::string name = procDecl->GetName();
+		std::shared_ptr<Statements::StatementsBody> body = procDecl->GetBody();
+
+		std::shared_ptr<Procedure> proc = std::make_shared<Procedure>(body);
+		m_procedures->AddItem(name, proc);
 	}
 
 	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
@@ -122,7 +127,7 @@ namespace Runtime
 		}
 
 		std::shared_ptr<Variable> var = std::make_shared<Variable>(varType, varValue, varDecl->Editable());
-		m_variables->AddVariable(varName, var);
+		m_variables->AddItem(varName, var);
 	}
 
 	std::shared_ptr<Value> Interpreter::EvaluateLiteral(std::shared_ptr<LiteralNode> literal)
@@ -179,6 +184,9 @@ namespace Runtime
 				}*/
 		case NodeType::VarDecl:
 			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
+			return nullptr;
+		case NodeType::ProcedureDecl:
+			EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(node));
 			return nullptr;
 		case NodeType::Identifier:
 			return EvaluateIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
