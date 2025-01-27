@@ -8,6 +8,7 @@
 #include "node/var_declaration.h"
 #include "node/identifier.h"
 #include "node/logical.h"
+#include "node/procedure.h"
 #include "interpreter/environment.h"
 #include "interpreter/value.h"
 
@@ -33,6 +34,7 @@ namespace Runtime
 
 	public:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
+		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
 
 	public:
 		ValueType EvaluateType(std::shared_ptr<Node> typeNode);
