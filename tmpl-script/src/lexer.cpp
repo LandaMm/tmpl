@@ -6,7 +6,13 @@ namespace AST
 {
 	Lexer::Lexer(std::ifstream &input)
 	{
+		m_tokens = std::vector<std::shared_ptr<Token>>();
+		m_tokens.reserve(10);
+
+		m_index = 0;
 		m_pos = 0;
+		m_line = 1;
+		m_col = 1;
 
 		input.seekg(0, std::ios::end);
 		m_code.reserve(input.tellg());
@@ -45,6 +51,7 @@ namespace AST
 			{
 				// skip comment symbol
 				m_pos++;
+				m_col++;
 				Comment();
 				continue;
 			}
@@ -96,6 +103,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::SingleArrow, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Minus, m_line, m_col));
@@ -114,6 +122,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Compare, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Equal, m_line, m_col));
@@ -123,6 +132,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::NotEqual, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Not, m_line, m_col));
@@ -132,6 +142,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::And, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Ampersand, m_line, m_col));
@@ -141,6 +152,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Or, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Bind, m_line, m_col));
@@ -150,6 +162,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::LessEqual, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Less, m_line, m_col));
@@ -159,6 +172,7 @@ namespace AST
 				{
 					m_tokens.push_back(std::make_shared<Token>(TokenType::GreaterEqual, m_line, m_col));
 					m_pos++;
+					m_col++;
 				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Greater, m_line, m_col));
@@ -181,7 +195,7 @@ namespace AST
 				m_line++;
 				m_col = 1;
 			}
-			else if (ch != '\r' && ch != '\t')
+			else if (ch != '\r')
 			{
 				m_col++;
 			}
