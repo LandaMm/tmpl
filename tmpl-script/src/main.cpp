@@ -17,7 +17,9 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	std::ifstream input(argv[1]);
+	std::string filename = argv[1];
+
+	std::ifstream input(filename);
 
 	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(input);
 
@@ -26,17 +28,26 @@ int main(int argc, char **argv)
 	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
 	parser->Parse();
 
-	std::shared_ptr<Environment<Variable>> env = std::make_shared<Environment<Variable>>();
-	Interpreter intrpt(parser, env);
+	auto variables = std::make_shared<Environment<Variable>>();
+	auto procedures = std::make_shared<Environment<Procedure>>();
+	Interpreter intrpt(parser, variables, procedures);
 
 	std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot());
 	std::vector<std::shared_ptr<Value>> values;
 
 	for (size_t i = 0; i < program->Size(); i++)
 	{
+		std::cout << "Evaluating node: " << *(*program)[i] << std::endl;
 		auto value = intrpt.Evaluate((*program)[i]);
 		std::cout << "value: " << value << std::endl;
 		values.push_back(value);
+	}
+
+	std::cout << "There are " << procedures->Size() << " procedures" << std::endl;
+
+	for (auto i = procedures->Begin(); i != procedures->End(); i++)
+	{
+		std::cout << "Key: " << i->first << ", Value: " << *i->second->GetBody() << std::endl;
 	}
 
 	return 0;
