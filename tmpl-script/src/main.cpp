@@ -37,13 +37,9 @@ int main(int argc, char **argv)
 
 	for (size_t i = 0; i < program->Size(); i++)
 	{
-		std::cout << "Evaluating node: " << *(*program)[i] << std::endl;
 		auto value = intrpt.Evaluate((*program)[i]);
-		std::cout << "value: " << value << std::endl;
 		values.push_back(value);
 	}
-
-	std::cout << "There are " << procedures->Size() << " procedures" << std::endl;
 
 	for (auto i = procedures->Begin(); i != procedures->End(); i++)
 	{
