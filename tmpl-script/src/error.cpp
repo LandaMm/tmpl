@@ -34,16 +34,16 @@ namespace Prelude
 		std::cout << "ParseError: Expected '" << Token::GetTokenTypeCharacter(tokenType) << "' character but got eof at line " << line << " and " << col << " column." << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UnexpectedToken(std::shared_ptr<Token> token)
+	void ErrorManager::UnexpectedToken(std::string filename, std::shared_ptr<Token> locToken)
 	{
-		std::cout << "ParseError: Unexpected token '" << Token::GetTokenTypeCharacter(token->GetType()) << "' at line "
-				  << token->GetLine() << " and " << token->GetColumn() << " column." << std::endl;
+		std::cout << "[" << filename << ":" << locToken->GetLine() << ":" << locToken->GetColumn() << "] ";
+		std::cout << "ParseError: Unexpected token '" << Token::GetTokenTypeCharacter(locToken->GetType()) << "' token" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UnexpectedToken(std::shared_ptr<Token> token, TokenType expectedTokenType)
+	void ErrorManager::UnexpectedToken(std::string filename, std::shared_ptr<Token> locToken, std::shared_ptr<Token> gotToken, TokenType expectedTokenType)
 	{
-		std::cout << "ParseError: Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' at line "
-				  << token->GetLine() << " and " << token->GetColumn() << " column but got '" << Token::GetTokenTypeCharacter(token->GetType()) << "'" << std::endl;
+		std::cout << "[" << filename << ":" << locToken->GetLine() << ":" << locToken->GetColumn() << "] ";
+		std::cout << "ParseError: Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
 	void ErrorManager::MissingConstantDefinition(std::shared_ptr<Token> token)

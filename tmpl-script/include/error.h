@@ -42,8 +42,8 @@ namespace Prelude
 
 	public: // Parser
 		void UnexpectedEofWhileToken(TokenType tokenType, size_t line, size_t col);
-		void UnexpectedToken(std::shared_ptr<Token> token);
-		void UnexpectedToken(std::shared_ptr<Token> token, TokenType expectedTokenType);
+		void UnexpectedToken(std::string filename, std::shared_ptr<Token> locToken);
+		void UnexpectedToken(std::string filename, std::shared_ptr<Token> locToken, std::shared_ptr<Token> gotToken, TokenType expectedTokenType);
 		void MissingConstantDefinition(std::shared_ptr<Token> token);
 
 	public: // Interpreter
