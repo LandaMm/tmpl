@@ -7,7 +7,7 @@ namespace AST
     {
         std::string ProcedureDeclaration::Format() const
         {
-            return "ProcedureDeclaration(" + m_name + ")";
+            return "ProcedureDeclaration(" + m_name + ", " + std::to_string(m_body->GetSize()) + " stmts" + ")";
         }
     }
 }
