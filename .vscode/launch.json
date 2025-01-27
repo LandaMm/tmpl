@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/Debug/tmpl-script/tmpl-script",
-      "args": [],
+      "args": ["${workspaceFolder}/example/test.tmpl"],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
       "environment": [],
