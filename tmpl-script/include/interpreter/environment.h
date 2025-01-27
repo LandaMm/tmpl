@@ -30,19 +30,47 @@ namespace Runtime
 	class Environment
 	{
 	private:
-		std::shared_ptr<Environment> m_parent;
+		std::shared_ptr<Environment<T>> m_parent;
 		std::unordered_map<std::string, std::shared_ptr<T>> m_declarations;
 
 	public:
 		Environment()
 			: m_parent(nullptr) {}
-		Environment(std::shared_ptr<Environment> parentEnv)
+		Environment(std::shared_ptr<Environment<T>> parentEnv)
 			: m_parent(parentEnv) {}
 
 	public:
-		std::shared_ptr<T> LookUp(std::string name);
-		bool HasVariable(std::string name);
-		void AddVariable(std::string name, std::shared_ptr<T> var);
+		bool HasVariable(std::string name)
+		{
+			if (m_declarations.find(name) == m_declarations.end())
+			{
+				if (m_parent != nullptr)
+					return m_parent->HasVariable(name);
+				else
+					return false;
+			}
+
+			return true;
+		}
+
+		std::shared_ptr<T> LookUp(std::string name)
+		{
+			if (m_declarations.find(name) == m_declarations.end())
+			{
+				if (m_parent != nullptr)
+					return m_parent->LookUp(name);
+				else
+					return nullptr;
+			}
+			else
+				return m_declarations.at(name);
+		}
+
+		void AddVariable(std::string name, std::shared_ptr<T> var)
+		{
+			// TODO: raise error when var exists already
+			m_declarations.insert(std::make_pair(name, var));
+		}
 	};
 }
 
