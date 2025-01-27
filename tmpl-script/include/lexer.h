@@ -23,7 +23,7 @@ namespace AST
 		size_t m_index;
 
 	public:
-		Lexer(std::string code) : m_code(code), m_pos(0)
+		Lexer(std::string code) : m_code(code)
 		{
 			m_tokens = std::vector<std::shared_ptr<Token>>();
 			m_tokens.reserve(10);
