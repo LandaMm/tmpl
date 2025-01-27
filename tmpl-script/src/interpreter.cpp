@@ -57,13 +57,13 @@ namespace Runtime
 
 	std::shared_ptr<Value> Interpreter::EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier)
 	{
-		if (!m_env->HasVariable(identifier->GetName()))
+		if (!m_variables->HasVariable(identifier->GetName()))
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.UndeclaredVariable(identifier);
 			return nullptr;
 		}
-		std::shared_ptr<Variable> var = m_env->LookUp(identifier->GetName());
+		std::shared_ptr<Variable> var = m_variables->LookUp(identifier->GetName());
 		return var->GetValue();
 	}
 
@@ -122,7 +122,7 @@ namespace Runtime
 		}
 
 		std::shared_ptr<Variable> var = std::make_shared<Variable>(varType, varValue, varDecl->Editable());
-		m_env->AddVariable(varName, var);
+		m_variables->AddVariable(varName, var);
 	}
 
 	std::shared_ptr<Value> Interpreter::EvaluateLiteral(std::shared_ptr<LiteralNode> literal)

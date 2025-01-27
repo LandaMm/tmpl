@@ -19,10 +19,10 @@ namespace Runtime
 	{
 	private:
 		std::shared_ptr<Parser> m_parser;
-		std::shared_ptr<Environment> m_env;
+		std::shared_ptr<Environment<Variable>> m_variables;
 
 	public:
-		Interpreter(std::shared_ptr<Parser> parser, std::shared_ptr<Environment> env) : m_parser(parser), m_env(env) {}
+		Interpreter(std::shared_ptr<Parser> parser, std::shared_ptr<Environment<Variable>> env_vars) : m_parser(parser), m_variables(env_vars) {}
 
 	public:
 		std::shared_ptr<Value> Evaluate(std::shared_ptr<Node> node);
