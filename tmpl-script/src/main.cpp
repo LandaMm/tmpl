@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
 	std::ifstream input(filename);
 
-	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(input);
+	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(input, filename);
 
 	lexer->Tokenize();
 
