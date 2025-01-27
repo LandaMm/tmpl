@@ -12,6 +12,7 @@ namespace AST
 	{
 	private:
 		std::vector<std::shared_ptr<Token>> m_tokens;
+		std::string m_filename;
 
 	private: // tokenizer
 		size_t m_pos;
@@ -33,7 +34,7 @@ namespace AST
 			m_line = 1;
 			m_col = 1;
 		}
-		Lexer(std::ifstream &input);
+		Lexer(std::ifstream &input, std::string filename);
 
 	public:
 		std::vector<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
@@ -45,10 +46,15 @@ namespace AST
 		void Number();
 		void Comment();
 
+	private:
+		void HandleCharacter(char ch);
+
 	public:
 		std::shared_ptr<Token> GetToken();
 		std::shared_ptr<Token> SeekToken();
 		std::shared_ptr<Token> NextToken();
+		std::shared_ptr<Token> PrevToken();
+		inline std::string GetFilename() const { return m_filename; }
 	};
 }
 

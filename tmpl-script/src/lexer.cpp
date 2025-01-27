@@ -4,15 +4,16 @@
 
 namespace AST
 {
-	Lexer::Lexer(std::ifstream &input)
+	Lexer::Lexer(std::ifstream &input, std::string filename)
 	{
+		m_filename = filename;
 		m_tokens = std::vector<std::shared_ptr<Token>>();
 		m_tokens.reserve(10);
 
 		m_index = 0;
 		m_pos = 0;
 		m_line = 1;
-		m_col = 1;
+		m_col = 0;
 
 		input.seekg(0, std::ios::end);
 		m_code.reserve(input.tellg());
@@ -21,6 +22,19 @@ namespace AST
 		m_code.assign((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
 
 		input.close();
+	}
+
+	void Lexer::HandleCharacter(char ch)
+	{
+		if (ch == '\n')
+		{
+			m_line++;
+			m_col = 0;
+		}
+		else if (ch != '\r')
+		{
+			m_col++;
+		}
 	}
 
 	void Lexer::Tokenize()
@@ -51,10 +65,11 @@ namespace AST
 			{
 				// skip comment symbol
 				m_pos++;
-				m_col++;
 				Comment();
 				continue;
 			}
+            
+			HandleCharacter(ch);
 
 			switch (ch)
 			{
@@ -190,15 +205,6 @@ namespace AST
 			}
 
 			m_pos++;
-			if (ch == '\n')
-			{
-				m_line++;
-				m_col = 1;
-			}
-			else if (ch != '\r')
-			{
-				m_col++;
-			}
 		}
 
 		m_tokens.push_back(std::make_shared<Token>(TokenType::_EOF, m_line, m_col));
@@ -242,21 +248,21 @@ namespace AST
 		}
 
 		if (*id == "require")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col));
 		else if (*id == "if")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::If, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::If, m_line, m_col));
 		else if (*id == "else")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Else, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Else, m_line, m_col));
 		else if (*id == "require")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col));
 		else if (*id == "var")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Var, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Var, m_line, m_col));
 		else if (*id == "const")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Const, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Const, m_line, m_col));
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, value, m_line, m_col - id->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Id, value, m_line, m_col));
 		}
 	}
 
@@ -287,7 +293,7 @@ namespace AST
 		}
 
 		std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));
-		m_tokens.push_back(std::make_shared<Token>(TokenType::String, value, m_line, m_col - id->size()));
+		m_tokens.push_back(std::make_shared<Token>(TokenType::String, value, m_line, m_col + 1)); // additional column for closing quote
 	}
 
 	void Lexer::Comment()
@@ -354,18 +360,18 @@ namespace AST
 			if (digitstr.size() <= 7)
 			{
 				std::shared_ptr<Token::TypedValueHolder<float>> value = std::make_shared<Token::TypedValueHolder<float>>(std::make_shared<float>(std::stof(*number)));
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, value, m_line, m_col - number->size()));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Float, value, m_line, m_col));
 			}
 			else
 			{
 				std::shared_ptr<Token::TypedValueHolder<double>> value = std::make_shared<Token::TypedValueHolder<double>>(std::make_shared<double>(std::stod(*number)));
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, value, m_line, m_col - number->size()));
+				m_tokens.push_back(std::make_shared<Token>(TokenType::Double, value, m_line, m_col));
 			}
 		}
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<int>> value = std::make_shared<Token::TypedValueHolder<int>>(std::make_shared<int>(std::stoi(*number)));
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, value, m_line, m_col - number->size()));
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Integer, value, m_line, m_col));
 		}
 	}
 
@@ -394,5 +400,14 @@ namespace AST
 			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
 		}
 		return m_tokens[m_index++];
+	}
+
+	std::shared_ptr<Token> Lexer::PrevToken()
+	{
+		if (m_index > 0)
+		{
+			return m_tokens[m_index - 1];
+		}
+		return nullptr;
 	}
 }
