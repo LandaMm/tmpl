@@ -1,10 +1,33 @@
 
-#include"../../include/parser.h"
-#include"../../include/node/statement.h"
-#include"../../include/node/var_declaration.h"
+#include "../../include/parser.h"
+#include "../../include/node/statement.h"
+#include "../../include/node/var_declaration.h"
+#include "../../include/node/procedure.h"
 
 namespace AST
 {
+	std::shared_ptr<Node> Parser::ProcedureDeclaration()
+	{
+		Eat(TokenType::SingleArrow);
+		std::shared_ptr<Nodes::IdentifierNode> nameId = Id();
+
+		std::shared_ptr<Statements::StatementsBody> body =
+			std::make_shared<Statements::StatementsBody>();
+
+		Eat(TokenType::OpenCurly);
+		while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+		{
+			std::shared_ptr<Node> statement = Statement();
+			body->AddItem(statement);
+		}
+		Eat(TokenType::CloseCurly);
+
+		std::shared_ptr<Nodes::ProcedureDeclaration> procedure =
+			std::make_shared<Nodes::ProcedureDeclaration>(nameId->GetName(), body);
+
+		return procedure;
+	}
+
 	std::shared_ptr<Node> Parser::VariableDeclaration()
 	{
 		bool editable = m_lexer->GetToken()->GetType() == TokenType::Var;
@@ -19,7 +42,7 @@ namespace AST
 		std::shared_ptr<std::string> name = std::make_shared<std::string>(nameNode->GetName());
 
 		std::shared_ptr<Node> value = nullptr;
-		
+
 		if (m_lexer->GetToken()->GetType() == TokenType::Equal)
 		{
 			Eat(TokenType::Equal);
@@ -27,7 +50,7 @@ namespace AST
 		}
 		else if (!editable)
 		{
-			Prelude::ErrorManager& manager = GetErrorManager();
+			Prelude::ErrorManager &manager = GetErrorManager();
 			manager.MissingConstantDefinition(m_lexer->GetToken());
 			return nullptr;
 		}
@@ -62,7 +85,7 @@ namespace AST
 			}
 			Eat(TokenType::CloseCurly);
 		}
-		
+
 		if (m_lexer->GetToken()->GetType() == TokenType::Else)
 		{
 			Eat(TokenType::Else);

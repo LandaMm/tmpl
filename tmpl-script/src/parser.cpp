@@ -1,17 +1,17 @@
 
-#include"../include/parser.h"
-#include"../include/error.h"
+#include "../include/parser.h"
+#include "../include/error.h"
 
-#include"../include/node/literal.h"
-#include"../include/node/identifier.h"
-#include"../include/node/function.h"
-#include"../include/node/expression.h"
+#include "../include/node/literal.h"
+#include "../include/node/identifier.h"
+#include "../include/node/function.h"
+#include "../include/node/expression.h"
 
 namespace AST
 {
-	Prelude::ErrorManager& Parser::GetErrorManager()
+	Prelude::ErrorManager &Parser::GetErrorManager()
 	{
-		Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+		Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 		return errorManager;
 	}
 
@@ -35,7 +35,7 @@ namespace AST
 			}
 		}
 	}
-	
+
 	TokenType Parser::Peek()
 	{
 		return m_lexer->SeekToken()->GetType();
@@ -62,6 +62,9 @@ namespace AST
 		case TokenType::Const:
 			stmt = VariableDeclaration();
 			Eat(TokenType::Semicolon);
+			break;
+		case TokenType::SingleArrow:
+			stmt = ProcedureDeclaration();
 			break;
 		default:
 			stmt = Ternary();

@@ -4,7 +4,7 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "cd Debug && cmake .. && make"
+      "command": "cd Debug && cmake -DCMAKE_BUILD_TYPE=Debug .. && make"
     }
   ]
 }

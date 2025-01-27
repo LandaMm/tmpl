@@ -1,5 +1,5 @@
-#include"../include/interpreter.h"
-#include"../include/error.h"
+#include "../include/interpreter.h"
+#include "../include/error.h"
 
 namespace Runtime
 {
@@ -12,7 +12,7 @@ namespace Runtime
 		if (condition->GetType() != ValueType::Integer)
 		{
 			// should be unreachable
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("RuntimeError: Condition cannot produce non-integer value");
 			return nullptr;
 		}
@@ -33,7 +33,7 @@ namespace Runtime
 
 		if (left->GetType() != right->GetType() && left->GetType() != ValueType::Null && right->GetType() != ValueType::Null)
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.OperandMismatchType(left->GetType(), right->GetType());
 			return nullptr;
 		}
@@ -42,7 +42,7 @@ namespace Runtime
 		{
 			if (condition->GetOperator() != Condition::ConditionType::Compare && condition->GetOperator() != Condition::ConditionType::NotEqual)
 			{
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.RaiseError("Unsupported condition operator for null values: " + std::to_string((int)condition->GetOperator()));
 				return nullptr;
 			}
@@ -57,13 +57,13 @@ namespace Runtime
 
 	std::shared_ptr<Value> Interpreter::EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier)
 	{
-		if (!m_env->HasVariable(identifier->GetName()))
+		if (!m_variables->HasItem(identifier->GetName()))
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.UndeclaredVariable(identifier);
 			return nullptr;
 		}
-		std::shared_ptr<Variable> var = m_env->LookUp(identifier->GetName());
+		std::shared_ptr<Variable> var = m_variables->LookUp(identifier->GetName());
 		return var->GetValue();
 	}
 
@@ -88,19 +88,29 @@ namespace Runtime
 			{
 				return ValueType::Integer;
 			}
-			else {
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			else
+			{
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.UndefinedType(id->GetName());
 			}
 		}
 		else
 		{
 			// TODO: support for complex types, e.g. inline objects, generic types
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported node type for type: " + std::to_string((int)typeNode->GetType()));
 		}
 
 		return ValueType::Null;
+	}
+
+	void Interpreter::EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl)
+	{
+		std::string name = procDecl->GetName();
+		std::shared_ptr<Statements::StatementsBody> body = procDecl->GetBody();
+
+		std::shared_ptr<Procedure> proc = std::make_shared<Procedure>(body);
+		m_procedures->AddItem(name, proc);
 	}
 
 	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
@@ -111,13 +121,13 @@ namespace Runtime
 
 		if (varType != varValue->GetType())
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.VarMismatchType(varName, varValue->GetType(), varType);
 			return;
 		}
 
 		std::shared_ptr<Variable> var = std::make_shared<Variable>(varType, varValue, varDecl->Editable());
-		m_env->AddVariable(varName, var);
+		m_variables->AddItem(varName, var);
 	}
 
 	std::shared_ptr<Value> Interpreter::EvaluateLiteral(std::shared_ptr<LiteralNode> literal)
@@ -133,7 +143,7 @@ namespace Runtime
 		case LiteralType::STRING:
 			return std::make_shared<StringValue>(*literal->GetValue<std::string>());
 		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported literal type: " + std::to_string((int)literal->GetLiteralType()));
 			break;
 		}
@@ -150,7 +160,7 @@ namespace Runtime
 		ValueType valueType = left->GetType();
 		if (valueType != right->GetType())
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported different types of operands: " + std::to_string((int)left->GetType()) + " != " + std::to_string((int)right->GetType()));
 			return nullptr;
 		}
@@ -175,6 +185,9 @@ namespace Runtime
 		case NodeType::VarDecl:
 			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
 			return nullptr;
+		case NodeType::ProcedureDecl:
+			EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(node));
+			return nullptr;
 		case NodeType::Identifier:
 			return EvaluateIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
 		case NodeType::Condition:
@@ -182,7 +195,7 @@ namespace Runtime
 		case NodeType::Ternary:
 			return EvaluateTernary(std::dynamic_pointer_cast<TernaryNode>(node));
 		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)node->GetType()));
 			break;
 		}
