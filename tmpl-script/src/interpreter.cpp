@@ -1,5 +1,5 @@
-#include"../include/interpreter.h"
-#include"../include/error.h"
+#include "../include/interpreter.h"
+#include "../include/error.h"
 
 namespace Runtime
 {
@@ -12,7 +12,7 @@ namespace Runtime
 		if (condition->GetType() != ValueType::Integer)
 		{
 			// should be unreachable
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("RuntimeError: Condition cannot produce non-integer value");
 			return nullptr;
 		}
@@ -33,7 +33,7 @@ namespace Runtime
 
 		if (left->GetType() != right->GetType() && left->GetType() != ValueType::Null && right->GetType() != ValueType::Null)
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.OperandMismatchType(left->GetType(), right->GetType());
 			return nullptr;
 		}
@@ -42,7 +42,7 @@ namespace Runtime
 		{
 			if (condition->GetOperator() != Condition::ConditionType::Compare && condition->GetOperator() != Condition::ConditionType::NotEqual)
 			{
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.RaiseError("Unsupported condition operator for null values: " + std::to_string((int)condition->GetOperator()));
 				return nullptr;
 			}
@@ -59,7 +59,7 @@ namespace Runtime
 	{
 		if (!m_env->HasVariable(identifier->GetName()))
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.UndeclaredVariable(identifier);
 			return nullptr;
 		}
@@ -88,19 +88,24 @@ namespace Runtime
 			{
 				return ValueType::Integer;
 			}
-			else {
-				Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			else
+			{
+				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.UndefinedType(id->GetName());
 			}
 		}
 		else
 		{
 			// TODO: support for complex types, e.g. inline objects, generic types
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported node type for type: " + std::to_string((int)typeNode->GetType()));
 		}
 
 		return ValueType::Null;
+	}
+
+	void Interpreter::EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl)
+	{
 	}
 
 	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
@@ -111,7 +116,7 @@ namespace Runtime
 
 		if (varType != varValue->GetType())
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.VarMismatchType(varName, varValue->GetType(), varType);
 			return;
 		}
@@ -133,7 +138,7 @@ namespace Runtime
 		case LiteralType::STRING:
 			return std::make_shared<StringValue>(*literal->GetValue<std::string>());
 		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported literal type: " + std::to_string((int)literal->GetLiteralType()));
 			break;
 		}
@@ -150,7 +155,7 @@ namespace Runtime
 		ValueType valueType = left->GetType();
 		if (valueType != right->GetType())
 		{
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported different types of operands: " + std::to_string((int)left->GetType()) + " != " + std::to_string((int)right->GetType()));
 			return nullptr;
 		}
@@ -182,7 +187,7 @@ namespace Runtime
 		case NodeType::Ternary:
 			return EvaluateTernary(std::dynamic_pointer_cast<TernaryNode>(node));
 		default:
-			Prelude::ErrorManager& errorManager = Prelude::ErrorManager::getInstance();
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)node->GetType()));
 			break;
 		}
