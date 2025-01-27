@@ -30,8 +30,14 @@ namespace AST
 			}
 			else
 			{
-				// TODO: provide better display of met token
-				GetErrorManager().UnexpectedToken(m_lexer->GetToken(), type);
+				if (std::shared_ptr<Token> prev = m_lexer->PrevToken())
+				{
+					GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), prev, m_lexer->GetToken(), type);
+				}
+				else
+				{
+					GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), m_lexer->GetToken(), m_lexer->GetToken(), type);
+				}
 			}
 		}
 	}

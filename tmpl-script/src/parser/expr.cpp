@@ -267,7 +267,7 @@ namespace AST
 		else
 		{
 			Prelude::ErrorManager &errManager = GetErrorManager();
-			errManager.UnexpectedToken(token);
+			errManager.UnexpectedToken(m_lexer->GetFilename(), token);
 			return nullptr;
 		}
 	}

@@ -1,7 +1,7 @@
 
 
-#include"../../include/parser.h"
-#include"../../include/node/object_member.h"
+#include "../../include/parser.h"
+#include "../../include/node/object_member.h"
 
 namespace AST
 {
@@ -10,7 +10,8 @@ namespace AST
 		std::shared_ptr<Node> result = nullptr;
 		std::shared_ptr<Nodes::ObjectMember> objMember = std::make_shared<Nodes::ObjectMember>(obj);
 
-		do {
+		do
+		{
 			// shell["exec"]
 			// shell.exec
 			// shell[5]
@@ -34,7 +35,7 @@ namespace AST
 			}
 			else
 			{
-				GetErrorManager().UnexpectedToken(m_lexer->GetToken());
+				GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), m_lexer->GetToken());
 			}
 		} while (m_lexer->GetToken()->GetType() == TokenType::Point || m_lexer->GetToken()->GetType() == TokenType::OpenSquareBracket);
 
