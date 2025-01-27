@@ -64,7 +64,7 @@ Expected Output:
 Hi everyone
 ```
 
-### Defining multiple subcommands
+### Defining Subcommand (Procedure)
 
 Update `HelloWorld.tmpl` by adding new procedure:
 
@@ -78,6 +78,8 @@ Update `HelloWorld.tmpl` by adding new procedure:
     print(message);
 }
 
+// says bye to stdout
+
 ->bye {
     print("Bye!");
 }
@@ -86,7 +88,7 @@ Update `HelloWorld.tmpl` by adding new procedure:
 Now run that procedure using following command:
 
 ```sh
-$ tmpl HelloWorld bye"
+$ tmpl HelloWorld bye
 ```
 
 Expected Output:
