@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
 	parser->Parse();
 
-	std::shared_ptr<Environment> env = std::make_shared<Environment>();
+	std::shared_ptr<Environment<Variable>> env = std::make_shared<Environment<Variable>>();
 	Interpreter intrpt(parser, env);
 
 	std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot());
