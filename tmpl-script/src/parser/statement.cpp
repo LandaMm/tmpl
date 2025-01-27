@@ -11,16 +11,19 @@ namespace AST
 		Eat(TokenType::SingleArrow);
 		std::shared_ptr<Nodes::IdentifierNode> nameId = Id();
 
-		std::shared_ptr<Nodes::ProcedureDeclaration> procedure =
-			std::make_shared<Nodes::ProcedureDeclaration>(nameId->GetName());
+		std::shared_ptr<Statements::StatementsBody> body =
+			std::make_shared<Statements::StatementsBody>();
 
 		Eat(TokenType::OpenCurly);
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
 			std::shared_ptr<Node> statement = Statement();
-			procedure->AddItem(statement);
+			body->AddItem(statement);
 		}
 		Eat(TokenType::CloseCurly);
+
+		std::shared_ptr<Nodes::ProcedureDeclaration> procedure =
+			std::make_shared<Nodes::ProcedureDeclaration>(nameId->GetName(), body);
 
 		return procedure;
 	}
