@@ -72,4 +72,21 @@ namespace Prelude
 		std::cout << "RuntimeError: Undeclared variable '" << id->GetName() << "'" << std::endl;
 		std::exit(-1);
 	}
+
+    // CliRunner
+    void ErrorManager::NotEnoughArgs(int expected, int got, bool atLeast)
+    {
+        std::cout << "ArgumentsError: Not enough additional arguments provided."
+            << " Expected " << (atLeast ? "at least" : "") << " " << expected
+            << " arguments, but got " << got
+            << std::endl;
+        std::exit(1);
+    }
+
+    void ErrorManager::InvalidArgument(std::string arg, std::string message)
+    {
+        std::cout << "ArgumentsError: Invalid argument provided" << arg << "."
+            << message << std::endl;
+        std::exit(1);
+    }
 }
