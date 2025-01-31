@@ -51,6 +51,9 @@ namespace Prelude
 		void UndefinedType(std::string name);
 		void UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id);
 		void OperandMismatchType(Runtime::ValueType leftType, Runtime::ValueType rightType);
+    public: // CliRunner
+        void NotEnoughArgs(int expected, int got, bool atLeast);
+        void InvalidArgument(std::string arg, std::string message);
 	};
 }
 
