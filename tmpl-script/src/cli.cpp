@@ -2,18 +2,46 @@
 
 #include"../include/cli.h"
 #include"../include/error.h"
-#include<filesystem>
+#include <filesystem>
+#include <iostream>
 
 namespace Runtime
 {
+    CliRunner::CliRunner(int argc, char* argv[])
+    {
+        m_argc = argc;
+        m_argv = argv;
+        CheckBasicCommands();
+    }
+
+    void CliRunner::CheckBasicCommands()
+    {
+        if (m_argc == 2)
+        {
+            std::string cmd = m_argv[1];
+            if (cmd == "--version" || cmd == "-v")
+            {
+                std::cout << "tmpl version 0.0.1" << std::endl;
+                std::exit(0);
+            }
+            if (cmd == "--help" || cmd == "-h")
+            {
+                ShowUsage();
+                std::exit(0);
+            }
+        }
+    }
+
     std::string CliRunner::GetScriptFilename()
     {
         Prelude::ErrorManager& errMan = Prelude::ErrorManager::getInstance();
         // example: tmpl <script_name> [procedure]
         if (m_argc < 2)
         {
-            // TODO: Show usage example.
-            errMan.NotEnoughArgs(1, m_argc - 1, true);
+            std::cout << "ArgumentsError: Not enough additional arguments provided."
+                << std::endl;
+            ShowUsage();
+            std::exit(1);
             return "";
         }
 
@@ -27,7 +55,7 @@ namespace Runtime
 
         auto cwd = std::filesystem::current_path();
 
-        std::filesystem::path scriptFilename = cwd / filename;
+        std::filesystem::path scriptFilename = cwd / ".tmpl/" / (filename + ".tmpl");
 
         return scriptFilename.string();
     }
@@ -38,8 +66,7 @@ namespace Runtime
         // example: tmpl <script_name> [procedure]
         if (m_argc < 3)
         {
-            // TODO: Show usage example.
-            errMan.NotEnoughArgs(2, m_argc - 1, false);
+            return "main";
         }
 
         std::string procedure = m_argv[2];
@@ -53,18 +80,33 @@ namespace Runtime
         // example: tmpl <script_name> [procedure] [...args]
         if (m_argc < 4)
         {
-            // TODO: Show usage example.
-            errMan.NotEnoughArgs(3, m_argc - 1, true);
+            return std::vector<std::string>();
         }
 
         std::vector<std::string> procArgs;
 
-        for (int i = 3; i < m_argc - 3; i++)
+        for (int i = 3; i < m_argc; i++)
         {
             procArgs.push_back(m_argv[i]);
         }
 
         return procArgs;
+    }
+
+    void CliRunner::ShowUsage()
+    {
+        std::cout << std::endl;
+        std::cout << "Usage: " << m_argv[0] << " <script> [procedure] [...args]"
+            << std::endl << std::endl;
+        std::cout << "Script:\n" << "\tName of the script placed in `.tmpl` folder"
+            << " or script file path" << std::endl << std::endl;
+        std::cout << "Procedure:\n" << "\tName of the procedure inside script to run"
+            << std::endl << std::endl;
+        std::cout << "Args:\n" << "\tAddition arguments to pass into procedure"
+            << std::endl << std::endl;
+        std::cout << "Other options:\n"
+            << "\t--version, -v\t" << "version of the tmpl cli" << std::endl
+            << "\t--help, -h\t" << "show help message" << std::endl;
     }
 }
 
