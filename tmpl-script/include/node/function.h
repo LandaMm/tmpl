@@ -14,12 +14,13 @@ namespace AST
 			std::shared_ptr<Node> m_callee;
 			std::vector<std::shared_ptr<Node>> m_args;
 
-		private:
+		public:
 			std::string Format() const override;
 			inline NodeType GetType() const override { return NodeType::FunctionCall; }
 
 		public:
-			FunctionCall(std::shared_ptr<Node> callee, std::vector<std::shared_ptr<Node>> args) : m_callee(callee), m_args(args) {}
+			FunctionCall(std::shared_ptr<Node> callee, std::vector<std::shared_ptr<Node>> args, Location loc)
+                : m_callee(callee), m_args(args), Node(loc) {}
 			~FunctionCall() {}
 
 		public:

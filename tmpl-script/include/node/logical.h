@@ -1,6 +1,7 @@
 #ifndef LOGICAL_H
 #define LOGICAL_H
-#include"../node.h"
+#include <memory>
+#include "../node.h"
 
 namespace AST
 {
@@ -24,13 +25,13 @@ namespace AST
 			std::shared_ptr<Node> m_right;
 			ConditionType m_operator;
 		public:
-			Condition() : m_left(nullptr), m_right(nullptr), m_operator(ConditionType::None) { }
+			Condition(Location loc)
+                : m_left(nullptr), m_right(nullptr), m_operator(ConditionType::None), Node(loc) { }
 			~Condition() { }
 		public:
 			inline NodeType GetType() const override { return NodeType::Condition; }
-		private:
-			// TODO:
-			std::string Format() const override { return "Condition"; }
+		public:
+			std::string Format() const override;
 		public:
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
@@ -49,9 +50,10 @@ namespace AST
 			std::shared_ptr<Node> m_right;
 		public:
 			inline NodeType GetType() const override { return NodeType::Ternary; }
-		private:
-			// TODO:
-			std::string Format() const override { return "Ternary"; }
+        public:
+            TernaryNode(Location loc) : Node(loc) { }
+		public:
+			std::string Format() const override;
 		public:
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }

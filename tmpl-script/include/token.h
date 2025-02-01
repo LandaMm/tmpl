@@ -2,6 +2,7 @@
 #define TOKEN_H
 #include<vector>
 #include<memory>
+#include "location.h"
 
 namespace AST
 {
@@ -48,6 +49,7 @@ namespace AST
 		Else,
 		Var,
 		Const,
+        Return,
 		_EOF,
 	};
 
@@ -94,6 +96,7 @@ namespace AST
 		"else",
 		"var",
 		"const",
+        "return",
 		"EOF",
 	};
 
@@ -119,11 +122,12 @@ namespace AST
 	private:
 		TokenType m_type;
 		std::shared_ptr<ValueHolder> m_value;
-		size_t m_line;
-		size_t m_col;
+        Location m_loc;
 	public:
-		Token(TokenType type, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(nullptr) {}
-		Token(TokenType type, std::shared_ptr<ValueHolder> value, size_t line, size_t col) : m_type(type), m_line(line), m_col(col), m_value(value) {}
+		Token(TokenType type, size_t line, size_t col)
+            : m_type(type), m_loc(Location(line, col)), m_value(nullptr) {}
+		Token(TokenType type, std::shared_ptr<ValueHolder> value, size_t line, size_t col)
+            : m_type(type), m_loc(Location(line, col)), m_value(value) {}
 	public:
 		inline TokenType GetType() const { return m_type; }
 		template<typename T>
@@ -133,8 +137,9 @@ namespace AST
 			return holder ? holder->GetValue() : nullptr;
 		}
 	public:
-		inline size_t GetLine() const { return m_line; }
-		inline size_t GetColumn() const { return m_col; }
+		inline size_t GetLine() const { return m_loc.line; }
+		inline size_t GetColumn() const { return m_loc.col; }
+        inline Location GetLocation() const { return m_loc; }
 	public:
 		static std::string GetTokenTypeCharacter(TokenType type)
 		{

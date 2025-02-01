@@ -1,6 +1,8 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 #include <memory>
+#include "node/program.h"
+#include "node/return.h"
 #include "parser.h"
 #include "node.h"
 #include "node/expression.h"
@@ -27,7 +29,8 @@ namespace Runtime
 			: m_parser(parser), m_variables(env_vars), m_procedures(env_procedures) {}
 
 	public:
-		std::shared_ptr<Value> Evaluate(std::shared_ptr<Node> node);
+		std::shared_ptr<Value> Execute(std::shared_ptr<Node> node);
+        void Evaluate(std::shared_ptr<ProgramNode> program);
 
 	private:
 		std::shared_ptr<Value> EvaluateExpression(std::shared_ptr<ExpressionNode> expr);
@@ -35,6 +38,7 @@ namespace Runtime
 		std::shared_ptr<Value> EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier);
 		std::shared_ptr<Value> EvaluateCondition(std::shared_ptr<Condition> condition);
 		std::shared_ptr<Value> EvaluateTernary(std::shared_ptr<TernaryNode> ternary);
+        std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret);
 
 	public:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);

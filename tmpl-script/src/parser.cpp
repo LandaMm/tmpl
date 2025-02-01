@@ -2,11 +2,6 @@
 #include "../include/parser.h"
 #include "../include/error.h"
 
-#include "../include/node/literal.h"
-#include "../include/node/identifier.h"
-#include "../include/node/function.h"
-#include "../include/node/expression.h"
-
 namespace AST
 {
 	Prelude::ErrorManager &Parser::GetErrorManager()
@@ -72,6 +67,10 @@ namespace AST
 		case TokenType::SingleArrow:
 			stmt = ProcedureDeclaration();
 			break;
+        case TokenType::Return:
+            stmt = ReturnStatement();
+            Eat(TokenType::Semicolon);
+            break;
 		default:
 			stmt = Ternary();
 			Eat(TokenType::Semicolon);

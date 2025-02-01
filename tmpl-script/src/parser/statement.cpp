@@ -3,16 +3,29 @@
 #include "../../include/node/statement.h"
 #include "../../include/node/var_declaration.h"
 #include "../../include/node/procedure.h"
+#include "../../include/node/return.h"
+#include <memory>
 
 namespace AST
 {
+    std::shared_ptr<Node> Parser::ReturnStatement()
+    {
+        auto token = m_lexer->GetToken();
+        Eat(TokenType::Return);
+
+        std::shared_ptr<Node> value = Ternary();
+
+        return std::make_shared<Nodes::ReturnNode>(value, token->GetLocation());
+    }
+
 	std::shared_ptr<Node> Parser::ProcedureDeclaration()
 	{
+        auto procLoc = m_lexer->GetToken()->GetLocation();
 		Eat(TokenType::SingleArrow);
 		std::shared_ptr<Nodes::IdentifierNode> nameId = Id();
 
 		std::shared_ptr<Statements::StatementsBody> body =
-			std::make_shared<Statements::StatementsBody>();
+			std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
 		Eat(TokenType::OpenCurly);
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
@@ -23,14 +36,17 @@ namespace AST
 		Eat(TokenType::CloseCurly);
 
 		std::shared_ptr<Nodes::ProcedureDeclaration> procedure =
-			std::make_shared<Nodes::ProcedureDeclaration>(nameId->GetName(), body);
+			std::make_shared<Nodes::ProcedureDeclaration>(nameId->GetName(), body, procLoc);
 
 		return procedure;
 	}
 
 	std::shared_ptr<Node> Parser::VariableDeclaration()
 	{
-		bool editable = m_lexer->GetToken()->GetType() == TokenType::Var;
+        auto keyword = m_lexer->GetToken();
+		bool editable = keyword->GetType() == TokenType::Var;
+        auto varLoc = keyword->GetLocation();
+
 		if (editable)
 			Eat(TokenType::Var);
 		else
@@ -56,20 +72,21 @@ namespace AST
 		}
 
 		if (value != nullptr)
-			return std::make_shared<Nodes::VarDeclaration>(type, name, value, editable);
+			return std::make_shared<Nodes::VarDeclaration>(type, name, value, editable, varLoc);
 		else
-			return std::make_shared<Nodes::VarDeclaration>(type, name);
+			return std::make_shared<Nodes::VarDeclaration>(type, name, varLoc);
 	}
 
 	std::shared_ptr<Node> Parser::IfElseStatement()
 	{
 		// if (5 == 5 ? true : false) {} else {}
+        auto loc = m_lexer->GetToken()->GetLocation();
 		Eat(TokenType::If);
 		// Eat(TokenType::OpenBracket)
 		std::shared_ptr<Node> condition = Ternary();
 		// Eat(TokenType::CloseBracket)
 
-		auto ifElse = std::make_shared<Statements::IfElseStatement>(condition);
+		auto ifElse = std::make_shared<Statements::IfElseStatement>(condition, loc);
 
 		if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
 		{
@@ -97,7 +114,7 @@ namespace AST
 			}
 			else
 			{
-				auto stmts = std::make_shared<Statements::StatementsBody>();
+				auto stmts = std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 				if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
 				{
 					stmts->AddItem(Statement());

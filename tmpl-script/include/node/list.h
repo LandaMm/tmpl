@@ -1,5 +1,7 @@
 #ifndef LIST_H
 #define LIST_H
+#include<vector>
+#include<memory>
 #include"../node.h"
 
 namespace AST
@@ -11,11 +13,12 @@ namespace AST
 		private:
 			std::vector<std::shared_ptr<Node>> m_items;
 		public:
-			ListNode() : m_items(std::vector<std::shared_ptr<Node>>()) {}
+			ListNode(Location loc)
+                : m_items(std::vector<std::shared_ptr<Node>>()), Node(loc) {}
 			~ListNode() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::List; }
-		private:
+		public:
 			std::string Format() const override { return "List"; };
 		public:
 			void AddItem(std::shared_ptr<Node> item);

@@ -35,12 +35,13 @@ namespace AST
 			std::shared_ptr<Node> m_right;
 		public:
 			inline NodeType GetType() const override { return NodeType::Expression; };
-		private:
-			// TODO:
-			std::string Format() const override { return "Expression()"; }
 		public:
-			ExpressionNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right, Operator oper) : m_left(left), m_right(right), m_operator(oper) {}
-			ExpressionNode() :m_left(nullptr), m_right(nullptr), m_operator(OperatorType::NONE) {}
+			std::string Format() const override;
+		public:
+			ExpressionNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right, Operator oper, Location loc)
+                : m_left(left), m_right(right), m_operator(oper), Node(loc) {}
+			ExpressionNode(Location loc)
+                : m_left(nullptr), m_right(nullptr), m_operator(OperatorType::NONE), Node(loc) {}
 			~ExpressionNode() {}
 		public:
 			inline std::shared_ptr<Node> GetLeft() const { return m_left; }

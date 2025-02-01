@@ -19,11 +19,12 @@ namespace AST
 			UnaryOperator m_operator;
 			std::shared_ptr<Node> m_target;
 		public:
-			UnaryNode(UnaryOperator op, std::shared_ptr<Node> target) : m_operator(op), m_target(target) {}
+			UnaryNode(UnaryOperator op, std::shared_ptr<Node> target, Location loc)
+                : m_operator(op), m_target(target), Node(loc) {}
 			~UnaryNode() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::Unary; }
-		private:
+		public:
 			std::string Format() const override { return "UnaryNode"; }
 		};
 	}

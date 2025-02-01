@@ -12,11 +12,11 @@ namespace AST
 		private:
 			std::string m_name;
 		public:
-			IdentifierNode(std::string name): m_name(name) { }
+			IdentifierNode(std::string name, Location loc): m_name(name), Node(loc) { }
 			~IdentifierNode() { }
 		public:
 			inline NodeType GetType() const override { return NodeType::Identifier; }
-		private:
+		public:
 			std::string Format() const override;
 		public:
 			inline std::string GetName() const { return m_name; }

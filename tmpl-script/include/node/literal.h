@@ -1,5 +1,6 @@
 #ifndef LITERAL_H
 #define LITERAL_H
+#include <memory>
 #include "../node.h"
 
 namespace AST
@@ -43,13 +44,14 @@ namespace AST
 			std::shared_ptr<ValueHolder> m_value;
 
 		public:
-			LiteralNode(LiteralType type, std::shared_ptr<ValueHolder> value) : m_type(type), m_value(value) {}
+			LiteralNode(LiteralType type, std::shared_ptr<ValueHolder> value, Location loc)
+                : m_type(type), m_value(value), Node(loc) {}
 			~LiteralNode() {}
 
 		public:
 			inline NodeType GetType() const override { return NodeType::Literal; }
 
-		private:
+		public:
 			std::string Format() const override;
 
 		public:

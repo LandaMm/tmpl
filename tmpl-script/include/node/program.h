@@ -14,10 +14,12 @@ namespace AST
 		private:
 			std::vector<std::shared_ptr<Node>> m_statements;
 			size_t m_index;
-		private:
+		public:
 			std::string Format() const override;
 		public:
-			ProgramNode(): m_index(-1), m_statements(std::vector<std::shared_ptr<Node>>()) {}
+			ProgramNode()
+                : m_index(0), m_statements(std::vector<std::shared_ptr<Node>>()),
+                  Node(Location(-1, -1)) {}
 			~ProgramNode() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::Program; }

@@ -1,9 +1,7 @@
 
 #include "../../include/parser.h"
 #include "../../include/node/expression.h"
-#include "../../include/node/identifier.h"
 #include "../../include/node/literal.h"
-#include "../../include/node/function.h"
 #include "../../include/node/logical.h"
 #include "../../include/node/unary.h"
 
@@ -22,7 +20,7 @@ namespace AST
 			Eat(TokenType::Colon);
 			std::shared_ptr<Node> right = Ternary();
 
-			auto node = std::make_shared<Nodes::TernaryNode>();
+			auto node = std::make_shared<Nodes::TernaryNode>(result->GetLocation());
 
 			node->SetCondition(result);
 			node->SetLeft(left);
@@ -37,7 +35,7 @@ namespace AST
 	std::shared_ptr<Node> Parser::Cond()
 	{
 		std::shared_ptr<Node> result = Expr();
-		std::shared_ptr<Nodes::Condition> expr = std::make_shared<Nodes::Condition>();
+		std::shared_ptr<Nodes::Condition> expr = std::make_shared<Nodes::Condition>(result->GetLocation());
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Less || m_lexer->GetToken()->GetType() == TokenType::Greater ||
@@ -80,7 +78,7 @@ namespace AST
 			expr->SetRight(right);
 
 			result = expr;
-			expr = std::make_shared<Nodes::Condition>();
+			expr = std::make_shared<Nodes::Condition>(result->GetLocation());
 			expr->SetLeft(result);
 		}
 
@@ -90,7 +88,7 @@ namespace AST
 	std::shared_ptr<Node> Parser::Expr()
 	{
 		std::shared_ptr<Node> result = Term();
-		std::shared_ptr<Nodes::ExpressionNode> expr = std::make_shared<Nodes::ExpressionNode>();
+		std::shared_ptr<Nodes::ExpressionNode> expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Plus || m_lexer->GetToken()->GetType() == TokenType::Minus)
@@ -105,7 +103,7 @@ namespace AST
 				expr->SetOperator(Nodes::ExpressionNode::Operator(Nodes::ExpressionNode::OperatorType::PLUS));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>();
+				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 			else if (token->GetType() == TokenType::Minus)
@@ -116,7 +114,7 @@ namespace AST
 				expr->SetOperator(Nodes::ExpressionNode::Operator(Nodes::ExpressionNode::OperatorType::MINUS));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>();
+				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 		}
@@ -127,7 +125,8 @@ namespace AST
 	std::shared_ptr<Node> Parser::Term()
 	{
 		std::shared_ptr<Node> result = Factor();
-		std::shared_ptr<Nodes::ExpressionNode> expr = std::make_shared<Nodes::ExpressionNode>(Nodes::ExpressionNode());
+		std::shared_ptr<Nodes::ExpressionNode> expr =
+            std::make_shared<Nodes::ExpressionNode>(Nodes::ExpressionNode(result->GetLocation()));
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Multiply || m_lexer->GetToken()->GetType() == TokenType::Divide)
@@ -142,7 +141,7 @@ namespace AST
 				expr->SetOperator(Nodes::ExpressionNode::Operator(Nodes::ExpressionNode::OperatorType::MULTIPLY));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>();
+				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 			else if (token->GetType() == TokenType::Divide)
@@ -153,7 +152,7 @@ namespace AST
 				expr->SetOperator(Nodes::ExpressionNode::Operator(Nodes::ExpressionNode::OperatorType::DIVIDE));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>();
+				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 		}
@@ -179,7 +178,7 @@ namespace AST
 			using Holder = Nodes::LiteralNode::TypedValueHolder<int>;
 			std::shared_ptr<Holder> v =
 				std::make_shared<Holder>(std::make_shared<int>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::INT, v);
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::INT, v, token->GetLocation());
 		}
 		// float literal
 		else if (token->GetType() == TokenType::Float)
@@ -189,7 +188,7 @@ namespace AST
 			using Holder = Nodes::LiteralNode::TypedValueHolder<float>;
 			std::shared_ptr<Holder> v =
 				std::make_shared<Holder>(std::make_shared<float>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::FLOAT, v);
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::FLOAT, v, token->GetLocation());
 		}
 		// double literal
 		else if (token->GetType() == TokenType::Double)
@@ -199,7 +198,7 @@ namespace AST
 			using Holder = Nodes::LiteralNode::TypedValueHolder<double>;
 			std::shared_ptr<Holder> v =
 				std::make_shared<Holder>(std::make_shared<double>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, v);
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, v, token->GetLocation());
 		}
 		// string literal
 		else if (token->GetType() == TokenType::String)
@@ -209,7 +208,7 @@ namespace AST
 			using Holder = Nodes::LiteralNode::TypedValueHolder<std::string>;
 			std::shared_ptr<Holder> v =
 				std::make_shared<Holder>(std::make_shared<std::string>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v);
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v, token->GetLocation());
 		}
 		// id || function call with args | object member | obj_member + call | call + obj_member
 		else if (token->GetType() == TokenType::Id)
@@ -241,19 +240,19 @@ namespace AST
 		else if (token->GetType() == TokenType::Not)
 		{
 			Eat(TokenType::Not);
-			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryNode::UnaryOperator::Not, Factor());
+			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryNode::UnaryOperator::Not, Factor(), token->GetLocation());
 		}
 		// +factor
 		else if (token->GetType() == TokenType::Plus)
 		{
 			Eat(TokenType::Plus);
-			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryNode::UnaryOperator::Positive, Factor());
+			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryNode::UnaryOperator::Positive, Factor(), token->GetLocation());
 		}
 		// -factor
 		else if (token->GetType() == TokenType::Minus)
 		{
 			Eat(TokenType::Minus);
-			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryNode::UnaryOperator::Negative, Factor());
+			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryNode::UnaryOperator::Negative, Factor(), token->GetLocation());
 		}
 		// (expr)
 		else if (token->GetType() == TokenType::OpenBracket)

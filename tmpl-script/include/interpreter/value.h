@@ -2,6 +2,7 @@
 #define RUNTIME_VALUE_H
 #include <memory>
 #include <string>
+#include <vector>
 #include "../node/logical.h"
 #include "../node/expression.h"
 
@@ -13,6 +14,7 @@ namespace Runtime
 		Float,
 		Double,
 		String,
+        List,
 		Null,
 	};
 
@@ -39,6 +41,35 @@ namespace Runtime
 	std::ostream &operator<<(std::ostream &stream, const Value &value);
 	std::ostream &operator<<(std::ostream &stream, const std::shared_ptr<Value> &value);
 
+
+	class ListValue : public Value
+	{
+	private:
+		std::vector<std::shared_ptr<Value>> m_value;
+
+	public:
+		ListValue() : m_value(std::vector<std::shared_ptr<Value>>()) {}
+		ListValue(std::vector<std::shared_ptr<Value>> values)
+            : m_value(values) {}
+
+	public:
+		inline ValueType GetType() const override { return ValueType::List; }
+
+	public:
+		inline std::vector<std::shared_ptr<Value>> GetValue() const
+            { return m_value; }
+
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
+
+    public:
+        void AddItem(std::shared_ptr<Value> item);
+        std::shared_ptr<Value> GetItem(std::shared_ptr<Value> indexVal);
+
+	public:
+		std::string format() const override;
+	};
 	class IntegerValue : public Value
 	{
 	private:
