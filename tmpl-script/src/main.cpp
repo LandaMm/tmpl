@@ -1,28 +1,35 @@
 
+#include <cassert>
 #include <iostream>
+#include <memory>
 #include "../include/lexer.h"
 #include "../include/parser.h"
 #include "../include/interpreter.h"
 #include "../include/interpreter/environment.h"
+#include "../include/interpreter/value.h"
+#include "../include/cli.h"
+#include "../include/error.h"
 
 int main(int argc, char **argv)
 {
 	using namespace AST;
 	using namespace Runtime;
 
-	if (argc < 2)
-	{
-		Prelude::ErrorManager &errManager = Prelude::ErrorManager::getInstance();
-		errManager.NoInputFile();
-		return 1;
-	}
+    CliRunner cliRunner(argc, argv);
 
-	std::string filename = argv[1];
+    std::string filename = cliRunner.GetScriptFilename();
 
 	std::ifstream input(filename);
 
-	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(input, filename);
+    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
 
+    if (!input.good())
+    {
+        errManager.FailedOpeningFile(filename);
+        return 1;
+    }
+
+	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(input, filename);
 	lexer->Tokenize();
 
 	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
@@ -30,21 +37,45 @@ int main(int argc, char **argv)
 
 	auto variables = std::make_shared<Environment<Variable>>();
 	auto procedures = std::make_shared<Environment<Procedure>>();
+
 	Interpreter intrpt(parser, variables, procedures);
 
 	std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot());
-	std::vector<std::shared_ptr<Value>> values;
 
-	for (size_t i = 0; i < program->Size(); i++)
-	{
-		auto value = intrpt.Evaluate((*program)[i]);
-		values.push_back(value);
-	}
+    intrpt.Evaluate(program);
 
-	for (auto i = procedures->Begin(); i != procedures->End(); i++)
-	{
-		std::cout << "Key: " << i->first << ", Value: " << *i->second->GetBody() << std::endl;
-	}
+    std::string procName = cliRunner.GetProcedureName();
+
+    if (!procedures->HasItem(procName))
+    {
+        errManager.ProcedureNotFound(procName);
+        return -1;
+    }
+
+    std::vector<std::string> args = cliRunner.GetProcedureArgs();
+
+    std::shared_ptr<ListValue> argsList = std::make_shared<ListValue>();
+
+    for (auto arg : args)
+    {
+        std::cout << "[DEBUG] Adding arg: '" << arg << "'" << std::endl;
+        std::shared_ptr<StringValue> argVal = std::make_shared<StringValue>(arg);
+        argsList->AddItem(argVal);
+    }
+
+    std::shared_ptr<Variable> argsVar = std::make_shared<Variable>(
+        ValueType::List,
+        argsList,
+        false
+    );
+    variables->AddItem("ARGS", argsVar);
+
+    std::shared_ptr<Procedure> procedure = procedures->LookUp(procName);
+    std::shared_ptr<Value> retVal = intrpt.Execute(procedure->GetBody());
+    std::cout << "[DEBUG] evaluated procedure: " << retVal << std::endl;
 
 	return 0;
 }
+
+
+
