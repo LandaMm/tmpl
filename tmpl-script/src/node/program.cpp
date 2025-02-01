@@ -17,7 +17,7 @@ namespace AST
 
 		std::shared_ptr<Node> ProgramNode::Next()
 		{
-			if (m_index + 1 >= m_statements.size())
+			if (m_index >= m_statements.size())
 			{
 				return nullptr;
 			}
