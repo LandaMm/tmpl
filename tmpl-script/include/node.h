@@ -2,8 +2,7 @@
 #define NODE_H
 #include <iostream>
 #include <string>
-#include <vector>
-#include <memory>
+#include "./location.h"
 
 namespace AST
 {
@@ -27,15 +26,17 @@ namespace AST
 		Block,
 		VarDecl,
 		ProcedureDecl,
+        Return,
 	};
 
-	// TODO: add line & column fields
 	class Node
 	{
+    private:
+        Location m_loc;
 	public:
 		virtual inline NodeType GetType() const = 0;
 
-	private:
+	public:
 		virtual std::string Format() const = 0;
 
 	public:
@@ -44,6 +45,16 @@ namespace AST
 
 	public:
 		friend std::ostream &operator<<(std::ostream &stream, const Node &node);
+
+    public:
+        inline Location GetLocation() const { return m_loc; }
+
+    public:
+        void SetLocation(Location loc) { m_loc = loc; }
+
+    public:
+        // Node() : m_loc(Location(-1, -1)) { }
+        Node(Location loc) : m_loc(loc) { }
 	};
 
 	// 2 + var - ((10 * 5) / 2) * 4.4
