@@ -15,13 +15,13 @@ namespace AST
             std::string m_name;
             std::shared_ptr<Statements::StatementsBody> m_body;
 
-        private:
+        public:
             std::string Format() const override;
             inline NodeType GetType() const override { return NodeType::ProcedureDecl; }
 
         public:
-            ProcedureDeclaration(std::string name, std::shared_ptr<Statements::StatementsBody> body)
-                : m_name(name), m_body(body) {}
+            ProcedureDeclaration(std::string name, std::shared_ptr<Statements::StatementsBody> body, Location loc)
+                : m_name(name), m_body(body), Node(loc) {}
             ~ProcedureDeclaration() {}
 
         public:
