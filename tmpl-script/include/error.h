@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include "location.h"
 #include "token.h"
 #include "interpreter/value.h"
 #include "node/identifier.h"
@@ -48,12 +49,15 @@ namespace Prelude
 
 	public: // Interpreter
 		void VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType);
+        void VarAlreadyExists(std::string filename, std::string name, Location loc);
 		void UndefinedType(std::string name);
 		void UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id);
 		void OperandMismatchType(Runtime::ValueType leftType, Runtime::ValueType rightType);
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);
         void InvalidArgument(std::string arg, std::string message);
+        void FailedOpeningFile(std::string path);
+        void ProcedureNotFound(std::string name);
 	};
 }
 
