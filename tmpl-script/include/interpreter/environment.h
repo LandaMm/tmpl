@@ -9,6 +9,8 @@
 
 namespace Runtime
 {
+    using namespace AST;
+
 	class Variable
 	{
 	private:
@@ -87,7 +89,6 @@ namespace Runtime
 
 		void AddItem(std::string name, std::shared_ptr<T> var)
 		{
-			// TODO: raise error when var exists already
 			m_declarations.insert(std::make_pair(name, var));
 		}
 
