@@ -26,6 +26,7 @@ namespace AST
 
 	public:
 		inline std::shared_ptr<Node> GetRoot() const { return m_root; }
+        inline std::string GetFilename() const { return m_lexer->GetFilename(); }
 
 	private:
 		Prelude::ErrorManager &GetErrorManager();
@@ -52,6 +53,7 @@ namespace AST
 		std::shared_ptr<Node> IfElseStatement();
 		std::shared_ptr<Node> VariableDeclaration();
 		std::shared_ptr<Node> ProcedureDeclaration();
+        std::shared_ptr<Node> ReturnStatement();
 	};
 }
 
