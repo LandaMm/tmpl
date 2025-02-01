@@ -18,12 +18,15 @@ namespace Runtime
         int m_argc;
         char** m_argv;
     public:
-        CliRunner(int argc, char* argv[]) : m_argc(argc), m_argv(argv) { }
+        CliRunner(int argc, char* argv[]);
         ~CliRunner() = default;
+    private:
+        void CheckBasicCommands();
     public:
         std::string GetScriptFilename();
         std::string GetProcedureName();
         std::vector<std::string> GetProcedureArgs();
+        void ShowUsage();
     };
 }
 
