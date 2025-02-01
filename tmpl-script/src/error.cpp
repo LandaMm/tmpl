@@ -89,4 +89,28 @@ namespace Prelude
             << message << std::endl;
         std::exit(1);
     }
+
+    
+    void ErrorManager::FailedOpeningFile(std::string path)
+    {
+        std::cout << "FileError: Failed opening file '" << path
+            << "'. No such file or directory" << std::endl;
+        std::exit(1);
+    }
+
+    void ErrorManager::ProcedureNotFound(std::string name)
+    {
+        std::cout << "ProcedureError: No procedure found with name '"
+            << name << "'" << std::endl;
+        std::exit(1);
+    }
+
+    void ErrorManager::VarAlreadyExists(std::string filename, std::string name, Location loc)
+    {
+		std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
+        std::cout << "RuntimeError: Cannot redeclare already existing variable '"
+            << name << "'" << std::endl;
+        std::exit(-1);
+    }
+
 }
