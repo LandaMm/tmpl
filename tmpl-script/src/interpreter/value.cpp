@@ -1,3 +1,5 @@
+#include <cassert>
+#include <memory>
 #include "../../include/interpreter/value.h"
 #include "../../include/error.h"
 
@@ -23,6 +25,72 @@ namespace Runtime
 		}
 		return stream;
 	}
+
+    // List Value
+
+    std::string Runtime::ListValue::format() const
+    {
+        std::string res = "List[";
+        for (size_t i = 0; i < m_value.size(); i++)
+        {
+            res += m_value[i]->format();
+            if (i + 1 < m_value.size())
+            {
+                res += ", ";
+            }
+        }
+        return res + "]";
+    }
+
+    std::shared_ptr<Value> Runtime::ListValue::Compare(std::shared_ptr<Value> right,
+            AST::Nodes::Condition::ConditionType condition)
+    {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Lists are not compareable");
+			return nullptr;
+    }
+
+    std::shared_ptr<Value> Runtime::ListValue::Operate(std::shared_ptr<Value> right,
+            AST::Nodes::ExpressionNode::OperatorType opType)
+    {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Lists are not operateable");
+			return nullptr;
+    }
+
+    void Runtime::ListValue::AddItem(std::shared_ptr<Value> item)
+    {
+        m_value.push_back(item);
+    }
+
+    std::shared_ptr<Value> Runtime::ListValue::GetItem(std::shared_ptr<Value> indexVal)
+    {
+        if (indexVal->GetType() != ValueType::Integer)
+        {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Non-integers values cannot be used as index for a list");
+			return nullptr;
+        }
+
+        std::shared_ptr<IntegerValue> vl = std::dynamic_pointer_cast<IntegerValue>(indexVal);
+        std::shared_ptr<int> index = vl->GetValue();
+
+        if (*index < 0)
+        {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Negative numbers cannot be used as index for list");
+			return nullptr;
+        }
+
+        if (m_value.size() <= *index)
+        {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Index is out of range of the list");
+			return nullptr;
+        }
+
+        return m_value[*index];
+    }
 
 	// Integer Value
 
@@ -53,7 +121,10 @@ namespace Runtime
 			return std::make_shared<IntegerValue>(vleft != vright);
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(condition != AST::Nodes::Condition::ConditionType::None &&
+                "Exhausted compare operator handlers for integers");
+
+        assert(false && "Unreachable code. Integer value compare");
 
 		return nullptr;
 	}
@@ -76,7 +147,10 @@ namespace Runtime
 			return std::make_shared<IntegerValue>(vleft - vright);
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(opType != AST::Nodes::ExpressionNode::OperatorType::NONE &&
+                "Exhausted operate operation handlers for integer");
+
+        assert(false && "Unreachable code. Integer value operate");
 
 		return nullptr;
 	}
@@ -110,7 +184,10 @@ namespace Runtime
 			return std::make_shared<IntegerValue>(vleft != vright);
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(condition != AST::Nodes::Condition::ConditionType::None &&
+                "Exhausted compare operator handlers for float");
+
+        assert(false && "Unreachable code. Float value compare");
 
 		return nullptr;
 	}
@@ -133,7 +210,10 @@ namespace Runtime
 			return std::make_shared<FloatValue>(vleft - vright);
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(opType != AST::Nodes::ExpressionNode::OperatorType::NONE &&
+                "Exhausted operate operation handlers for float");
+
+        assert(false && "Unreachable code. Float value operate");
 
 		return nullptr;
 	}
@@ -167,7 +247,10 @@ namespace Runtime
 			return std::make_shared<IntegerValue>(vleft != vright);
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(condition != AST::Nodes::Condition::ConditionType::None &&
+                "Exhausted compare operator handlers for double");
+
+        assert(false && "Unreachable code. Double value compare");
 
 		return nullptr;
 	}
@@ -190,7 +273,10 @@ namespace Runtime
 			return std::make_shared<DoubleValue>(vleft - vright);
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(opType != AST::Nodes::ExpressionNode::OperatorType::NONE &&
+                "Exhausted operate operation handlers for doubles");
+
+        assert(false && "Unreachable code. Double value operate");
 
 		return nullptr;
 	}
@@ -220,7 +306,7 @@ namespace Runtime
 			return nullptr;
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(false && "Unreachable code. String value compare");
 
 		return nullptr;
 	}
@@ -241,7 +327,7 @@ namespace Runtime
 			return nullptr;
 		}
 
-		// TODO: raise error for unimplemented type
+        assert(false && "Unreachable string operator condition met.");
 
 		return nullptr;
 	}
