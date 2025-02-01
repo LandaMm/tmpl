@@ -8,7 +8,7 @@ namespace AST
 	std::shared_ptr<Node> Parser::ObjectMember(std::shared_ptr<Node> obj)
 	{
 		std::shared_ptr<Node> result = nullptr;
-		std::shared_ptr<Nodes::ObjectMember> objMember = std::make_shared<Nodes::ObjectMember>(obj);
+		std::shared_ptr<Nodes::ObjectMember> objMember = std::make_shared<Nodes::ObjectMember>(obj, obj->GetLocation());
 
 		do
 		{
@@ -21,8 +21,9 @@ namespace AST
 				Eat(TokenType::Point);
 				std::shared_ptr<Node> member = Id();
 				objMember->SetMember(member);
+                objMember->SetLocation(member->GetLocation());
 				result = objMember;
-				objMember = std::make_shared<Nodes::ObjectMember>(result);
+				objMember = std::make_shared<Nodes::ObjectMember>(result, result->GetLocation());
 			}
 			else if (m_lexer->GetToken()->GetType() == TokenType::OpenSquareBracket)
 			{
@@ -30,8 +31,9 @@ namespace AST
 				std::shared_ptr<Node> member = Expr();
 				Eat(TokenType::CloseSquareBracket);
 				objMember->SetMember(member);
+                objMember->SetLocation(member->GetLocation());
 				result = objMember;
-				objMember = std::make_shared<Nodes::ObjectMember>(result);
+				objMember = std::make_shared<Nodes::ObjectMember>(result, result->GetLocation());
 			}
 			else
 			{

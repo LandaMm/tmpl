@@ -9,7 +9,7 @@ namespace AST
 		auto token = m_lexer->GetToken();
 		Eat(TokenType::Id);
 		std::shared_ptr<std::string> name = token->GetValue<std::string>();
-		return std::make_shared<Nodes::IdentifierNode>(name->c_str());
+		return std::make_shared<Nodes::IdentifierNode>(name->c_str(), token->GetLocation());
 	}
 
 	std::shared_ptr<Nodes::FunctionCall> Parser::FunctionCall(std::shared_ptr<Node> callee)
@@ -26,12 +26,12 @@ namespace AST
 			}
 		}
 		Eat(TokenType::CloseBracket);
-		return std::make_shared<Nodes::FunctionCall>(callee, args);
+		return std::make_shared<Nodes::FunctionCall>(callee, args, callee->GetLocation());
 	}
 
 	std::shared_ptr<Nodes::ListNode> Parser::List()
 	{
-		std::shared_ptr<Nodes::ListNode> list = std::make_shared<Nodes::ListNode>();
+		std::shared_ptr<Nodes::ListNode> list = std::make_shared<Nodes::ListNode>(m_lexer->GetToken()->GetLocation());
 		Eat(TokenType::OpenSquareBracket);
 		
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseSquareBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
