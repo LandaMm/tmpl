@@ -1,5 +1,6 @@
 
 #include "../include/error.h"
+#include <memory>
 #include "../include/lexer.h"
 
 namespace AST
@@ -261,6 +262,8 @@ namespace AST
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Const, m_line, m_col));
 		else if (*id == "return")
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Return, m_line, m_col));
+        else if (*id == "fn")
+            m_tokens.push_back(std::make_shared<Token>(TokenType::Fn, m_line, m_col));
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));

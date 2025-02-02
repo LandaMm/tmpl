@@ -50,6 +50,7 @@ namespace AST
 		Var,
 		Const,
         Return,
+        Fn,
 		_EOF,
 	};
 
@@ -97,6 +98,7 @@ namespace AST
 		"var",
 		"const",
         "return",
+        "fn",
 		"EOF",
 	};
 

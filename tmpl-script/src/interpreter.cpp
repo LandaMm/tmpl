@@ -13,6 +13,9 @@ namespace Runtime
         {
             switch (stmt->GetType())
             {
+                case NodeType::FnDecl:
+                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
+                    break;
                 case NodeType::ProcedureDecl:
                     EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(stmt));
                     break;
@@ -45,6 +48,8 @@ namespace Runtime
 			return EvaluateTernary(std::dynamic_pointer_cast<TernaryNode>(node));
         case NodeType::Return:
             return EvaluateReturn(std::dynamic_pointer_cast<ReturnNode>(node));
+        case NodeType::FunctionCall:
+            return EvaluateFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
         case NodeType::Block:
         {
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);

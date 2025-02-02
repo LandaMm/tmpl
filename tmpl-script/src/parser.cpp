@@ -71,6 +71,9 @@ namespace AST
             stmt = ReturnStatement();
             Eat(TokenType::Semicolon);
             break;
+        case TokenType::Fn:
+            stmt = FunctionDeclaration();
+            break;
 		default:
 			stmt = Ternary();
 			Eat(TokenType::Semicolon);

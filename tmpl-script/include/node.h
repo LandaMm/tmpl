@@ -27,6 +27,7 @@ namespace AST
 		VarDecl,
 		ProcedureDecl,
         Return,
+        FnDecl,
 	};
 
 	class Node

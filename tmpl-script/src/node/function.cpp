@@ -8,7 +8,12 @@ namespace AST
 	{
 		std::string FunctionCall::Format() const
 		{
-			return "FunctionCall(" + std::to_string(m_args.size()) + ")";
+			return "FnCall(" + std::to_string(m_args.size()) + ")";
+		}
+
+		std::string FunctionDeclaration::Format() const
+		{
+			return "FnDecl(" + m_name->Format() + ", " + std::to_string(m_params.size()) + " params, returns " + m_ret_type->Format() + ")";
 		}
 	}
 }

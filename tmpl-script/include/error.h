@@ -51,8 +51,14 @@ namespace Prelude
 		void VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType);
         void VarAlreadyExists(std::string filename, std::string name, Location loc);
 		void UndefinedType(std::string name);
-		void UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id);
+		void UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id);
 		void OperandMismatchType(Runtime::ValueType leftType, Runtime::ValueType rightType);
+		void UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id);
+        // TODO:
+		// void UndeclaredFunction(std::shared_ptr<Nodes::ObjectMember> member);
+		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
+		void ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
+        void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc);
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);
         void InvalidArgument(std::string arg, std::string message);
