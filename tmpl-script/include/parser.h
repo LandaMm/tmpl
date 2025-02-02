@@ -54,6 +54,7 @@ namespace AST
 		std::shared_ptr<Node> VariableDeclaration();
 		std::shared_ptr<Node> ProcedureDeclaration();
         std::shared_ptr<Node> ReturnStatement();
+        std::shared_ptr<Node> FunctionDeclaration();
 	};
 }
 
