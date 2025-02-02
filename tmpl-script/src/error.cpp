@@ -1,4 +1,5 @@
 
+#include <cassert>
 #include "../include/error.h"
 
 using namespace AST;
@@ -67,11 +68,62 @@ namespace Prelude
 		std::cout << "RuntimeError: Undefined type '" << name << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UndeclaredVariable(std::shared_ptr<Nodes::IdentifierNode> id)
+	void ErrorManager::UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id)
 	{
+        auto loc = id->GetLocation();
+		std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
 		std::cout << "RuntimeError: Undeclared variable '" << id->GetName() << "'" << std::endl;
 		std::exit(-1);
 	}
+    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
+    {
+		std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
+        std::cout << "RuntimeError: Argument type ("
+            << std::to_string((int)type)
+            << ") of parameter '" << name << "' doesn't match parameter type ("
+            << std::to_string((int)expectedType)
+            << ")" << std::endl;
+        exit(-1);
+    }
+
+    void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
+    {
+		std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
+        std::cout << "RuntimeError: Return value type ("
+            << std::to_string((int)type)
+            << ") of the function '" << name << "' doesn't match function's signature type ("
+            << std::to_string((int)expectedType)
+            << ")" << std::endl;
+        exit(-1);
+    }
+
+    void ErrorManager::ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc)
+    {
+		std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
+        std::cout << "RuntimeError: ";
+
+        assert(argsSize != paramsSize && "Args count is same as params count. Should be unreachable");
+        
+        if (argsSize < paramsSize)
+        {
+            std::cout << "Exhausted args for function '" << name << "'";
+        }
+        else
+        {
+            std::cout << "Exhausted params for function '" << name << "'";
+        }
+        std::cout << '\n';
+
+        exit(-1);
+    }
+
+    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id)
+    {
+        auto loc = id->GetLocation();
+		std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
+		std::cout << "RuntimeError: Calling undeclared function '" << id->GetName() << "'" << std::endl;
+		std::exit(-1);
+    }
 
     // CliRunner
     void ErrorManager::NotEnoughArgs(int expected, int got, bool atLeast)
