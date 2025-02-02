@@ -11,6 +11,7 @@
 #include "node/identifier.h"
 #include "node/logical.h"
 #include "node/procedure.h"
+#include "node/function.h"
 #include "interpreter/environment.h"
 #include "interpreter/value.h"
 
@@ -23,10 +24,17 @@ namespace Runtime
 		std::shared_ptr<Parser> m_parser;
 		std::shared_ptr<Environment<Variable>> m_variables;
 		std::shared_ptr<Environment<Procedure>> m_procedures;
+		std::shared_ptr<Environment<Fn>> m_functions;
 
 	public:
-		Interpreter(std::shared_ptr<Parser> parser, std::shared_ptr<Environment<Variable>> env_vars, std::shared_ptr<Environment<Procedure>> env_procedures)
-			: m_parser(parser), m_variables(env_vars), m_procedures(env_procedures) {}
+        Interpreter(std::shared_ptr<Parser> parser,
+                std::shared_ptr<Environment<Variable>> env_vars,
+                std::shared_ptr<Environment<Procedure>> env_procedures,
+                std::shared_ptr<Environment<Fn>> env_functions)
+            : m_parser(parser),
+            m_variables(env_vars),
+            m_procedures(env_procedures),
+            m_functions(env_functions) { }
 
 	public:
 		std::shared_ptr<Value> Execute(std::shared_ptr<Node> node);
@@ -39,10 +47,12 @@ namespace Runtime
 		std::shared_ptr<Value> EvaluateCondition(std::shared_ptr<Condition> condition);
 		std::shared_ptr<Value> EvaluateTernary(std::shared_ptr<TernaryNode> ternary);
         std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret);
+        std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret);
 
 	public:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
+        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl);
 
 	public:
 		ValueType EvaluateType(std::shared_ptr<Node> typeNode);
