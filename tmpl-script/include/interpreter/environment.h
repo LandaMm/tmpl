@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include <vector>
 #include "value.h"
 
 namespace Runtime
@@ -43,6 +44,45 @@ namespace Runtime
 		friend std::ostream &operator<<(std::ostream &stream, const Procedure &procedure)
 		{
 			stream << "Procedure(" << procedure.m_body << ")" << std::endl;
+			return stream;
+		}
+	};
+
+    class FnParam
+    {
+    private:
+        ValueType m_type;
+        std::string m_name;
+    public:
+        FnParam(ValueType type, std::string name) : m_type(type), m_name(name) { }
+        ~FnParam() = default;
+    public:
+        inline ValueType GetType() const { return m_type; }
+        inline std::string GetName() const { return m_name; }
+    };
+
+	class Fn
+	{
+	private:
+		std::shared_ptr<Node> m_body;
+        std::vector<FnParam> m_params;
+        ValueType m_ret_type;
+
+	public:
+		Fn(std::shared_ptr<Node> body, ValueType retType)
+			: m_body(body), m_ret_type(retType), m_params(std::vector<FnParam>()) {}
+
+    public:
+        void AddParam(FnParam param) { m_params.push_back(param); }
+
+	public:
+		inline std::shared_ptr<Node> GetBody() { return m_body; }
+        inline std::vector<FnParam> GetParams() { return m_params; }
+        inline ValueType GetReturnType() { return m_ret_type; }
+
+		friend std::ostream &operator<<(std::ostream &stream, const Fn &fn)
+		{
+			stream << "Fn(" << fn.m_body << ")" << std::endl;
 			return stream;
 		}
 	};
