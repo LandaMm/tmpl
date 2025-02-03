@@ -51,6 +51,7 @@ namespace AST
 		Const,
         Return,
         Fn,
+        Export,
 		_EOF,
 	};
 
@@ -99,6 +100,7 @@ namespace AST
 		"const",
         "return",
         "fn",
+        "export",
 		"EOF",
 	};
 
