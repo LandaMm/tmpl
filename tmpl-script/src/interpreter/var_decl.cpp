@@ -23,7 +23,7 @@ namespace Runtime
         if (m_variables->HasItem(varName))
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.VarAlreadyExists(m_parser->GetFilename(), varName, varDecl->GetLocation());
+			errorManager.VarAlreadyExists(GetFilename(), varName, varDecl->GetLocation());
 			return;
         }
 
