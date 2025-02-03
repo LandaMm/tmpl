@@ -1,7 +1,8 @@
-#include "../include/interpreter.h"
-#include "../include/error.h"
+
 #include <cassert>
 #include <memory>
+#include "../include/interpreter.h"
+#include "../include/error.h"
 
 namespace Runtime
 {
@@ -13,6 +14,9 @@ namespace Runtime
         {
             switch (stmt->GetType())
             {
+                case NodeType::Require:
+                    ImportModule(std::dynamic_pointer_cast<RequireMacro>(stmt));
+                    break;
                 case NodeType::FnDecl:
                     EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
                     break;
@@ -23,6 +27,28 @@ namespace Runtime
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                         errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)stmt->GetType()));
+                        break;
+                    }
+            }
+        }
+    }
+
+    void Interpreter::EvaluateModule(std::shared_ptr<ProgramNode> program)
+    {
+        while (auto stmt = program->Next())
+        {
+            switch (stmt->GetType())
+            {
+                case NodeType::Require:
+                    ImportModule(std::dynamic_pointer_cast<RequireMacro>(stmt));
+                    break;
+                case NodeType::Export:
+                    EvaluateExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
+                    break;
+                default:
+                    {
+                        Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                        errorManager.RaiseError("Unsupported node type by evaluating imported module: " + std::to_string((int)stmt->GetType()));
                         break;
                     }
             }
@@ -46,6 +72,8 @@ namespace Runtime
 			return EvaluateCondition(std::dynamic_pointer_cast<Condition>(node));
 		case NodeType::Ternary:
 			return EvaluateTernary(std::dynamic_pointer_cast<TernaryNode>(node));
+		case NodeType::Unary:
+			return EvaluateUnary(std::dynamic_pointer_cast<UnaryNode>(node));
         case NodeType::Return:
             return EvaluateReturn(std::dynamic_pointer_cast<ReturnNode>(node));
         case NodeType::FunctionCall:
