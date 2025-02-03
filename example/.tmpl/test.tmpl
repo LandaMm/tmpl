@@ -1,14 +1,11 @@
-
-fn add_floats(float a, float b) : float {
-    return a + b;
-}
+@require"math/floats"
+@require"negative"
 
 ->main{
-    return add_floats(3.1415, 1.22,);
+    return add_floats(3.1415, 1.22);
 }
 
 ->wheel {
-    var float PI = 3.1415;
-    return PI;
+    return getNegativeFloat(PI);
 }
 
