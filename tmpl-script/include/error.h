@@ -1,6 +1,5 @@
 #ifndef ERROR_H
 #define ERROR_H
-#include <iostream>
 #include <string>
 #include <memory>
 #include "location.h"
@@ -59,6 +58,7 @@ namespace Prelude
 		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
 		void ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc);
+        void UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, Location loc);
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);
         void InvalidArgument(std::string arg, std::string message);
