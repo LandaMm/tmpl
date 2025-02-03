@@ -65,19 +65,24 @@ namespace Runtime
 	{
 	private:
 		std::shared_ptr<Node> m_body;
-        std::vector<FnParam> m_params;
+        std::vector<std::shared_ptr<FnParam>> m_params;
         ValueType m_ret_type;
+    private:
+        size_t m_index;
 
 	public:
 		Fn(std::shared_ptr<Node> body, ValueType retType)
-			: m_body(body), m_ret_type(retType), m_params(std::vector<FnParam>()) {}
+			: m_body(body), m_ret_type(retType), m_params(std::vector<std::shared_ptr<FnParam>>()), m_index(0) {}
 
     public:
-        void AddParam(FnParam param) { m_params.push_back(param); }
+        void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
 
 	public:
 		inline std::shared_ptr<Node> GetBody() { return m_body; }
-        inline std::vector<FnParam> GetParams() { return m_params; }
+        inline bool HasParams() { return m_index < m_params.size(); }
+        inline std::shared_ptr<FnParam> GetNextParam() { return m_params[m_index++]; }
+        inline size_t GetParamsSize() { return m_params.size(); }
+        inline size_t GetParamsIndex() { return m_index; }
         inline ValueType GetReturnType() { return m_ret_type; }
 
 		friend std::ostream &operator<<(std::ostream &stream, const Fn &fn)
