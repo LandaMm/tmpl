@@ -40,7 +40,7 @@ namespace Runtime
         if (!moduleFile.good())
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.FailedOpeningFile(modulePath);
+            errManager.FailedOpeningFile(modulePath.string());
             return;
         }
 
