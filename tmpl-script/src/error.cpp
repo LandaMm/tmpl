@@ -65,35 +65,35 @@ namespace Prelude
 				  << "but got unexpected '" << Token::GetTokenTypeCharacter(token->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
+	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
 	{
         // TODO: allow defining double type variable with float value (casting) and opposite direction
-        LogFileLocation(filename, loc, "ParseError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name << "'. Expected type '" << (int)expectedType << "' but got '" << (int)type << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc)
+	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
 	{
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Mismatch type of left and right operands '" << (int)leftType << "' != '" << (int)rightType << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc)
+	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc, std::string prefix)
 	{
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Undefined type '" << name << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id)
+	void ErrorManager::UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id, std::string prefix)
 	{
         auto loc = id->GetLocation();
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Undeclared variable '" << id->GetName() << "'" << std::endl;
 		std::exit(-1);
 	}
-    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
+    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
     {
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Argument type ("
             << std::to_string((int)type)
             << ") of parameter '" << name << "' doesn't match parameter type ("
@@ -113,9 +113,23 @@ namespace Prelude
         exit(-1);
     }
 
-    void ErrorManager::ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc)
+    void ErrorManager::UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, Location loc)
     {
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, "TypeError");
+        std::cerr << "Unexpected return type '" << std::to_string((int)gotType) << "' when '" << std::to_string((int)expected) << "' type was expected" << std::endl;
+        exit(-1);
+    }
+
+    void ErrorManager::TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, Location loc)
+    {
+        LogFileLocation(filename, loc, "TypeError");
+        std::cerr << "Different return types '" << std::to_string((int)left) << "' and '" << std::to_string((int)right) << "'" << std::endl;
+        exit(-1);
+    }
+
+    void ErrorManager::ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
         assert(argsSize != paramsSize && "Args count is same as params count. Should be unreachable");
         
         if (argsSize < paramsSize)
@@ -139,10 +153,10 @@ namespace Prelude
         std::exit(-1);
     }
 
-    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id)
+    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id, std::string prefix)
     {
         auto loc = id->GetLocation();
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Calling undeclared function '" << id->GetName() << "'" << std::endl;
 		std::exit(-1);
     }
@@ -179,9 +193,9 @@ namespace Prelude
         std::exit(1);
     }
 
-    void ErrorManager::VarAlreadyExists(std::string filename, std::string name, Location loc)
+    void ErrorManager::VarAlreadyExists(std::string filename, std::string name, Location loc, std::string prefix)
     {
-        LogFileLocation(filename, loc, "RuntimeError");
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Cannot redeclare already existing variable '"
             << name << "'" << std::endl;
         std::exit(-1);
