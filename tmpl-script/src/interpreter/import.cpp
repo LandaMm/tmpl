@@ -44,7 +44,7 @@ namespace Runtime
             return;
         }
 
-        std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(moduleFile, modulePath);
+        std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(moduleFile, modulePath.string());
         lexer->Tokenize();
 
         std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
@@ -52,7 +52,7 @@ namespace Runtime
 
         std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot());
 
-        SetFilename(modulePath);
+        SetFilename(modulePath.string());
         EvaluateModule(program);
         SetFilename(currentPath.string());
     }
