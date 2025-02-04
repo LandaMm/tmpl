@@ -1,4 +1,8 @@
 
+# TODOs to complete before this can be implemented
+
+- Define custom types
+- Objects support
 
 # Example of creating C library binded to tmpl
 
