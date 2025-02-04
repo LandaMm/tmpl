@@ -6,6 +6,11 @@ using namespace AST;
 
 namespace Prelude
 {
+    // TODO: Refactor error.cpp:
+    // 1. create separate function for logging out error location + show relative path to .tmpl file
+    // 2. provide error location in all error kinds
+    // 3. use stderr instead of stdout
+    // 4. colorize error location with grey (like this comment)
 	ErrorManager::ErrorManager() {}
 	ErrorManager::~ErrorManager() {}
 	void ErrorManager::RaiseError(std::string errorMessage)
@@ -55,6 +60,7 @@ namespace Prelude
 	}
 	void ErrorManager::VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType)
 	{
+        // TODO: allow defining double type variable with float value (casting) and opposite direction
 		std::cout << "RuntimeError: Type mismatch for variable '" << name << "'. Expected type '" << (int)expectedType << "' but got '" << (int)type << "'" << std::endl;
 		std::exit(-1);
 	}
@@ -106,15 +112,23 @@ namespace Prelude
         
         if (argsSize < paramsSize)
         {
-            std::cout << "Exhausted args for function '" << name << "'";
+            std::cout << "Exhausted args for function '" << name << "'. Needs to provide " << paramsSize << " arguments but only " << argsSize << " provided";
         }
         else
         {
-            std::cout << "Exhausted params for function '" << name << "'";
+            std::cout << "Exhausted params for function '" << name << "'. Needs to provide " << paramsSize << " arguments but " << argsSize << " provided";
         }
         std::cout << '\n';
 
         exit(-1);
+    }
+
+    void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, Location loc)
+    {
+        std::cout << "[" << filename << ":" << loc.line << ":" << loc.col << "] ";
+        std::cout << "RuntimeError: Unary operator '" << op
+            << "' is not allowed with type '" << std::to_string((int)metType) << "'" << std::endl;
+        std::exit(-1);
     }
 
     void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id)

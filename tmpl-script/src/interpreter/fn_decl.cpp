@@ -18,10 +18,10 @@ namespace Runtime
 
         while (fnDecl->HasParams())
         {
-            FunctionParam param = fnDecl->GetNextParam();
-            ValueType paramType = EvaluateType(param.GetType());
-            std::string paramName = param.GetName()->GetName();
-            FnParam fnParam = FnParam(paramType, paramName);
+            std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
+            ValueType paramType = EvaluateType(param->GetType());
+            std::string paramName = param->GetName()->GetName();
+            std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);
         }
 

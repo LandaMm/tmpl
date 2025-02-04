@@ -59,7 +59,6 @@ int main(int argc, char **argv)
 
     for (auto arg : args)
     {
-        std::cout << "[DEBUG] Adding arg: '" << arg << "'" << std::endl;
         std::shared_ptr<StringValue> argVal = std::make_shared<StringValue>(arg);
         argsList->AddItem(argVal);
     }

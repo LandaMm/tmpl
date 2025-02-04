@@ -74,6 +74,33 @@ namespace AST
         case TokenType::Fn:
             stmt = FunctionDeclaration();
             break;
+        case TokenType::Export:
+            stmt = ExportStmt();
+            break;
+        case TokenType::At:
+        {
+            auto tokenType = Peek();
+            if (tokenType == TokenType::_EOF)
+            {
+                Prelude::ErrorManager& manager = GetErrorManager();
+                manager.UnexpectedEOF(token->GetLine(), token->GetColumn());
+                return nullptr;
+            }
+            Eat(TokenType::At);
+            // Macros
+            switch (tokenType)
+            {
+                case TokenType::Require:
+                    stmt = RequireStatement();
+                    break;
+                // TODO: add extern fn macro
+                default:
+                    Prelude::ErrorManager& manager = GetErrorManager();
+                    manager.UnexpectedToken(GetFilename(), m_lexer->SeekToken());
+                    return nullptr;
+            }
+            break;
+        }
 		default:
 			stmt = Ternary();
 			Eat(TokenType::Semicolon);

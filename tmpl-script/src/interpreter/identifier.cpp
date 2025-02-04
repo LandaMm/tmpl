@@ -10,7 +10,7 @@ namespace Runtime
 		if (!m_variables->HasItem(identifier->GetName()))
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.UndeclaredVariable(m_parser->GetFilename(), identifier);
+			errorManager.UndeclaredVariable(GetFilename(), identifier);
 			return nullptr;
 		}
 		std::shared_ptr<Variable> var = m_variables->LookUp(identifier->GetName());

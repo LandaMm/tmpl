@@ -21,7 +21,7 @@ namespace Runtime
             if (!m_functions->HasItem(fnName))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                errorManager.UndeclaredFunction(m_parser->GetFilename(), callee);
+                errorManager.UndeclaredFunction(GetFilename(), callee);
                 return nullptr;
             }
 
@@ -30,41 +30,40 @@ namespace Runtime
             std::shared_ptr<Environment<Variable>> currentScope = m_variables;
             std::shared_ptr<Environment<Variable>> variables = std::make_shared<Environment<Variable>>(m_variables);
 
-            auto params = fn->GetParams();
             auto args = fnCall->GetArgs();
 
-            if (params.size() != args->size())
+            if (fn->GetParamsSize() != args->size())
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgsParamsExhausted(
-                        m_parser->GetFilename(),
+                        GetFilename(),
                         fnName,
                         args->size(),
-                        params.size(),
+                        fn->GetParamsSize(),
                         fnCall->GetLocation());
                 return nullptr;
             }
 
-            for (size_t i = 0; i < params.size(); i++)
+            while (fn->HasParams())
             {
-                FnParam param = params[i];
-                std::shared_ptr<Node> arg = (*args)[i];
+                std::shared_ptr<Node> arg = (*args)[fn->GetParamsIndex()];
+                std::shared_ptr<FnParam> param = fn->GetNextParam();
                 std::shared_ptr<Value> val = Execute(arg);
-                if (val->GetType() != param.GetType())
+                if (val->GetType() != param->GetType())
                 {
                     Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                     errorManager.ArgMismatchType(
-                        m_parser->GetFilename(),
-                        param.GetName(),
+                        GetFilename(),
+                        param->GetName(),
                         val->GetType(),
-                        param.GetType(),
+                        param->GetType(),
                         arg->GetLocation()
                     );
                     return nullptr;
                 }
                 std::shared_ptr<Variable> var =
                     std::make_shared<Variable>(val->GetType(), val, false);
-                variables->AddItem(param.GetName(), var);
+                variables->AddItem(param->GetName(), var);
             }
 
             m_variables = variables;
@@ -76,7 +75,7 @@ namespace Runtime
             if (value->GetType() != fn->GetReturnType())
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                errorManager.ReturnMismatchType(m_parser->GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());
+                errorManager.ReturnMismatchType(GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());
                 return nullptr;
             }
 

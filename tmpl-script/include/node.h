@@ -28,7 +28,9 @@ namespace AST
 		ProcedureDecl,
         Return,
         FnDecl,
-	};
+        Require,
+        Export,
+    };
 
 	class Node
 	{
