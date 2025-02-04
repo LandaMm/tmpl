@@ -29,7 +29,7 @@ namespace Runtime
 			else
 			{
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.UndefinedType(id->GetName());
+				errorManager.UndefinedType(GetFilename(), id->GetName(), id->GetLocation());
 			}
 		}
 		else

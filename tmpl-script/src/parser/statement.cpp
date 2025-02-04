@@ -157,7 +157,7 @@ namespace AST
 		else if (!editable)
 		{
 			Prelude::ErrorManager &manager = GetErrorManager();
-			manager.MissingConstantDefinition(m_lexer->GetToken());
+			manager.MissingConstantDefinition(GetFilename(), m_lexer->GetToken());
 			return nullptr;
 		}
 

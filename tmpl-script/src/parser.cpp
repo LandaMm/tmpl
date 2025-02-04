@@ -21,7 +21,7 @@ namespace AST
 			if (m_lexer->GetToken()->GetType() == TokenType::_EOF)
 			{
 				auto token = m_lexer->GetToken();
-				GetErrorManager().UnexpectedEofWhileToken(type, token->GetLine(), token->GetColumn());
+				GetErrorManager().UnexpectedEofWhileToken(GetFilename(), type, token->GetLine(), token->GetColumn());
 			}
 			else
 			{
@@ -83,7 +83,7 @@ namespace AST
             if (tokenType == TokenType::_EOF)
             {
                 Prelude::ErrorManager& manager = GetErrorManager();
-                manager.UnexpectedEOF(token->GetLine(), token->GetColumn());
+                manager.UnexpectedEOF(GetFilename(), token->GetLine(), token->GetColumn());
                 return nullptr;
             }
             Eat(TokenType::At);

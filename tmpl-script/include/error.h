@@ -35,23 +35,26 @@ namespace Prelude
 
 	public:
 		void NoInputFile();
+    
+    private:
+        void LogFileLocation(std::string filename, Location loc, std::string prefix);
 
 	public: // Lexer (Tokenizer)
-		void UnexpectedCharacter(char ch, size_t line, size_t col);
-		void UnexpectedEOF(size_t line, size_t col);
+		void UnexpectedCharacter(std::string filename, char ch, size_t line, size_t col);
+		void UnexpectedEOF(std::string filename, size_t line, size_t col);
 
 	public: // Parser
-		void UnexpectedEofWhileToken(TokenType tokenType, size_t line, size_t col);
+		void UnexpectedEofWhileToken(std::string filename, TokenType tokenType, size_t line, size_t col);
 		void UnexpectedToken(std::string filename, std::shared_ptr<Token> locToken);
 		void UnexpectedToken(std::string filename, std::shared_ptr<Token> locToken, std::shared_ptr<Token> gotToken, TokenType expectedTokenType);
-		void MissingConstantDefinition(std::shared_ptr<Token> token);
+		void MissingConstantDefinition(std::string filename, std::shared_ptr<Token> token);
 
 	public: // Interpreter
-		void VarMismatchType(std::string name, Runtime::ValueType type, Runtime::ValueType expectedType);
+		void VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
         void VarAlreadyExists(std::string filename, std::string name, Location loc);
-		void UndefinedType(std::string name);
+		void UndefinedType(std::string filename, std::string name, Location loc);
 		void UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id);
-		void OperandMismatchType(Runtime::ValueType leftType, Runtime::ValueType rightType);
+		void OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc);
 		void UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id);
         // TODO:
 		// void UndeclaredFunction(std::shared_ptr<Nodes::ObjectMember> member);
