@@ -177,10 +177,12 @@ namespace AST
 		// Eat(TokenType::CloseBracket)
 
 		auto ifElse = std::make_shared<Statements::IfElseStatement>(condition, loc);
+        std::shared_ptr<Statements::StatementsBody> body =
+            std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
 		if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
 		{
-			ifElse->AddItem(Statement());
+			body->AddItem(Statement());
 		}
 		else
 		{
@@ -188,10 +190,12 @@ namespace AST
 			while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 			{
 				std::shared_ptr<Node> statement = Statement();
-				ifElse->AddItem(statement);
+				body->AddItem(statement);
 			}
 			Eat(TokenType::CloseCurly);
 		}
+
+        ifElse->SetBody(body);
 
 		if (m_lexer->GetToken()->GetType() == TokenType::Else)
 		{
