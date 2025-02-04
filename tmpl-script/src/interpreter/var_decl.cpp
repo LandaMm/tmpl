@@ -14,7 +14,7 @@ namespace Runtime
 		if (varType != varValue->GetType())
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.VarMismatchType(varName, varValue->GetType(), varType);
+			errorManager.VarMismatchType(GetFilename(), varName, varValue->GetType(), varType, varDecl->GetLocation());
 			return;
 		}
 

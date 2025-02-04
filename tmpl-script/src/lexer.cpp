@@ -201,7 +201,7 @@ namespace AST
 				break;
 			default:
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.UnexpectedCharacter(ch, m_line, m_col);
+				errorManager.UnexpectedCharacter(GetFilename(), ch, m_line, m_col);
 				break;
 			}
 
@@ -239,7 +239,7 @@ namespace AST
 			else if (id->empty())
 			{
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.UnexpectedEOF(m_line, m_col);
+				errorManager.UnexpectedEOF(GetFilename(), m_line, m_col);
 				break;
 			}
 			else
@@ -337,7 +337,7 @@ namespace AST
 				if (already_met_point)
 				{
 					Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-					errorManager.UnexpectedCharacter(ch, m_line, m_col);
+					errorManager.UnexpectedCharacter(GetFilename(), ch, m_line, m_col);
 					break;
 				}
 				else
@@ -351,7 +351,7 @@ namespace AST
 			else if (number->empty())
 			{
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.UnexpectedEOF(m_line, m_col);
+				errorManager.UnexpectedEOF(GetFilename(), m_line, m_col);
 				break;
 			}
 			else
