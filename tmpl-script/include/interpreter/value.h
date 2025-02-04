@@ -15,6 +15,7 @@ namespace Runtime
 		Double,
 		String,
         List,
+        Bool,
 		Null,
 	};
 
