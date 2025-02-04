@@ -83,7 +83,7 @@ namespace Runtime
 		if (left->GetType() != right->GetType() && left->GetType() != ValueType::Null && right->GetType() != ValueType::Null)
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.OperandMismatchType(GetFilename(), left->GetType(), right->GetType(), condition->GetLocation());
+			errorManager.OperandMismatchType(GetFilename(), left->GetType(), right->GetType(), condition->GetLocation(), "RuntimeError");
 			return nullptr;
 		}
 

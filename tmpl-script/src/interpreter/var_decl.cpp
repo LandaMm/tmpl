@@ -14,7 +14,7 @@ namespace Runtime
 		if (varType != varValue->GetType())
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.VarMismatchType(GetFilename(), varName, varValue->GetType(), varType, varDecl->GetLocation());
+			errorManager.VarMismatchType(GetFilename(), varName, varValue->GetType(), varType, varDecl->GetLocation(), "RuntimeError");
 			return;
 		}
 
@@ -23,7 +23,7 @@ namespace Runtime
         if (m_variables->HasItem(varName))
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.VarAlreadyExists(GetFilename(), varName, varDecl->GetLocation());
+			errorManager.VarAlreadyExists(GetFilename(), varName, varDecl->GetLocation(), "RuntimeError");
 			return;
         }
 

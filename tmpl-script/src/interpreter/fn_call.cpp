@@ -21,7 +21,7 @@ namespace Runtime
             if (!m_functions->HasItem(fnName))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                errorManager.UndeclaredFunction(GetFilename(), callee);
+                errorManager.UndeclaredFunction(GetFilename(), callee, "RuntimeError");
                 return nullptr;
             }
 
@@ -40,7 +40,7 @@ namespace Runtime
                         fnName,
                         args->size(),
                         fn->GetParamsSize(),
-                        fnCall->GetLocation());
+                        fnCall->GetLocation(), "RuntimeError");
                 return nullptr;
             }
 
@@ -57,7 +57,8 @@ namespace Runtime
                         param->GetName(),
                         val->GetType(),
                         param->GetType(),
-                        arg->GetLocation()
+                        arg->GetLocation(),
+                        "RuntimeError"
                     );
                     return nullptr;
                 }
