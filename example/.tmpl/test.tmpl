@@ -1,11 +1,28 @@
 @require"math/floats"
 @require"negative"
 
+fn test(int a) : string {
+    if (a > 5) {
+        if (a == 6) {
+            return 6;
+        }
+
+        return "youhooo!";
+    } else {
+        return 3.15;
+    }
+
+    return 10;
+}
+
 ->main{
+    if (1 == 1) {
+        var string t = 1 == 5 ? "5" : 10;
+    }
     return add_floats(3.1415, 1.22);
 }
 
 ->wheel {
-    return getNegativeFloat(PI);
+    return getNegativeFloat(3.1415);
 }
 
