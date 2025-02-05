@@ -1,5 +1,6 @@
 
 #include "../../include/interpreter.h"
+#include "include/typechecker.h"
 
 namespace Runtime
 {
@@ -7,7 +8,7 @@ namespace Runtime
 
 	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
 	{
-		ValueType varType = EvaluateType(varDecl->GetType());
+		ValueType varType = TypeChecker::EvaluateType(GetFilename(), varDecl->GetType());
 		std::string varName = *varDecl->GetName();
 		std::shared_ptr<Value> varValue = Execute(varDecl->GetValue());
 
