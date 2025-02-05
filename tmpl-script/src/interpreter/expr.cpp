@@ -58,6 +58,7 @@ namespace Runtime
 	{
 		std::shared_ptr<Value> condition = Execute(ternary->GetCondition());
 
+        // TODO: boolean support
 		if (condition->GetType() != ValueType::Integer)
 		{
 			// should be unreachable
