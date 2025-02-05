@@ -13,23 +13,23 @@ namespace AST
 	enum class NodeType
 	{
 		Program,
-		Expression,
-		FunctionCall,
-		Literal,
-		Identifier,
+		Expression, //
+		FunctionCall, //
+		Literal, // 
+		Identifier, //
 		ObjectMember,
 		List,
-		Condition,
-		Ternary,
-		Unary,
+		Condition, // 
+		Ternary, // 
+		Unary, // 
 		IfElse,
-		Block,
-		VarDecl,
-		ProcedureDecl,
-        Return,
-        FnDecl,
-        Require,
-        Export,
+		Block, //
+		VarDecl, // 
+		ProcedureDecl, //
+        Return, //
+        FnDecl, // 
+        Require, // 
+        Export, // 
     };
 
 	class Node
@@ -54,6 +54,9 @@ namespace AST
 
     public:
         void SetLocation(Location loc) { m_loc = loc; }
+
+    public:
+        virtual inline bool IsBlock() { return false; }
 
     public:
         // Node() : m_loc(Location(-1, -1)) { }
