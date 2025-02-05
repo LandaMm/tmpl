@@ -1,25 +1,20 @@
 @require"math/floats"
 @require"negative"
 
-fn test(int a) : string {
-    if (a > 5) {
-        if (a == 6) {
-            return 6;
-        }
-
-        return "youhooo!";
+fn main() : string {
+    var string compare = "ms10";
+    if (compare == "msg") {
+        return "compare is 'msg'.";
+    } else if (compare == "ms1") {
+        return "compare is just 'ms1'.";
     } else {
-        return 3.15;
+        return "compare is something else.";
     }
-
-    return 10;
+    return "should be unreachable!";
 }
 
 ->main{
-    if (1 == 1) {
-        var string t = 1 == 5 ? "5" : 10;
-    }
-    return add_floats(3.1415, 1.22);
+    return main();
 }
 
 ->wheel {
