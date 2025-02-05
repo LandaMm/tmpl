@@ -2,6 +2,9 @@
 #ifndef TYPECHECKER_H
 #define TYPECHECKER_H
 #include <memory>
+#include "include/interpreter.h"
+#include "include/node/logical.h"
+#include "include/node/unary.h"
 #include "interpreter/environment.h"
 #include "interpreter/value.h"
 #include "parser.h"
@@ -68,17 +71,23 @@ namespace Runtime
               m_functions(std::make_shared<Environment<TypeFn>>()) { }
     public:
         void RunChecker(std::shared_ptr<ProgramNode> program);
+        void RunModuleChecker(std::shared_ptr<RequireMacro> require);
     private:
         ValueType DiagnoseNode(std::shared_ptr<Node> node);
         ValueType DiagnoseExpression(std::shared_ptr<ExpressionNode> expr);
         ValueType DiagnoseLiteral(std::shared_ptr<LiteralNode> literal);
         ValueType DiagnoseId(std::shared_ptr<IdentifierNode> identifier);
         ValueType DiagnoseFnCall(std::shared_ptr<FunctionCall> fnCall);
+        ValueType DiagnoseUnary(std::shared_ptr<UnaryNode> unary);
+        ValueType DiagnoseCondition(std::shared_ptr<Condition> condition);
+        ValueType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary);
         // TODO:
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl);
         void HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl);
+        void HandleModule(std::shared_ptr<ProgramNode> program);
+        void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt);
 
     private:
         void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, ValueType expected);
@@ -89,6 +98,7 @@ namespace Runtime
 
     private:
         std::string GetFilename() const { return m_filename; }
+        void SetFilename(std::string filename) { m_filename = filename; }
     };
 }
 
