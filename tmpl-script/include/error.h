@@ -31,7 +31,7 @@ namespace Prelude
 		}
 
 	public:
-		void RaiseError(std::string errorMessage);
+		void RaiseError(std::string errorMessage, std::string prefix);
 
 	public:
 		void NoInputFile();

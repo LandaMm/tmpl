@@ -11,9 +11,9 @@ namespace Prelude
 {
 	ErrorManager::ErrorManager() {}
 	ErrorManager::~ErrorManager() {}
-	void ErrorManager::RaiseError(std::string errorMessage)
+	void ErrorManager::RaiseError(std::string errorMessage, std::string prefix)
 	{
-        LogPrefix("Error");
+        LogPrefix(prefix);
         std::cerr << errorMessage
 				  << std::endl;
 		std::exit(-1);
