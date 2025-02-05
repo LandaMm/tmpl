@@ -38,6 +38,7 @@ namespace Prelude
     
     private:
         void LogFileLocation(std::string filename, Location loc, std::string prefix);
+        void LogPrefix(std::string prefix);
 
 	public: // Lexer (Tokenizer)
 		void UnexpectedCharacter(std::string filename, char ch, size_t line, size_t col);
