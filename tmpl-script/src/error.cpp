@@ -2,6 +2,7 @@
 #include <cassert>
 #include <filesystem>
 #include "../include/error.h"
+#include "include/interpreter/value.h"
 
 using namespace AST;
 namespace fs = std::filesystem;
@@ -12,7 +13,8 @@ namespace Prelude
 	ErrorManager::~ErrorManager() {}
 	void ErrorManager::RaiseError(std::string errorMessage)
 	{
-        std::cerr << "Error: " << errorMessage
+        LogPrefix("Error");
+        std::cerr << errorMessage
 				  << std::endl;
 		std::exit(-1);
 	}
@@ -22,9 +24,16 @@ namespace Prelude
         fs::path relative = fs::relative(filename, cwd);
         std::cerr << "\033[90m[" << relative.string() << ":" << loc.line << ":" << loc.col << "]\033[0m \033[1;31m" << prefix << "\033[0m: ";
     }
+
+    void ErrorManager::LogPrefix(std::string prefix)
+    {
+        std::cerr << "\033[1;31m" << prefix << "\033[0m: ";
+    }
+
 	void ErrorManager::NoInputFile()
 	{
-        std::cerr << "Error: No input file provided." << '\n'
+        LogPrefix("Error");
+        std::cerr << "No input file provided." << '\n'
 				  << std::endl;
 		std::exit(-1);
 	}
@@ -69,13 +78,15 @@ namespace Prelude
 	{
         // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
-        std::cerr << "Type mismatch for variable '" << name << "'. Expected type '" << (int)expectedType << "' but got '" << (int)type << "'" << std::endl;
+        std::cerr << "Type mismatch for variable '" << name
+            << "'. Expected type '" << Runtime::HumanValueType(expectedType)
+            << "' but got '" << Runtime::HumanValueType(type) << "'" << std::endl;
 		std::exit(-1);
 	}
 	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
-        std::cerr << "Mismatch type of left and right operands '" << (int)leftType << "' != '" << (int)rightType << "'" << std::endl;
+        std::cerr << "Mismatch type of left and right operands '" << Runtime::HumanValueType(leftType) << "' != '" << Runtime::HumanValueType(rightType) << "'" << std::endl;
 		std::exit(-1);
 	}
 	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc, std::string prefix)
@@ -94,37 +105,38 @@ namespace Prelude
     void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
-        std::cerr << "Argument type ("
-            << std::to_string((int)type)
-            << ") of parameter '" << name << "' doesn't match parameter type ("
-            << std::to_string((int)expectedType)
-            << ")" << std::endl;
+        std::cerr << "Argument type '"
+            << Runtime::HumanValueType(type)
+            << "' of parameter '" << name << "' doesn't match parameter type '"
+            << Runtime::HumanValueType(expectedType)
+            << "'" << std::endl;
         exit(-1);
     }
 
     void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
-        std::cerr << "Return value type ("
-            << std::to_string((int)type)
-            << ") of the function '" << name << "' doesn't match function's signature type ("
-            << std::to_string((int)expectedType)
-            << ")" << std::endl;
+        std::cerr << "Return value type '"
+            << Runtime::HumanValueType(type)
+            << "' of the function '" << name << "' doesn't match function's signature type '"
+            << Runtime::HumanValueType(expectedType)
+            << "'" << std::endl;
         exit(-1);
     }
 
     void ErrorManager::UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
-        std::cerr << "Unexpected return type '" << std::to_string((int)gotType) << "' when '" << std::to_string((int)expected) << "' type was expected" << std::endl;
-        exit(-1);
+        std::cerr << "Unexpected return type '" << Runtime::HumanValueType(gotType) << "' when '" << Runtime::HumanValueType(expected) << "' type was expected" << std::endl;
+        /*exit(-1);*/
     }
 
     void ErrorManager::TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
-        std::cerr << "Different return types '" << std::to_string((int)left) << "' and '" << std::to_string((int)right) << "'" << std::endl;
-        exit(-1);
+        std::cerr << "Different return types '" << Runtime::HumanValueType(left)
+            << "' and '" << Runtime::HumanValueType(right) << "'" << std::endl;
+        /*exit(-1);*/
     }
 
     void ErrorManager::ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc, std::string prefix)
@@ -149,7 +161,7 @@ namespace Prelude
     {
         LogFileLocation(filename, loc, "RuntimeError");
         std::cerr << "Unary operator '" << op
-            << "' is not allowed with type '" << std::to_string((int)metType) << "'" << std::endl;
+            << "' is not allowed with type '" << Runtime::HumanValueType(metType) << "'" << std::endl;
         std::exit(-1);
     }
 
@@ -164,7 +176,8 @@ namespace Prelude
     // CliRunner
     void ErrorManager::NotEnoughArgs(int expected, int got, bool atLeast)
     {
-        std::cerr << "ArgumentsError: Not enough additional arguments provided."
+        LogPrefix("ArgumentsError");
+        std::cerr << "Not enough additional arguments provided."
             << " Expected " << (atLeast ? "at least" : "") << " " << expected
             << " arguments, but got " << got
             << std::endl;
@@ -173,7 +186,8 @@ namespace Prelude
 
     void ErrorManager::InvalidArgument(std::string arg, std::string message)
     {
-        std::cerr << "ArgumentsError: Invalid argument provided" << arg << "."
+        LogPrefix("ArgumentsError");
+        std::cerr << "Invalid argument provided" << arg << "."
             << message << std::endl;
         std::exit(1);
     }
@@ -181,14 +195,16 @@ namespace Prelude
     
     void ErrorManager::FailedOpeningFile(std::string path)
     {
-        std::cerr << "FileError: Failed opening file '" << path
+        LogPrefix("FileError");
+        std::cerr << "Failed opening file '" << path
             << "'. No such file or directory" << std::endl;
         std::exit(1);
     }
 
     void ErrorManager::ProcedureNotFound(std::string name)
     {
-        std::cerr << "ProcedureError: No procedure found with name '"
+        LogPrefix("ProcedureError");
+        std::cerr << "No procedure found with name '"
             << name << "'" << std::endl;
         std::exit(1);
     }
