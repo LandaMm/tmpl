@@ -63,12 +63,14 @@ namespace Runtime
         std::string m_filename;
         std::shared_ptr<Environment<TypeVariable>> m_variables;
         std::shared_ptr<Environment<TypeFn>> m_functions;
+        int m_errors;
         
     public:
         TypeChecker(std::shared_ptr<Parser> parser)
             : m_parser(parser), m_filename(parser->GetFilename()),
               m_variables(std::make_shared<Environment<TypeVariable>>()),
-              m_functions(std::make_shared<Environment<TypeFn>>()) { }
+              m_functions(std::make_shared<Environment<TypeFn>>()),
+              m_errors(0) { }
     public:
         void RunChecker(std::shared_ptr<ProgramNode> program);
         void RunModuleChecker(std::shared_ptr<RequireMacro> require);
@@ -92,6 +94,12 @@ namespace Runtime
     private:
         void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, ValueType expected);
         void AssumeIfElse(std::shared_ptr<Statements::IfElseStatement> ifElse, ValueType expected);
+
+    private:
+        void ReportError() { m_errors++; };
+
+    public:
+        int GetErrorReport() { return m_errors; }
 
 	public:
 		static ValueType EvaluateType(std::string filename, std::shared_ptr<Node> typeNode);
