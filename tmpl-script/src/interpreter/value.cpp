@@ -46,7 +46,7 @@ namespace Runtime
             AST::Nodes::Condition::ConditionType condition)
     {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Lists are not compareable");
+			errorManager.RaiseError("Lists are not compareable", "RuntimeError");
 			return nullptr;
     }
 
@@ -54,7 +54,7 @@ namespace Runtime
             AST::Nodes::ExpressionNode::OperatorType opType)
     {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Lists are not operateable");
+			errorManager.RaiseError("Lists are not operateable", "RuntimeError");
 			return nullptr;
     }
 
@@ -68,7 +68,7 @@ namespace Runtime
         if (indexVal->GetType() != ValueType::Integer)
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Non-integers values cannot be used as index for a list");
+			errorManager.RaiseError("Non-integers values cannot be used as index for a list", "RuntimeError");
 			return nullptr;
         }
 
@@ -78,19 +78,69 @@ namespace Runtime
         if (*index < 0)
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Negative numbers cannot be used as index for list");
+			errorManager.RaiseError("Negative numbers cannot be used as index for list", "RuntimeError");
 			return nullptr;
         }
 
         if (m_value.size() <= *index)
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Index is out of range of the list");
+			errorManager.RaiseError("Index is out of range of the list", "RuntimeError");
 			return nullptr;
         }
 
         return m_value[*index];
     }
+
+	// Bool Value
+
+	std::string BoolValue::format() const
+	{
+        if (m_value) {
+            return "BoolValue(true)";
+        }
+        return "BoolValue(false)";
+	}
+
+	std::shared_ptr<Value> Runtime::BoolValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
+	{
+		std::shared_ptr<BoolValue> iright = std::dynamic_pointer_cast<BoolValue>(right);
+		bool vleft = GetValue();
+		bool vright = iright->GetValue();
+
+		switch (condition)
+		{
+		case AST::Nodes::Condition::ConditionType::Compare:
+			return std::make_shared<BoolValue>(vleft == vright);
+		case AST::Nodes::Condition::ConditionType::NotEqual:
+			return std::make_shared<BoolValue>(vleft != vright);
+        default:
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Unsupported operator for bool literals: " + std::to_string((int)condition), "RuntimeError");
+			return nullptr;
+		}
+
+        assert(condition != AST::Nodes::Condition::ConditionType::None &&
+                "Exhausted compare operator handlers for bool");
+
+        assert(false && "Unreachable code. Bool value compare");
+
+		return nullptr;
+	}
+
+	std::shared_ptr<Value> Runtime::BoolValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
+	{
+		std::shared_ptr<BoolValue> iright = std::dynamic_pointer_cast<BoolValue>(right);
+		bool vleft = GetValue();
+		bool vright = iright->GetValue();
+
+        Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+        errorManager.RaiseError("Bool values do not support any operations", "RuntimeError");
+
+        assert(false && "Unreachable code. Bool value operate");
+
+		return nullptr;
+	}
 
 	// Integer Value
 
@@ -108,17 +158,17 @@ namespace Runtime
 		switch (condition)
 		{
 		case AST::Nodes::Condition::ConditionType::Compare:
-			return std::make_shared<IntegerValue>(vleft == vright);
+			return std::make_shared<BoolValue>(vleft == vright);
 		case AST::Nodes::Condition::ConditionType::Less:
-			return std::make_shared<IntegerValue>(vleft < vright);
+			return std::make_shared<BoolValue>(vleft < vright);
 		case AST::Nodes::Condition::ConditionType::Greater:
-			return std::make_shared<IntegerValue>(vleft > vright);
+			return std::make_shared<BoolValue>(vleft > vright);
 		case AST::Nodes::Condition::ConditionType::LessEqual:
-			return std::make_shared<IntegerValue>(vleft <= vright);
+			return std::make_shared<BoolValue>(vleft <= vright);
 		case AST::Nodes::Condition::ConditionType::GreaterEqual:
-			return std::make_shared<IntegerValue>(vleft >= vright);
+			return std::make_shared<BoolValue>(vleft >= vright);
 		case AST::Nodes::Condition::ConditionType::NotEqual:
-			return std::make_shared<IntegerValue>(vleft != vright);
+			return std::make_shared<BoolValue>(vleft != vright);
 		}
 
         assert(condition != AST::Nodes::Condition::ConditionType::None &&
@@ -171,17 +221,17 @@ namespace Runtime
 		switch (condition)
 		{
 		case AST::Nodes::Condition::ConditionType::Compare:
-			return std::make_shared<IntegerValue>(vleft == vright);
+			return std::make_shared<BoolValue>(vleft == vright);
 		case AST::Nodes::Condition::ConditionType::Less:
-			return std::make_shared<IntegerValue>(vleft < vright);
+			return std::make_shared<BoolValue>(vleft < vright);
 		case AST::Nodes::Condition::ConditionType::Greater:
-			return std::make_shared<IntegerValue>(vleft > vright);
+			return std::make_shared<BoolValue>(vleft > vright);
 		case AST::Nodes::Condition::ConditionType::LessEqual:
-			return std::make_shared<IntegerValue>(vleft <= vright);
+			return std::make_shared<BoolValue>(vleft <= vright);
 		case AST::Nodes::Condition::ConditionType::GreaterEqual:
-			return std::make_shared<IntegerValue>(vleft >= vright);
+			return std::make_shared<BoolValue>(vleft >= vright);
 		case AST::Nodes::Condition::ConditionType::NotEqual:
-			return std::make_shared<IntegerValue>(vleft != vright);
+			return std::make_shared<BoolValue>(vleft != vright);
 		}
 
         assert(condition != AST::Nodes::Condition::ConditionType::None &&
@@ -234,17 +284,17 @@ namespace Runtime
 		switch (condition)
 		{
 		case AST::Nodes::Condition::ConditionType::Compare:
-			return std::make_shared<IntegerValue>(vleft == vright);
+			return std::make_shared<BoolValue>(vleft == vright);
 		case AST::Nodes::Condition::ConditionType::Less:
-			return std::make_shared<IntegerValue>(vleft < vright);
+			return std::make_shared<BoolValue>(vleft < vright);
 		case AST::Nodes::Condition::ConditionType::Greater:
-			return std::make_shared<IntegerValue>(vleft > vright);
+			return std::make_shared<BoolValue>(vleft > vright);
 		case AST::Nodes::Condition::ConditionType::LessEqual:
-			return std::make_shared<IntegerValue>(vleft <= vright);
+			return std::make_shared<BoolValue>(vleft <= vright);
 		case AST::Nodes::Condition::ConditionType::GreaterEqual:
-			return std::make_shared<IntegerValue>(vleft >= vright);
+			return std::make_shared<BoolValue>(vleft >= vright);
 		case AST::Nodes::Condition::ConditionType::NotEqual:
-			return std::make_shared<IntegerValue>(vleft != vright);
+			return std::make_shared<BoolValue>(vleft != vright);
 		}
 
         assert(condition != AST::Nodes::Condition::ConditionType::None &&
@@ -297,12 +347,12 @@ namespace Runtime
 		switch (condition)
 		{
 		case AST::Nodes::Condition::ConditionType::Compare:
-			return std::make_shared<IntegerValue>(vleft == vright);
+			return std::make_shared<BoolValue>(vleft == vright);
 		case AST::Nodes::Condition::ConditionType::NotEqual:
-			return std::make_shared<IntegerValue>(vleft != vright);
+			return std::make_shared<BoolValue>(vleft != vright);
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)condition));
+			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)condition), "RuntimeError");
 			return nullptr;
 		}
 
@@ -323,7 +373,7 @@ namespace Runtime
 			return std::make_shared<StringValue>(vleft + vright);
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)opType));
+			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)opType), "RuntimeError");
 			return nullptr;
 		}
 
