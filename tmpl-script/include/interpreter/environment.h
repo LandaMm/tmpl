@@ -106,6 +106,7 @@ namespace Runtime
 			: m_parent(parentEnv) {}
 
 	public:
+        inline std::shared_ptr<Environment<T>> GetParent() const { return m_parent; }
 		bool HasItem(std::string name)
 		{
 			if (m_declarations.find(name) == m_declarations.end())
