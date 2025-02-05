@@ -40,6 +40,11 @@ int main(int argc, char **argv)
 
     typeChecker->RunChecker(std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot()));
 
+    if (typeChecker->GetErrorReport() > 0)
+    {
+        errManager.RaiseError("Found " + std::to_string(typeChecker->GetErrorReport()) + " type errors. Exiting...", "PreLaunchError:");
+    }
+
 	auto variables = std::make_shared<Environment<Variable>>();
 	auto procedures = std::make_shared<Environment<Procedure>>();
 	auto functions = std::make_shared<Environment<Fn>>();
