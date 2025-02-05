@@ -24,6 +24,9 @@ namespace AST
 		public:
 			void AddItem(std::shared_ptr<Node> item);
 
+        public:
+            inline bool IsBlock() override { return true; }
+
 		public: // Iterate
 			void ResetIterator() { m_index = 0; }
 			std::shared_ptr<Node> Next()
@@ -57,6 +60,7 @@ namespace AST
 		public:
 			inline NodeType GetType() const override { return NodeType::IfElse; }
             std::string Format() const override;
+            inline bool IsBlock() override { return true; }
 
 		public:
 			IfElseStatement(std::shared_ptr<Node> condition, Location loc)
