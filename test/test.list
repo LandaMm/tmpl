@@ -1,0 +1,36 @@
+tmpl nothing
+tmpl empty-procedure
+tmpl proc-main && tmpl proc-main main
+tmpl expr
+tmpl literal int
+tmpl literal float
+tmpl literal double
+tmpl literal string
+tmpl literal false
+tmpl literal true
+tmpl var int
+tmpl var float
+tmpl var double
+tmpl var string
+tmpl condition true_compare
+tmpl condition false_compare
+tmpl condition true_less
+tmpl condition false_less
+tmpl condition true_greater
+tmpl condition false_greater
+tmpl condition true_lesseq
+tmpl condition false_lesseq
+tmpl condition true_greatereq
+tmpl condition false_greatereq
+tmpl condition true_not
+tmpl condition false_not
+tmpl ternary left
+tmpl ternary right
+tmpl ternary inner_left
+tmpl ternary inner_right
+tmpl unary neg_int
+tmpl unary neg_float
+tmpl unary neg_double
+tmpl unary dbl_neg_int
+tmpl unary dbl_neg_float
+tmpl unary dbl_neg_double
