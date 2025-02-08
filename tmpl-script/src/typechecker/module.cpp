@@ -47,7 +47,7 @@ namespace Runtime
         switch(target->GetType())
         {
            case NodeType::FnDecl:
-                HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target));
+                HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target), true);
                 break;
             case NodeType::VarDecl:
                 HandleVarDeclaration(std::dynamic_pointer_cast<VarDeclaration>(target));
@@ -72,7 +72,7 @@ namespace Runtime
                     HandleExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
                     break;
                 case NodeType::FnDecl:
-                    HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
+                    HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
                 default:
                     {
