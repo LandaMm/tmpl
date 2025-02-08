@@ -12,7 +12,7 @@ namespace AST
 
 	enum class NodeType
 	{
-		Program,
+		Program, //
 		Expression, //
 		FunctionCall, //
 		Literal, // 
@@ -22,7 +22,7 @@ namespace AST
 		Condition, // 
 		Ternary, // 
 		Unary, // 
-		IfElse,
+		IfElse, //
 		Block, //
 		VarDecl, // 
 		ProcedureDecl, //
