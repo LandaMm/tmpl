@@ -41,3 +41,4 @@ tmpl if-else true_else
 tmpl if-else false_else
 tmpl if-else inner
 tmpl return
+tmpl fn params
