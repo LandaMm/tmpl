@@ -16,7 +16,7 @@ namespace Prelude
         LogPrefix(prefix);
         std::cerr << errorMessage
 				  << std::endl;
-		std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
 	}
     void ErrorManager::LogFileLocation(std::string filename, Location loc, std::string prefix)
     {
@@ -81,26 +81,26 @@ namespace Prelude
         std::cerr << "Type mismatch for variable '" << name
             << "'. Expected type '" << Runtime::HumanValueType(expectedType)
             << "' but got '" << Runtime::HumanValueType(type) << "'" << std::endl;
-		std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Mismatch type of left and right operands '" << Runtime::HumanValueType(leftType) << "' != '" << Runtime::HumanValueType(rightType) << "'" << std::endl;
-		std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Undefined type '" << name << "'" << std::endl;
-		std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id, std::string prefix)
 	{
         auto loc = id->GetLocation();
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Undeclared variable '" << id->GetName() << "'" << std::endl;
-		std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
 	}
     void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
     {
@@ -110,7 +110,7 @@ namespace Prelude
             << "' of parameter '" << name << "' doesn't match parameter type '"
             << Runtime::HumanValueType(expectedType)
             << "'" << std::endl;
-        exit(-1);
+        if (prefix != "TypeError") exit(-1);
     }
 
     void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
@@ -154,7 +154,7 @@ namespace Prelude
         }
         std::cerr << '\n';
 
-        exit(-1);
+        if (prefix != "TypeError") exit(-1);
     }
 
     void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, Location loc)
@@ -170,7 +170,7 @@ namespace Prelude
         auto loc = id->GetLocation();
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Calling undeclared function '" << id->GetName() << "'" << std::endl;
-		std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
     }
 
     // CliRunner
@@ -214,7 +214,7 @@ namespace Prelude
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Cannot redeclare already existing variable '"
             << name << "'" << std::endl;
-        std::exit(-1);
+        if (prefix != "TypeError") std::exit(-1);
     }
 
 }
