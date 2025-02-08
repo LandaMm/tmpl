@@ -20,7 +20,7 @@ namespace Runtime
                     ImportModule(std::dynamic_pointer_cast<RequireMacro>(stmt));
                     break;
                 case NodeType::FnDecl:
-                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
+                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
                 case NodeType::ProcedureDecl:
                     EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(stmt));
@@ -48,7 +48,7 @@ namespace Runtime
                     EvaluateExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
                     break;
                 case NodeType::FnDecl:
-                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
+                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), true);
                     break;
                 default:
                     {

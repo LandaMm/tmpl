@@ -104,7 +104,7 @@ namespace Runtime
                     RunModuleChecker(std::dynamic_pointer_cast<RequireMacro>(stmt));
                     break;
                 case NodeType::FnDecl:
-                    HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
+                    HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
                 // TODO: add require, export support
                 default:
