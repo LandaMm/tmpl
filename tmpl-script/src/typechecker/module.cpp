@@ -1,6 +1,8 @@
 
 #include <filesystem>
+#include <memory>
 #include "../../include/typechecker.h"
+#include "include/node/function.h"
 
 namespace fs = std::filesystem;
 
@@ -68,6 +70,9 @@ namespace Runtime
                     break;
                 case NodeType::Export:
                     HandleExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
+                    break;
+                case NodeType::FnDecl:
+                    HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
                     break;
                 default:
                     {
