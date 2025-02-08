@@ -25,6 +25,13 @@ namespace Prelude
         std::cerr << "\033[90m[" << relative.string() << ":" << loc.line << ":" << loc.col << "]\033[0m \033[1;31m" << prefix << "\033[0m: ";
     }
 
+    void ErrorManager::LogFileLocation(std::string filename, Location loc)
+    {
+        fs::path cwd = fs::current_path();
+        fs::path relative = fs::relative(filename, cwd);
+        std::cerr << "(\033[90m" << relative.string() << ":" << loc.line << ":" << loc.col << "\033[0m)";
+    }
+
     void ErrorManager::LogPrefix(std::string prefix)
     {
         std::cerr << "\033[1;31m" << prefix << "\033[0m: ";
@@ -214,6 +221,16 @@ namespace Prelude
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Cannot redeclare already existing variable '"
             << name << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, Location loc, Location mLoc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Cannot call a private function '" << fnName
+            << "' outside of it's module ";
+        LogFileLocation(fnModule, mLoc);
+        std::cout << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 

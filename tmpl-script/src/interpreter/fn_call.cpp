@@ -27,6 +27,13 @@ namespace Runtime
 
             std::shared_ptr<Fn> fn = m_functions->LookUp(fnName);
 
+            if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
+            {
+                Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                errorManager.PrivateFunctionError(GetFilename(), fnName, fn->GetModuleName(), callee->GetLocation(), fn->GetLocation(), "RuntimeError");
+                return nullptr;
+            }
+
             std::shared_ptr<Environment<Variable>> currentScope = m_variables;
             std::shared_ptr<Environment<Variable>> variables = std::make_shared<Environment<Variable>>(m_variables);
 

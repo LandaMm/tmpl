@@ -62,7 +62,7 @@ namespace Runtime
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
-        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl);
+        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
         void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt);
 
     private:

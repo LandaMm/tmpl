@@ -1,6 +1,8 @@
 
 #include <filesystem>
+#include <memory>
 #include "../../include/typechecker.h"
+#include "include/node/function.h"
 
 namespace fs = std::filesystem;
 
@@ -45,7 +47,7 @@ namespace Runtime
         switch(target->GetType())
         {
            case NodeType::FnDecl:
-                HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target));
+                HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target), true);
                 break;
             case NodeType::VarDecl:
                 HandleVarDeclaration(std::dynamic_pointer_cast<VarDeclaration>(target));
@@ -68,6 +70,9 @@ namespace Runtime
                     break;
                 case NodeType::Export:
                     HandleExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
+                    break;
+                case NodeType::FnDecl:
+                    HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
                 default:
                     {

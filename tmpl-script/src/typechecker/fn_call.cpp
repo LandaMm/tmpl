@@ -27,6 +27,14 @@ namespace Runtime
 
         std::shared_ptr<TypeFn> fn = m_functions->LookUp(fnName);
 
+        if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.PrivateFunctionError(GetFilename(), fnName, fn->GetModuleName(), callee->GetLocation(), fn->GetLocation(), "TypeError");
+            ReportError();
+            return ValueType::Null;
+        }
+
         auto args = fnCall->GetArgs();
 
         if (fn->GetParamsSize() != args->size())
