@@ -17,7 +17,7 @@ namespace Runtime
         switch(target->GetType())
         {
            case NodeType::FnDecl:
-                EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target));
+                EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target), true);
                 break;
             case NodeType::VarDecl:
                 EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(target));
