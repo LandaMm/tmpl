@@ -6,14 +6,14 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    void TypeChecker::HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl)
+    void TypeChecker::HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
         ValueType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
 
         std::string name = fnDecl->GetName();
 
-        std::shared_ptr<TypeFn> fn = std::make_shared<TypeFn>(retType);
+        std::shared_ptr<TypeFn> fn = std::make_shared<TypeFn>(retType, GetFilename(), exported, fnDecl->GetLocation());
 
         auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
