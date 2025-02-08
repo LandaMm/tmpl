@@ -1,11 +1,23 @@
 @require"math/floats"
 @require"negative"
 
+fn main() : string {
+    var string compare = "ms10";
+    if (compare == "msg") {
+        return "compare is 'msg'.";
+    } else if (compare == "ms1") {
+        return "compare is just 'ms1'.";
+    } else {
+        return "compare is something else.";
+    }
+    return "should be unreachable!";
+}
+
 ->main{
-    return add_floats(3.1415, 1.22);
+    return main();
 }
 
 ->wheel {
-    return getNegativeFloat(PI);
+    return getNegativeFloat(3.1415);
 }
 

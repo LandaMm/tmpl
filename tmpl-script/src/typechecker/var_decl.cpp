@@ -1,0 +1,36 @@
+
+
+#include "../../include/typechecker.h"
+
+namespace Runtime
+{
+    using namespace AST::Nodes;
+
+    void TypeChecker::HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl)
+    {
+		ValueType varType = EvaluateType(GetFilename(), varDecl->GetType());
+		std::string varName = *varDecl->GetName();
+		ValueType varValueType = DiagnoseNode(varDecl->GetValue());
+
+		if (varType != varValueType)
+		{
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.VarMismatchType(GetFilename(), varName, varValueType, varType, varDecl->GetLocation(), "TypeError");
+            ReportError();
+			return;
+		}
+
+		std::shared_ptr<TypeVariable> var = std::make_shared<TypeVariable>(varType, varDecl->Editable());
+
+        if (m_variables->HasItem(varName))
+        {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.VarAlreadyExists(GetFilename(), varName, varDecl->GetLocation(), "TypeError");
+            ReportError();
+			return;
+        }
+
+		m_variables->AddItem(varName, var);
+    }
+}
+

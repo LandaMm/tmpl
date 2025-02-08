@@ -2,6 +2,7 @@
 
 #ifndef RETURN_H
 #define RETURN_H
+#include <memory>
 #include "../node.h"
 
 namespace AST

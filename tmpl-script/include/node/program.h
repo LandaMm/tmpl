@@ -25,6 +25,7 @@ namespace AST
 			inline NodeType GetType() const override { return NodeType::Program; }
 		public:
 			void AddStatement(std::shared_ptr<Node> statement);
+            void ResetIterator() { m_index = 0; }
 		public:
 			std::shared_ptr<Node> operator[](size_t index) { return m_statements[index]; }
 		public:

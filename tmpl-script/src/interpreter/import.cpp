@@ -16,7 +16,7 @@ namespace Runtime
         auto target = exportStmt->GetTarget();
         switch(target->GetType())
         {
-            case NodeType::FnDecl:
+           case NodeType::FnDecl:
                 EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(target));
                 break;
             case NodeType::VarDecl:

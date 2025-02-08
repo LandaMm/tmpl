@@ -3,6 +3,7 @@
 #include <memory>
 #include "../include/interpreter.h"
 #include "../include/error.h"
+#include "include/node/statement.h"
 
 namespace Runtime
 {
@@ -26,7 +27,7 @@ namespace Runtime
                 default:
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                        errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)stmt->GetType()));
+                        errorManager.RaiseError("Unsupported node type by evaluating: " + std::to_string((int)stmt->GetType()), "RuntimeError");
                         break;
                     }
             }
@@ -48,7 +49,7 @@ namespace Runtime
                 default:
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                        errorManager.RaiseError("Unsupported node type by evaluating imported module: " + std::to_string((int)stmt->GetType()));
+                        errorManager.RaiseError("Unsupported node type by evaluating imported module: " + std::to_string((int)stmt->GetType()), "RuntimeError");
                         break;
                     }
             }
@@ -78,28 +79,41 @@ namespace Runtime
             return EvaluateReturn(std::dynamic_pointer_cast<ReturnNode>(node));
         case NodeType::FunctionCall:
             return EvaluateFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
+        case NodeType::IfElse:
+            return EvaluateIfElseStatement(std::dynamic_pointer_cast<Statements::IfElseStatement>(node));
         case NodeType::Block:
         {
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);
+            auto scope = std::make_shared<Environment<Variable>>(m_variables);
+            m_variables = scope;
+            std::shared_ptr<Value> value = nullptr;
             while (block->HasItems())
             {
                 std::shared_ptr<Node> node = block->Next();
                 if (node->GetType() == NodeType::Return)
                 {
-                    auto value = EvaluateReturn(std::dynamic_pointer_cast<ReturnNode>(node));
-                    return value;
+                    value = EvaluateReturn(std::dynamic_pointer_cast<ReturnNode>(node));
+                    break;
                 }
                 else
                 {
-                    Execute(node);
+                    auto localVal = Execute(node);
+                    if (node->IsBlock() && localVal != nullptr)
+                    {
+                        value = localVal;
+                        break;
+                    }
                 }
             }
-            return nullptr;
+            assert(scope->GetParent() != nullptr && "Scope parent gone.");
+            m_variables = scope->GetParent();
+            assert(m_variables != scope && "Parent and child are located at the same memory space.");
+            return value;
         }
 		default:
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                errorManager.RaiseError("Unsupported node type by executing: " + std::to_string((int)node->GetType()));
+                errorManager.RaiseError("Unsupported node type by executing: " + std::to_string((int)node->GetType()), "RuntimeError");
                 break;
             }
 		}

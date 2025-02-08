@@ -24,6 +24,9 @@ namespace AST
 		public:
 			void AddItem(std::shared_ptr<Node> item);
 
+        public:
+            inline bool IsBlock() override { return true; }
+
 		public: // Iterate
 			void ResetIterator() { m_index = 0; }
 			std::shared_ptr<Node> Next()
@@ -33,26 +36,6 @@ namespace AST
             }
 			bool HasItems() { return m_index < m_body.size(); }
 			size_t GetSize() { return m_body.size(); }
-		};
-
-		class IfElseStatement : public StatementsNode
-		{
-		private:
-			std::shared_ptr<Node> m_condition;
-			std::shared_ptr<Node> m_else_statement;
-
-		public:
-			inline NodeType GetType() const override { return NodeType::IfElse; }
-            std::string Format() const override;
-
-		public:
-			IfElseStatement(std::shared_ptr<Node> condition, Location loc)
-				: m_condition(condition), m_else_statement(nullptr), StatementsNode(loc)
-			{
-			}
-
-		public:
-			void SetElseStatement(std::shared_ptr<Node> elseNode) { m_else_statement = elseNode; }
 		};
 
 		class StatementsBody : public StatementsNode
@@ -66,7 +49,34 @@ namespace AST
 			{
 			}
 		};
-	}
+
+		class IfElseStatement : public Node
+		{
+		private:
+            std::shared_ptr<StatementsBody> m_body;
+			std::shared_ptr<Node> m_condition;
+			std::shared_ptr<Node> m_else_statement;
+
+		public:
+			inline NodeType GetType() const override { return NodeType::IfElse; }
+            std::string Format() const override;
+            inline bool IsBlock() override { return true; }
+
+		public:
+			IfElseStatement(std::shared_ptr<Node> condition, Location loc)
+				: m_condition(condition), m_else_statement(nullptr), Node(loc)
+			{
+			}
+
+		public:
+			void SetElseStatement(std::shared_ptr<Node> elseNode) { m_else_statement = elseNode; }
+            void SetBody(std::shared_ptr<StatementsBody> body) { m_body = body; }
+        public:
+            inline std::shared_ptr<Node> GetCondition() const { return m_condition; }
+            inline std::shared_ptr<Node> GetElseNode() const { return m_else_statement; }
+            inline std::shared_ptr<StatementsBody> GetBody() const { return m_body; }
+		};
+    }
 }
 
 #endif

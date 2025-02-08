@@ -77,6 +77,7 @@ namespace AST
         public: // Iterate
             inline bool HasParams() { return m_params.size() > m_index; }
             std::shared_ptr<FunctionParam> GetNextParam() { return m_params[m_index++]; }
+            void ResetIterator() { m_index = 0; }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
             std::string Format() const override;

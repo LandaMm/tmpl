@@ -2,6 +2,7 @@
 #define RUNTIME_VALUE_H
 #include <memory>
 #include <string>
+#include <cassert>
 #include <vector>
 #include "../node/logical.h"
 #include "../node/expression.h"
@@ -15,8 +16,25 @@ namespace Runtime
 		Double,
 		String,
         List,
+        Bool,
 		Null,
 	};
+
+    static std::string HumanValueType(ValueType type)
+    {
+        switch(type)
+        {
+            case ValueType::String: return "string";
+            case ValueType::Float: return "float";
+            case ValueType::Integer: return "int";
+            case ValueType::Double: return "double";
+            case ValueType::Bool: return "bool";
+            case ValueType::List: return "list";
+            case ValueType::Null: return "null";
+        }
+
+        assert(false && "Unreachable code. Every value type should be printable in human readable format");
+    }
 
 	class Value
 	{
@@ -70,6 +88,45 @@ namespace Runtime
 	public:
 		std::string format() const override;
 	};
+
+	class NullValue : public Value
+	{
+	public:
+		NullValue() { }
+
+	public:
+		inline ValueType GetType() const override { return ValueType::Bool; }
+
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
+
+	public:
+		std::string format() const override;
+	};
+
+	class BoolValue : public Value
+	{
+	private:
+		bool m_value;
+
+	public:
+		BoolValue(bool value) : m_value(value) {}
+
+	public:
+		inline ValueType GetType() const override { return ValueType::Bool; }
+
+	public:
+		inline bool GetValue() const { return m_value; }
+
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
+
+	public:
+		std::string format() const override;
+	};
+
 	class IntegerValue : public Value
 	{
 	private:

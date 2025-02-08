@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 #include <memory>
+#include "include/node/statement.h"
 #include "node/return.h"
 #include "node/program.h"
 #include "parser.h"
@@ -56,15 +57,13 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateUnary(std::shared_ptr<UnaryNode> unary);
         std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret);
         std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret);
+        std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse);
 
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
         void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl);
         void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt);
-
-	private:
-		ValueType EvaluateType(std::shared_ptr<Node> typeNode);
 
     private:
         inline std::string GetFilename() const { return m_filename; }

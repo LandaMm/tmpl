@@ -1,0 +1,71 @@
+
+->if_true {
+    if (1 == 1) {
+        return "works!";
+    }
+
+    return "error!";
+}
+
+->if_false {
+    if (1 != 1) {
+        return "error!";
+    }
+
+    return "works!";
+}
+
+->else_case {
+    if (1 != 1) {
+        return "error!";
+    } else {
+        return "works!";
+    }
+
+    return "unreachable!";
+}
+
+->true_else {
+    if (1 != 1) {
+        return "error!";
+    } else if (5 == 5) {
+        return "works!";
+    } else {
+        return "error!";
+    }
+
+    return "unreachable!";
+}
+
+->false_else {
+    if (1 != 1) {
+        return "error!";
+    } else if (5 != 5) {
+        return "error!";
+    } else {
+        return "works!";
+    }
+
+    return "unreachable!";
+}
+
+->inner {
+    if (1 == 1) {
+        if (5 != 5) {
+            return "error!";
+        }
+
+        if ("hi" != "hi") {
+            return "error!";
+        } else {
+            return "works!";
+        }
+
+        return "unreachable!";
+    } else {
+        return "error!";
+    }
+
+    return "unreachable!";
+}
+

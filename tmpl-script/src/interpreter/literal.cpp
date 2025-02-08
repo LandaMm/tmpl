@@ -20,7 +20,7 @@ namespace Runtime
 			return std::make_shared<StringValue>(*literal->GetValue<std::string>());
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported literal type: " + std::to_string((int)literal->GetLiteralType()));
+			errorManager.RaiseError("Unsupported literal type: " + std::to_string((int)literal->GetLiteralType()), "RuntimeError");
 			break;
 		}
 

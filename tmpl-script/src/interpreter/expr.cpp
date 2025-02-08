@@ -58,16 +58,17 @@ namespace Runtime
 	{
 		std::shared_ptr<Value> condition = Execute(ternary->GetCondition());
 
-		if (condition->GetType() != ValueType::Integer)
+        // TODO: boolean support
+		if (condition->GetType() != ValueType::Bool)
 		{
 			// should be unreachable
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("RuntimeError: Condition cannot produce non-integer value");
+			errorManager.RaiseError("RuntimeError: Condition cannot produce non-boolean value", "RuntimeError");
 			return nullptr;
 		}
 
-		std::shared_ptr<IntegerValue> cVal = std::dynamic_pointer_cast<IntegerValue>(condition);
-		if (*cVal->GetValue() == 1)
+		auto cVal = std::dynamic_pointer_cast<BoolValue>(condition);
+		if (cVal->GetValue() == true)
 		{
 			return Execute(ternary->GetLeft());
 		}
@@ -83,7 +84,7 @@ namespace Runtime
 		if (left->GetType() != right->GetType() && left->GetType() != ValueType::Null && right->GetType() != ValueType::Null)
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.OperandMismatchType(GetFilename(), left->GetType(), right->GetType(), condition->GetLocation());
+			errorManager.OperandMismatchType(GetFilename(), left->GetType(), right->GetType(), condition->GetLocation(), "RuntimeError");
 			return nullptr;
 		}
 
@@ -92,13 +93,13 @@ namespace Runtime
 			if (condition->GetOperator() != Condition::ConditionType::Compare && condition->GetOperator() != Condition::ConditionType::NotEqual)
 			{
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.RaiseError("Unsupported condition operator for null values: " + std::to_string((int)condition->GetOperator()));
+				errorManager.RaiseError("Unsupported condition operator for null values: " + std::to_string((int)condition->GetOperator()), "RuntimeError");
 				return nullptr;
 			}
 			if (condition->GetOperator() == Condition::ConditionType::Compare)
-				return std::make_shared<IntegerValue>(std::make_shared<int>(0));
+				return std::make_shared<BoolValue>(false);
 			else
-				return std::make_shared<IntegerValue>(std::make_shared<int>(1));
+				return std::make_shared<BoolValue>(true);
 		}
 
 		return left->Compare(right, condition->GetOperator());
@@ -113,7 +114,7 @@ namespace Runtime
 		if (valueType != right->GetType())
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported different types of operands: " + std::to_string((int)left->GetType()) + " != " + std::to_string((int)right->GetType()));
+			errorManager.RaiseError("Unsupported different types of operands: " + std::to_string((int)left->GetType()) + " != " + std::to_string((int)right->GetType()), "RuntimeError");
 			return nullptr;
 		}
 

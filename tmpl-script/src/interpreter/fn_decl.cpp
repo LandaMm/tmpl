@@ -3,6 +3,7 @@
 #include <memory>
 #include "../../include/interpreter.h"
 #include "../../include/node/statement.h"
+#include "../../include/typechecker.h"
 
 namespace Runtime
 {
@@ -12,14 +13,14 @@ namespace Runtime
     {
         std::string name = fnDecl->GetName();
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
-        ValueType retType = EvaluateType(fnDecl->GetReturnType());
+        ValueType retType = TypeChecker::EvaluateType(GetFilename(), fnDecl->GetReturnType());
 
         std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType);
 
         while (fnDecl->HasParams())
         {
             std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
-            ValueType paramType = EvaluateType(param->GetType());
+            ValueType paramType = TypeChecker::EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);

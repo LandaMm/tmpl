@@ -9,6 +9,7 @@
 #include "../include/interpreter/value.h"
 #include "../include/cli.h"
 #include "../include/error.h"
+#include "../include/typechecker.h"
 
 int main(int argc, char **argv)
 {
@@ -34,6 +35,15 @@ int main(int argc, char **argv)
 
 	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
 	parser->Parse();
+
+    std::shared_ptr<TypeChecker> typeChecker = std::make_shared<TypeChecker>(parser);
+
+    typeChecker->RunChecker(std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot()));
+
+    if (typeChecker->GetErrorReport() > 0)
+    {
+        errManager.RaiseError("Found " + std::to_string(typeChecker->GetErrorReport()) + " type errors. Exiting...", "PreLaunchError:");
+    }
 
 	auto variables = std::make_shared<Environment<Variable>>();
 	auto procedures = std::make_shared<Environment<Procedure>>();

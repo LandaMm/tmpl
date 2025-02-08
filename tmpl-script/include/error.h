@@ -31,13 +31,14 @@ namespace Prelude
 		}
 
 	public:
-		void RaiseError(std::string errorMessage);
+		void RaiseError(std::string errorMessage, std::string prefix);
 
 	public:
 		void NoInputFile();
     
     private:
         void LogFileLocation(std::string filename, Location loc, std::string prefix);
+        void LogPrefix(std::string prefix);
 
 	public: // Lexer (Tokenizer)
 		void UnexpectedCharacter(std::string filename, char ch, size_t line, size_t col);
@@ -50,18 +51,21 @@ namespace Prelude
 		void MissingConstantDefinition(std::string filename, std::shared_ptr<Token> token);
 
 	public: // Interpreter
-		void VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
-        void VarAlreadyExists(std::string filename, std::string name, Location loc);
-		void UndefinedType(std::string filename, std::string name, Location loc);
-		void UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id);
-		void OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc);
-		void UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id);
+		void VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix);
+        void VarAlreadyExists(std::string filename, std::string name, Location loc, std::string prefix);
+		void UndefinedType(std::string filename, std::string name, Location loc, std::string prefix);
+		void UndeclaredVariable(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id, std::string prefix);
+		void OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix);
+		void UndeclaredFunction(std::string filename, std::shared_ptr<Nodes::IdentifierNode> id, std::string prefix);
         // TODO:
 		// void UndeclaredFunction(std::shared_ptr<Nodes::ObjectMember> member);
-		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
+		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix);
 		void ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc);
-        void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc);
+        void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc, std::string prefix);
         void UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, Location loc);
+    public: // TypeChecker
+        void UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, Location loc);
+        void TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, Location loc);
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);
         void InvalidArgument(std::string arg, std::string message);
