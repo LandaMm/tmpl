@@ -49,6 +49,7 @@ namespace Runtime
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
 
 	public:
+        void ResetIterator() { m_index = 0; }
         inline bool HasParams() { return m_index < m_params.size(); }
         inline std::shared_ptr<FnParam> GetNextParam() { return m_params[m_index++]; }
         inline size_t GetParamsSize() { return m_params.size(); }
