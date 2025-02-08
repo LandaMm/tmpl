@@ -10,8 +10,8 @@
 #include "../include/interpreter.h"
 #include "../include/node/procedure.h"
 #include "../include/node/unary.h"
-#include "include/interpreter/value.h"
-#include "include/node/logical.h"
+#include "../include/interpreter/value.h"
+#include "../include/node/logical.h"
 
 namespace Runtime
 {
@@ -54,12 +54,32 @@ namespace Runtime
             case NodeType::Block:
             {
                 auto block = std::dynamic_pointer_cast<Statements::StatementsBody>(node);
-                while (auto stmt = block->Next())
+                auto scope = std::make_shared<Environment<TypeVariable>>(m_variables);
+                m_variables = scope;
+                ValueType value = ValueType::Null;
+                while (block->HasItems())
                 {
-                    DiagnoseNode(stmt);
+                    std::shared_ptr<Node> node = block->Next();
+                    if (node->GetType() == NodeType::Return)
+                    {
+                        value = DiagnoseNode(node);
+                        break;
+                    }
+                    else
+                    {
+                        auto localVal = DiagnoseNode(node);
+                        if (node->IsBlock())
+                        {
+                            value = localVal;
+                            break;
+                        }
+                    }
                 }
                 block->ResetIterator();
-                return ValueType::Null;
+                assert(scope->GetParent() != nullptr && "Scope parent gone.");
+                m_variables = scope->GetParent();
+                assert(m_variables != scope && "Parent and child are located at the same memory space.");
+                return value;
             }
             default:
                 // just skip the nodes we cannot typecheck
