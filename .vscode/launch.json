@@ -23,6 +23,11 @@
           "description": "Set Disassembly Flavor to Intel",
           "text": "-gdb-set disassembly-flavor intel",
           "ignoreFailures": true
+        },
+        {
+          "text": "set print object on",
+          "description": "enables to identify the actual (derived) type of an object",
+          "ignoreFailures": true
         }
       ]
     }
