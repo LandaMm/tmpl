@@ -9,13 +9,13 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    void Interpreter::EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl)
+    void Interpreter::EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
         std::string name = fnDecl->GetName();
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
         ValueType retType = TypeChecker::EvaluateType(GetFilename(), fnDecl->GetReturnType());
 
-        std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType);
+        std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType, GetFilename(), exported, fnDecl->GetLocation());
 
         while (fnDecl->HasParams())
         {
