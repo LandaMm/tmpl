@@ -15,7 +15,10 @@ namespace Runtime
             Prelude::ErrorManager& manager = Prelude::ErrorManager::getInstance();
             manager.OperandMismatchType(GetFilename(), left, right, expr->GetLocation(), "TypeError");
             ReportError();
-            return ValueType::Null;
+            // TODO: maybe there is some better
+            // e.g. add typechecker's only value type "Mixed"
+            // that passes all type tests?
+            return left;
         }
 
         return left;
@@ -31,7 +34,7 @@ namespace Runtime
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.OperandMismatchType(GetFilename(), left, right, condition->GetLocation(), "RuntimeError");
             ReportError();
-			return ValueType::Null;
+			return ValueType::Bool;
 		}
 
 		if (left != right && (left == ValueType::Null || right == ValueType::Null))
@@ -41,7 +44,7 @@ namespace Runtime
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 				errorManager.RaiseError("Unsupported condition operator for null values: " + std::to_string((int)condition->GetOperator()), "TypeError");
                 ReportError();
-				return ValueType::Null;
+				return ValueType::Bool;
 			}
             return ValueType::Bool;
 		}
@@ -53,6 +56,9 @@ namespace Runtime
     {
 		ValueType condition = DiagnoseNode(ternary->GetCondition());
 
+        auto leftType = DiagnoseNode(ternary->GetLeft());
+        auto rightType = DiagnoseNode(ternary->GetRight());
+
         // TODO: boolean support
 		if (condition != ValueType::Bool)
 		{
@@ -60,11 +66,9 @@ namespace Runtime
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("RuntimeError: Condition cannot produce non-boolean value", "TypeError");
                 ReportError();
-			return ValueType::Null;
+		    // TODO: mixed type (see DiagnoseExpression)
+            return leftType;
 		}
-
-        auto leftType = DiagnoseNode(ternary->GetLeft());
-        auto rightType = DiagnoseNode(ternary->GetRight());
 
         if (leftType != rightType) {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
