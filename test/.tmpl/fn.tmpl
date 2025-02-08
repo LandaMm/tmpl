@@ -1,0 +1,16 @@
+
+
+fn params(int num, string msg) : float {
+    return 3.1415;
+}
+
+->params_correct {
+    var float res = params(123, "Hi everyone!");
+    return res;
+}
+
+->params_incorrect {
+    var float res = params("msg", 3.16779);
+    return res;
+}
+
