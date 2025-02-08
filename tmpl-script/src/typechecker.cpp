@@ -10,8 +10,8 @@
 #include "../include/interpreter.h"
 #include "../include/node/procedure.h"
 #include "../include/node/unary.h"
-#include "include/interpreter/value.h"
-#include "include/node/logical.h"
+#include "../include/interpreter/value.h"
+#include "../include/node/logical.h"
 
 namespace Runtime
 {
