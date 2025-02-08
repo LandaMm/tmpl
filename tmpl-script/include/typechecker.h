@@ -38,23 +38,34 @@ namespace Runtime
 	private:
         std::vector<std::shared_ptr<FnParam>> m_params;
         ValueType m_ret_type;
+        std::string m_module_name;
+        bool m_exported;
+        Location m_loc;
     private:
         size_t m_index;
 
 	public:
-		TypeFn(ValueType retType)
-			: m_ret_type(retType), m_params(std::vector<std::shared_ptr<FnParam>>()), m_index(0) {}
+		TypeFn(ValueType retType, std::string module, bool exported, Location loc)
+			: m_ret_type(retType),
+            m_params(std::vector<std::shared_ptr<FnParam>>()),
+            m_index(0),
+            m_module_name(module),
+            m_exported(exported),
+            m_loc(loc) {}
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
 
 	public:
         void ResetIterator() { m_index = 0; }
-        inline bool HasParams() { return m_index < m_params.size(); }
+        inline bool HasParams() const { return m_index < m_params.size(); }
         inline std::shared_ptr<FnParam> GetNextParam() { return m_params[m_index++]; }
-        inline size_t GetParamsSize() { return m_params.size(); }
-        inline size_t GetParamsIndex() { return m_index; }
-        inline ValueType GetReturnType() { return m_ret_type; }
+        inline size_t GetParamsSize() const { return m_params.size(); }
+        inline size_t GetParamsIndex() const { return m_index; }
+        inline ValueType GetReturnType() const { return m_ret_type; }
+        inline std::string GetModuleName() const { return m_module_name; }
+        inline bool IsExported() const { return m_exported; }
+        inline Location GetLocation() const { return m_loc; }
 	};
 
     class TypeChecker
@@ -88,7 +99,7 @@ namespace Runtime
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl);
-        void HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl);
+        void HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
         void HandleModule(std::shared_ptr<ProgramNode> program);
         void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt);
 
