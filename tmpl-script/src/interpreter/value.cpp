@@ -142,6 +142,46 @@ namespace Runtime
 		return nullptr;
 	}
 
+    // NullValue
+
+	std::string NullValue::format() const
+	{
+		return "NullValue()";
+	}
+
+	std::shared_ptr<Value> Runtime::NullValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
+	{
+		std::shared_ptr<Value> iright = std::dynamic_pointer_cast<Value>(right);
+
+		switch (condition)
+		{
+		case AST::Nodes::Condition::ConditionType::Compare:
+			return std::make_shared<BoolValue>(iright->GetType() == ValueType::Null);
+		case AST::Nodes::Condition::ConditionType::NotEqual:
+			return std::make_shared<BoolValue>(iright->GetType() != ValueType::Null);
+		default:
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.RaiseError("Unsupported operator for undefined: " + std::to_string((int)condition), "RuntimeError");
+			return nullptr;
+		}
+
+        assert(condition != AST::Nodes::Condition::ConditionType::None &&
+                "Exhausted compare operator handlers for null value");
+
+        assert(false && "Unreachable code. Null value compare");
+
+		return nullptr;
+	}
+
+	std::shared_ptr<Value> Runtime::NullValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
+	{
+		std::shared_ptr<IntegerValue> iright = std::dynamic_pointer_cast<IntegerValue>(right);
+
+        Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+        errorManager.RaiseError("Null values does not support any operations", "RuntimeError");
+        return nullptr;
+	}
+
 	// Integer Value
 
 	std::string IntegerValue::format() const

@@ -23,9 +23,6 @@ namespace Runtime
             return Execute(ifElse->GetElseNode());
         }
 
-        // TODO: check if this is useful when void functions are implemented!
-        assert(false && "Unreachable. Should be handled by typechecker!");
-
         return nullptr;
     }
 }

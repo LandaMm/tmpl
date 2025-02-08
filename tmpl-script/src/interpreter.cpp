@@ -98,7 +98,7 @@ namespace Runtime
                 else
                 {
                     auto localVal = Execute(node);
-                    if (node->IsBlock())
+                    if (node->IsBlock() && localVal != nullptr)
                     {
                         value = localVal;
                         break;

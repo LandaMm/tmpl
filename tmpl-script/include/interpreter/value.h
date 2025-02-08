@@ -89,6 +89,22 @@ namespace Runtime
 		std::string format() const override;
 	};
 
+	class NullValue : public Value
+	{
+	public:
+		NullValue() { }
+
+	public:
+		inline ValueType GetType() const override { return ValueType::Bool; }
+
+	public:
+		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
+		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
+
+	public:
+		std::string format() const override;
+	};
+
 	class BoolValue : public Value
 	{
 	private:
