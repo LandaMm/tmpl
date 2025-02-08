@@ -3,6 +3,7 @@
 #include <memory>
 #include "../include/interpreter.h"
 #include "../include/error.h"
+#include "include/node/function.h"
 #include "include/node/statement.h"
 
 namespace Runtime
@@ -45,6 +46,9 @@ namespace Runtime
                     break;
                 case NodeType::Export:
                     EvaluateExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
+                    break;
+                case NodeType::FnDecl:
+                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt));
                     break;
                 default:
                     {
