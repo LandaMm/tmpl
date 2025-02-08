@@ -39,7 +39,7 @@ namespace Runtime
                     fn->GetParamsSize(),
                     fnCall->GetLocation(), "TypeError");
             ReportError();
-            return ValueType::Null;
+            return fn->GetReturnType();
         }
 
         while (fn->HasParams())
@@ -59,7 +59,7 @@ namespace Runtime
                         "TypeError"
                         );
                 ReportError();
-                return ValueType::Null;
+                break; // will get to return of the fn's return type (+4 lines)
             }
         }
 
