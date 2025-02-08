@@ -63,6 +63,8 @@ namespace Runtime
             }
         }
 
+        fn->ResetIterator();
+
         return fn->GetReturnType();
     }
 }
