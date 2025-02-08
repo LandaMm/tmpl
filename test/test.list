@@ -34,3 +34,9 @@ tmpl unary neg_double
 tmpl unary dbl_neg_int
 tmpl unary dbl_neg_float
 tmpl unary dbl_neg_double
+tmpl if-else if_true
+tmpl if-else if_false
+tmpl if-else else_case
+tmpl if-else true_else
+tmpl if-else false_else
+tmpl if-else inner
