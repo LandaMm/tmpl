@@ -13,6 +13,7 @@ namespace Runtime
 
     void Interpreter::Evaluate(std::shared_ptr<ProgramNode> program)
     {
+        program->ResetIterator();
         while (auto stmt = program->Next())
         {
             switch (stmt->GetType())
@@ -44,6 +45,7 @@ namespace Runtime
 
     void Interpreter::EvaluateModule(std::shared_ptr<ProgramNode> program)
     {
+        program->ResetIterator();
         while (auto stmt = program->Next())
         {
             switch (stmt->GetType())

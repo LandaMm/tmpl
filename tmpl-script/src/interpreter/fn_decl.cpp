@@ -17,6 +17,7 @@ namespace Runtime
 
         std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType, GetFilename(), exported, externed, fnDecl->GetLocation());
 
+        fnDecl->ResetIterator();
         while (fnDecl->HasParams())
         {
             std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
@@ -25,6 +26,7 @@ namespace Runtime
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);
         }
+        fnDecl->ResetIterator();
 
         m_functions->AddItem(name, fn);
     }

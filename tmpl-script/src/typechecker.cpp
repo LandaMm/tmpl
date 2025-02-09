@@ -57,6 +57,7 @@ namespace Runtime
                 auto scope = std::make_shared<Environment<TypeVariable>>(m_variables);
                 m_variables = scope;
                 ValueType value = ValueType::Null;
+                block->ResetIterator();
                 while (block->HasItems())
                 {
                     std::shared_ptr<Node> node = block->Next();

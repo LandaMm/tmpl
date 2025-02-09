@@ -18,6 +18,7 @@ namespace Runtime
         auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
 
+        fnDecl->ResetIterator();
         while (fnDecl->HasParams())
         {
             std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
@@ -50,6 +51,7 @@ namespace Runtime
         auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
 
+        fnDecl->ResetIterator();
         while (fnDecl->HasParams())
         {
             std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();

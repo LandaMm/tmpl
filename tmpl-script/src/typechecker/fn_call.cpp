@@ -50,6 +50,7 @@ namespace Runtime
             return fn->GetReturnType();
         }
 
+        fn->ResetIterator();
         while (fn->HasParams())
         {
             std::shared_ptr<Node> arg = (*args)[fn->GetParamsIndex()];
@@ -70,7 +71,6 @@ namespace Runtime
                 break; // will get to return of the fn's return type (+4 lines)
             }
         }
-
         fn->ResetIterator();
 
         return fn->GetReturnType();

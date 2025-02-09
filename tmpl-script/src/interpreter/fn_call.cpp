@@ -55,6 +55,7 @@ namespace Runtime
             return nullptr;
         }
 
+        fn->ResetIterator();
         while (fn->HasParams())
         {
             std::shared_ptr<Node> arg = (*args)[fn->GetParamsIndex()];
