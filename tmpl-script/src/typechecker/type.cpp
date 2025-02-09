@@ -27,6 +27,10 @@ namespace Runtime
 			{
 				return ValueType::Integer;
 			}
+			else if (id->GetName() == "bool")
+            {
+                return ValueType::Bool;
+            }
 			else if (id->GetName() == "void")
             {
                 return ValueType::Null;
