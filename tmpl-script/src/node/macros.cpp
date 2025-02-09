@@ -9,6 +9,11 @@ namespace AST
         {
             return "Require(" + m_module + ")";
         }
+
+        std::string ExternMacro::Format() const
+        {
+            return "Extern(" + m_target->Format() + ")";
+        }
     }
 }
 

@@ -68,6 +68,12 @@ namespace Runtime
                 case NodeType::Require:
                     RunModuleChecker(std::dynamic_pointer_cast<RequireMacro>(stmt));
                     break;
+                case NodeType::Extern:
+                {
+                    auto ext = std::dynamic_pointer_cast<ExternMacro>(stmt);
+                    HandleFnSignature(ext->GetFnSignature(), false);
+                    break;
+                }
                 case NodeType::Export:
                     HandleExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
                     break;

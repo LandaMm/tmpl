@@ -42,9 +42,9 @@ namespace AST
         return std::make_shared<Nodes::ExportStatement>(target, loc);
     }
 
-    std::shared_ptr<Node> Parser::FunctionDeclaration()
+    std::shared_ptr<Nodes::FunctionDeclaration> Parser::FunctionSignature()
     {
-        // fn name(type param, type param2) : type {...}
+        // fn name(type param, type param2) : type
         auto fnLoc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Fn);
 
@@ -83,6 +83,15 @@ namespace AST
         std::shared_ptr<Node> retType = Id();
 
         fn->SetReturnType(retType);
+
+        return fn;
+    }
+
+    std::shared_ptr<Node> Parser::FunctionDeclaration()
+    {
+        // fn name(type param, type param2) : type {...}
+        auto fn = FunctionSignature();
+        auto body = fn->GetBody();
 
         Eat(TokenType::OpenCurly);
 

@@ -27,6 +27,10 @@ namespace Runtime
 			{
 				return ValueType::Integer;
 			}
+			else if (id->GetName() == "void")
+            {
+                return ValueType::Null;
+            }
 			else
 			{
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();

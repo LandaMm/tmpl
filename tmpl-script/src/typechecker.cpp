@@ -7,11 +7,11 @@
 #include "../include/node/statement.h"
 #include "../include/node/var_declaration.h"
 #include "../include/node/function.h"
-#include "../include/interpreter.h"
 #include "../include/node/procedure.h"
 #include "../include/node/unary.h"
 #include "../include/interpreter/value.h"
 #include "../include/node/logical.h"
+#include "include/node/macros.h"
 
 namespace Runtime
 {
@@ -106,7 +106,12 @@ namespace Runtime
                 case NodeType::FnDecl:
                     HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
-                // TODO: add require, export support
+                case NodeType::Extern:
+                {
+                    auto ext = std::dynamic_pointer_cast<ExternMacro>(stmt);
+                    HandleFnSignature(ext->GetFnSignature(), false);
+                    break;
+                }
                 default:
                     break;
             }

@@ -30,6 +30,7 @@ namespace AST
         FnDecl, // 
         Require, // 
         Export, // 
+        Extern, //
     };
 
 	class Node

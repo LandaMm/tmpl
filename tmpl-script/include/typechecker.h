@@ -100,6 +100,7 @@ namespace Runtime
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl);
         void HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
+        void HandleFnSignature(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
         void HandleModule(std::shared_ptr<ProgramNode> program);
         void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt);
 

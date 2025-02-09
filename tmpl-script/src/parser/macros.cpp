@@ -19,5 +19,17 @@ namespace AST
 
         return std::make_shared<RequireMacro>(*module, loc);
     }
+
+    std::shared_ptr<Node> Parser::ExternStatement()
+    {
+        auto loc = m_lexer->GetToken()->GetLocation();
+        Eat(TokenType::Extern);
+
+        // TODO: maybe add support for static variables from c
+        auto fnSign = FunctionSignature();
+        Eat(TokenType::Semicolon);
+
+        return std::make_shared<ExternMacro>(fnSign, loc);
+    }
 }
 

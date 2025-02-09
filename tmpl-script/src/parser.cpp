@@ -93,7 +93,9 @@ namespace AST
                 case TokenType::Require:
                     stmt = RequireStatement();
                     break;
-                // TODO: add extern fn macro
+                case TokenType::Extern:
+                    stmt = ExternStatement();
+                    break;
                 default:
                     Prelude::ErrorManager& manager = GetErrorManager();
                     manager.UnexpectedToken(GetFilename(), m_lexer->SeekToken());

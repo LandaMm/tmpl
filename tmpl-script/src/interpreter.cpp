@@ -3,6 +3,7 @@
 #include <memory>
 #include "../include/interpreter.h"
 #include "../include/error.h"
+#include "include/interpreter/value.h"
 #include "include/node/function.h"
 #include "include/node/statement.h"
 
@@ -19,8 +20,14 @@ namespace Runtime
                 case NodeType::Require:
                     ImportModule(std::dynamic_pointer_cast<RequireMacro>(stmt));
                     break;
+                case NodeType::Extern:
+                {
+                    auto ext = std::dynamic_pointer_cast<ExternMacro>(stmt);
+                    EvaluateFunctionDeclaration(ext->GetFnSignature(), false, true);
+                    break;
+                }
                 case NodeType::FnDecl:
-                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
+                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false, false);
                     break;
                 case NodeType::ProcedureDecl:
                     EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(stmt));
@@ -47,8 +54,14 @@ namespace Runtime
                 case NodeType::Export:
                     EvaluateExportStatement(std::dynamic_pointer_cast<ExportStatement>(stmt));
                     break;
+                case NodeType::Extern:
+                {
+                    auto ext = std::dynamic_pointer_cast<ExternMacro>(stmt);
+                    EvaluateFunctionDeclaration(ext->GetFnSignature(), false, true);
+                    break;
+                }
                 case NodeType::FnDecl:
-                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), true);
+                    EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), true, false);
                     break;
                 default:
                     {
@@ -70,7 +83,7 @@ namespace Runtime
 			return EvaluateLiteral(std::dynamic_pointer_cast<LiteralNode>(node));
 		case NodeType::VarDecl:
 			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
-			return nullptr;
+			return std::make_shared<NullValue>();
 		case NodeType::Identifier:
 			return EvaluateIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
 		case NodeType::Condition:
@@ -90,7 +103,7 @@ namespace Runtime
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);
             auto scope = std::make_shared<Environment<Variable>>(m_variables);
             m_variables = scope;
-            std::shared_ptr<Value> value = nullptr;
+            std::shared_ptr<Value> value = std::make_shared<NullValue>();
             while (block->HasItems())
             {
                 std::shared_ptr<Node> node = block->Next();
@@ -102,7 +115,7 @@ namespace Runtime
                 else
                 {
                     auto localVal = Execute(node);
-                    if (node->IsBlock() && localVal != nullptr)
+                    if (node->IsBlock() && (localVal != nullptr && localVal->GetType() != ValueType::Null))
                     {
                         value = localVal;
                         break;
@@ -122,6 +135,6 @@ namespace Runtime
             }
 		}
 
-		return nullptr;
+		return std::make_shared<NullValue>();
 	}
 }

@@ -58,11 +58,12 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret);
         std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret);
         std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse);
+        std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args);
 
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
-        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
+        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
         void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt);
 
     private:

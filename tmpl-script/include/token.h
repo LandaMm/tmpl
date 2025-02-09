@@ -52,6 +52,7 @@ namespace AST
         Return,
         Fn,
         Export,
+        Extern,
 		_EOF,
 	};
 
@@ -101,6 +102,7 @@ namespace AST
         "return",
         "fn",
         "export",
+        "extern",
 		"EOF",
 	};
 

@@ -71,16 +71,18 @@ namespace Runtime
         std::string m_module_name;
         bool m_exported;
         Location m_loc;
+        bool m_externed;
     private:
         size_t m_index;
 
 	public:
-		Fn(std::shared_ptr<Node> body, ValueType retType, std::string module, bool exported, Location loc)
+		Fn(std::shared_ptr<Node> body, ValueType retType, std::string module, bool exported, bool externed, Location loc)
 			: m_body(body),
             m_ret_type(retType),
             m_params(std::vector<std::shared_ptr<FnParam>>()),
             m_index(0),
-            m_module_name(module), m_exported(exported), m_loc(loc) {}
+            m_module_name(module), m_exported(exported), m_externed(externed),
+            m_loc(loc) {}
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
@@ -94,7 +96,9 @@ namespace Runtime
         inline ValueType GetReturnType() const { return m_ret_type; }
         inline std::string GetModuleName() const { return m_module_name; }
         inline bool IsExported() const { return m_exported; }
+        inline bool IsExterned() const { return m_externed; }
         inline Location GetLocation() const { return m_loc; }
+        void ResetIterator() { m_index = 0; }
 
 		friend std::ostream &operator<<(std::ostream &stream, const Fn &fn)
 		{

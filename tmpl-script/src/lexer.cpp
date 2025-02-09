@@ -254,8 +254,8 @@ namespace AST
 			m_tokens.push_back(std::make_shared<Token>(TokenType::If, m_line, m_col));
 		else if (*id == "else")
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Else, m_line, m_col));
-		else if (*id == "require")
-			m_tokens.push_back(std::make_shared<Token>(TokenType::Require, m_line, m_col));
+		else if (*id == "extern")
+			m_tokens.push_back(std::make_shared<Token>(TokenType::Extern, m_line, m_col));
 		else if (*id == "var")
 			m_tokens.push_back(std::make_shared<Token>(TokenType::Var, m_line, m_col));
 		else if (*id == "const")

@@ -95,7 +95,7 @@ namespace Runtime
 		NullValue() { }
 
 	public:
-		inline ValueType GetType() const override { return ValueType::Bool; }
+		inline ValueType GetType() const override { return ValueType::Null; }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
