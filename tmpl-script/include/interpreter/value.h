@@ -31,7 +31,6 @@ namespace Runtime
             case ValueType::Bool: return "bool";
             case ValueType::List: return "list";
             case ValueType::Null: return "null";
-            default: return "UNKNOWN_TYPE";
         }
 
         return "UNKNOWN_TYPE";
