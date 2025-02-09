@@ -1,5 +1,6 @@
 @extern fn cprintln(string message) : void;
 @extern fn cprint(string message) : void;
+@extern fn cgetline() : string;
 
 export fn println(string message) : void {
     cprintln(message);
@@ -7,4 +8,8 @@ export fn println(string message) : void {
 
 export fn print(string message) : void {
     cprint(message);
+}
+
+export fn getline() : string {
+    return cgetline();
 }
