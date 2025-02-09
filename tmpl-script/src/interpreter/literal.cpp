@@ -18,6 +18,8 @@ namespace Runtime
 			return std::make_shared<DoubleValue>(*literal->GetValue<double>());
 		case LiteralType::STRING:
 			return std::make_shared<StringValue>(*literal->GetValue<std::string>());
+		case LiteralType::BOOL:
+			return std::make_shared<BoolValue>(*literal->GetValue<bool>());
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported literal type: " + std::to_string((int)literal->GetLiteralType()), "RuntimeError");

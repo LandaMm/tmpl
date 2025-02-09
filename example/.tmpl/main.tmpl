@@ -10,6 +10,12 @@ fn factorial(int n) : int {
 ->main {
     var float PI = 3.1415;
     var int factor = 1;
+    var bool is_good = true;
+    if (is_good) {
+        println("is_good is true!");
+    } else {
+        println("is_good is false!");
+    }
     return PI + itof(factor);
 }
 
@@ -17,6 +23,13 @@ fn factorial(int n) : int {
     var int res = factorial(5);
     println("Factorial of 5 is " + itos(res));
     return res;
+}
+
+->ask_name {
+    print("Enter your name: ");
+    var string name = getline();
+    println("Nice to meet you, " + name + "!");
+    return name;
 }
 
 ->strlen {

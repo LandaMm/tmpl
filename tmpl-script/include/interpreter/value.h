@@ -33,7 +33,7 @@ namespace Runtime
             case ValueType::Null: return "null";
         }
 
-        assert(false && "Unreachable code. Every value type should be printable in human readable format");
+        return "UNKNOWN_TYPE";
     }
 
 	class Value

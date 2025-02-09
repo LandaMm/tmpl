@@ -4,6 +4,7 @@
 #include "../../include/node/literal.h"
 #include "../../include/node/logical.h"
 #include "../../include/node/unary.h"
+#include "include/token.h"
 
 namespace AST
 {
@@ -210,6 +211,16 @@ namespace AST
 				std::make_shared<Holder>(std::make_shared<std::string>(*value));
 			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v, token->GetLocation());
 		}
+		else if (token->GetType() == TokenType::True || token->GetType() == TokenType::False)
+        {
+            bool active = token->GetType() == TokenType::True;
+			Eat(active ? TokenType::True : TokenType::False);
+			using Holder = Nodes::LiteralNode::TypedValueHolder<bool>;
+			std::shared_ptr<Holder> v =
+				std::make_shared<Holder>(std::make_shared<bool>(active));
+			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::BOOL, v, token->GetLocation());
+        }
+        /*else if (token->GetType() == TokenType::Boo)*/
 		// id || function call with args | object member | obj_member + call | call + obj_member
 		else if (token->GetType() == TokenType::Id)
 		{
