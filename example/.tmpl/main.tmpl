@@ -1,6 +1,29 @@
-@require"dummstd"
+@require"std/convert"
+@require"std/io"
+
+fn factorial(int n) : int {
+    print("factorial num: ");
+    println(itos(n));
+    if (n == 0) return 1;
+    else if (n == 1) return 1;
+    else return n * factorial(n - 1);
+}
 
 ->main {
-    return increment(10);
+    var float PI = 3.1415;
+    var int factor = 1;
+    return PI + itof(factor);
+}
+
+->fact {
+    var int res = factorial(5);
+    return res;
+}
+
+->strlen {
+    var string msg = "Hello, World!";
+    print("Message to get length of: ");
+    println(msg);
+    return strlen(msg);
 }
 
