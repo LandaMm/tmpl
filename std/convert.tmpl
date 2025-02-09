@@ -1,0 +1,21 @@
+
+@extern fn i_tof(int value) : float;
+@extern fn f_toi(float value) : int;
+@extern fn i_tos(int value) : string;
+@extern fn cstrlen(string msg) : int;
+
+export fn itof(int value) : float {
+    return i_tof(value);
+}
+
+export fn ftoi(float value) : int {
+    return f_toi(value);
+}
+
+export fn itos(int value) : string {
+    return i_tos(value);
+}
+
+export fn strlen(string message) : int {
+    return cstrlen(message);
+}
