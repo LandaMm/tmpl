@@ -31,6 +31,7 @@ namespace Runtime
             case ValueType::Bool: return "bool";
             case ValueType::List: return "list";
             case ValueType::Null: return "null";
+            default: return "UNKNOWN_TYPE";
         }
 
         assert(false && "Unreachable code. Every value type should be printable in human readable format");

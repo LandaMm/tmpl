@@ -101,7 +101,7 @@ namespace Runtime
             }
         }
 
-        using LibFn = void*(*)(void**data, unsigned int argc, void* ret);
+        using LibFn = void*(*)(void**data, unsigned int argc);
 
 #ifdef _WIN32
         LibFn plugfn = (LibFn)GetProcAddress(handle, fnName.c_str());
@@ -131,7 +131,7 @@ namespace Runtime
             return nullptr; 
         }
 
-        void* ret = plugfn(data, fn->GetParamsSize(), ret);
+        void* ret = plugfn(data, fn->GetParamsSize());
 
         for (size_t i = 0; i < fn->GetParamsSize(); i++)
         {
