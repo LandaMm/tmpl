@@ -33,7 +33,7 @@ namespace Runtime
         fs::path libPath = fnModule.replace_filename(libBase);
         
 #ifdef _WIN32
-        HMODULE handle = LoadLibrary(libPath.c_str());
+        HMODULE handle = LoadLibrary(libPath.string().c_str());
 #else
         void* handle = dlopen(libPath.c_str(), RTLD_NOW);
 #endif
