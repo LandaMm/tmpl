@@ -4,7 +4,8 @@
 fn factorial(int n) : int {
     if (n == 0) return 1;
     if (n == 1) return 1;
-    return n * factorial(n - 1);
+    var int res = n * factorial(n - 1);
+    return res;
 }
 
 ->main {
@@ -20,8 +21,9 @@ fn factorial(int n) : int {
 }
 
 ->fact {
-    var int res = factorial(5);
-    println("Factorial of 5 is " + itos(res));
+    var int num = 7;
+    var int res = factorial(7);
+    println("Factorial of " + itos(num) + " is " + itos(res));
     return res;
 }
 
