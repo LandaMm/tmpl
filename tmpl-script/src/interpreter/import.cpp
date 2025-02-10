@@ -33,6 +33,9 @@ namespace Runtime
         std::string module = require->GetModule();
         fs::path currentPath = GetFilename();
         fs::path modulePath = currentPath.parent_path() / (module + ".tmpl");
+        
+        if (m_modules->HasItem(modulePath.string()))
+            return;
 
         std::cout << "[DEBUG] Import module from '" << modulePath << "'" << std::endl;
 
@@ -55,6 +58,8 @@ namespace Runtime
         SetFilename(modulePath.string());
         EvaluateModule(program);
         SetFilename(currentPath.string());
+
+        m_modules->AddItem(modulePath.string(), std::make_shared<std::string>(currentPath.string()));
     }
 }
 
