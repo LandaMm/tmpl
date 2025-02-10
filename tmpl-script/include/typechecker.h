@@ -71,6 +71,7 @@ namespace Runtime
         std::string m_filename;
         std::shared_ptr<Environment<TypeVariable>> m_variables;
         std::shared_ptr<Environment<TypeFn>> m_functions;
+        std::shared_ptr<Environment<Environment<TypeFn>, ValueType>> m_type_functions;
         int m_errors;
         
     public:
@@ -78,6 +79,7 @@ namespace Runtime
             : m_parser(parser), m_filename(parser->GetFilename()),
               m_variables(std::make_shared<Environment<TypeVariable>>()),
               m_functions(std::make_shared<Environment<TypeFn>>()),
+              m_type_functions(std::make_shared<Environment<Environment<TypeFn>, ValueType>>()),
               m_errors(0) { }
     public:
         void RunChecker(std::shared_ptr<ProgramNode> program);
