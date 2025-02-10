@@ -26,6 +26,9 @@ namespace AST
 		public:
 			void SetMember(std::shared_ptr<Node> member) { m_member = member; }
 			void SetObject(std::shared_ptr<Node> obj) { m_obj = obj; }
+        public:
+            inline std::shared_ptr<Node> GetMember() const { return m_member; }
+            inline std::shared_ptr<Node> GetObject() const { return m_obj; }
 		};
 	}
 }
