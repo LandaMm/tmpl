@@ -3,9 +3,10 @@
 #include <memory>
 #include "../include/interpreter.h"
 #include "../include/error.h"
-#include "include/interpreter/value.h"
-#include "include/node/function.h"
-#include "include/node/statement.h"
+#include "../include/interpreter/value.h"
+#include "../include/node/function.h"
+#include "../include/node/statement.h"
+#include "../include/iterator.h"
 
 namespace Runtime
 {
@@ -13,9 +14,11 @@ namespace Runtime
 
     void Interpreter::Evaluate(std::shared_ptr<ProgramNode> program)
     {
-        program->ResetIterator();
-        while (auto stmt = program->Next())
+        auto it = std::make_shared<Common::Iterator>(program->Size());
+        while (it->HasItems())
         {
+            auto stmt = program->GetItem(it->GetPosition());
+            it->Next();
             switch (stmt->GetType())
             {
                 case NodeType::Require:
@@ -45,9 +48,11 @@ namespace Runtime
 
     void Interpreter::EvaluateModule(std::shared_ptr<ProgramNode> program)
     {
-        program->ResetIterator();
-        while (auto stmt = program->Next())
+        auto it = std::make_shared<Common::Iterator>(program->Size());
+        while (it->HasItems())
         {
+            auto stmt = program->GetItem(it->GetPosition());
+            it->Next();
             switch (stmt->GetType())
             {
                 case NodeType::Require:
@@ -106,10 +111,11 @@ namespace Runtime
             auto scope = std::make_shared<Environment<Variable>>(m_variables);
             m_variables = scope;
             std::shared_ptr<Value> value = std::make_shared<NullValue>();
-            block->ResetIterator();
-            while (block->HasItems())
+            auto it = std::make_shared<Common::Iterator>(block->GetSize());
+            while (it->HasItems())
             {
-                std::shared_ptr<Node> node = block->Next();
+                auto node = block->GetItem(it->GetPosition());
+                it->Next();
                 if (node->GetType() == NodeType::Return)
                 {
                     value = EvaluateReturn(std::dynamic_pointer_cast<ReturnNode>(node));

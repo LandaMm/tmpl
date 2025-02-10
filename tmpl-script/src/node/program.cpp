@@ -14,20 +14,5 @@ namespace AST
 		{
 			m_statements.push_back(statement);
 		}
-
-		std::shared_ptr<Node> ProgramNode::Next()
-		{
-			if (m_index >= m_statements.size())
-			{
-				return nullptr;
-			}
-
-			return m_statements[m_index++];
-		}
-
-		void ProgramNode::Reset()
-		{
-			m_index = -1;
-		}
 	}
 }

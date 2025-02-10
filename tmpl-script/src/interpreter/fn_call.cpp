@@ -6,6 +6,7 @@
 #include <memory>
 #include "../../include/interpreter.h"
 #include "include/interpreter/value.h"
+#include "include/iterator.h"
 
 namespace Runtime
 {
@@ -55,11 +56,12 @@ namespace Runtime
             return nullptr;
         }
 
-        fn->ResetIterator();
-        while (fn->HasParams())
+        auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
+        while (it->HasItems())
         {
-            std::shared_ptr<Node> arg = (*args)[fn->GetParamsIndex()];
-            std::shared_ptr<FnParam> param = fn->GetNextParam();
+            auto param = fn->GetItem(it->GetPosition());
+            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            it->Next();
             std::shared_ptr<Value> val = Execute(arg);
             if (val->GetType() != param->GetType())
             {
@@ -78,7 +80,6 @@ namespace Runtime
                 std::make_shared<Variable>(val->GetType(), val, false);
             variables->AddItem(param->GetName(), var);
         }
-        fn->ResetIterator();
 
         if (fn->IsExterned()) {
             return EvaluateExternFunctionCall(fnName, fn, args);

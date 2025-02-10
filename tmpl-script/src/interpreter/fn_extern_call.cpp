@@ -1,4 +1,5 @@
 
+#include "include/iterator.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -50,10 +51,12 @@ namespace Runtime
 
         void** data = (void**)malloc(sizeof(void*) * fn->GetParamsSize());
 
-        while(fn->HasParams())
+        auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
+        while(it->HasItems())
         {
-            std::shared_ptr<Node> arg = (*args)[fn->GetParamsIndex()];
-            auto param = fn->GetNextParam();
+            auto param = fn->GetItem(it->GetPosition());
+            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            it->Next();
             std::shared_ptr<Value> val = Execute(arg);
             switch(val->GetType()) {
                 case ValueType::String:
@@ -64,35 +67,35 @@ namespace Runtime
 #else
                     char* str = strdup(sVal->GetValue()->c_str());
 #endif
-                    data[fn->GetParamsIndex() - 1] = (void*)str;
+                    data[it->GetPosition() - 1] = (void*)str;
                     break;
                 }
                 case ValueType::Bool:
                 {
                     auto bVal = std::dynamic_pointer_cast<BoolValue>(val);
                     int* b = new int(bVal->GetValue() ? 1 : 0);
-                    data[fn->GetParamsIndex() - 1] = (void*)b;
+                    data[it->GetPosition() - 1] = (void*)b;
                     break;
                 }
                 case ValueType::Float:
                 {
                     auto fVal = std::dynamic_pointer_cast<FloatValue>(val);
                     float* b = new float(*fVal->GetValue());
-                    data[fn->GetParamsIndex() - 1] = (void*)b;
+                    data[it->GetPosition() - 1] = (void*)b;
                     break;
                 }
                 case ValueType::Double:
                 {
                     auto dVal = std::dynamic_pointer_cast<DoubleValue>(val);
                     double* b = new double(*dVal->GetValue());
-                    data[fn->GetParamsIndex() - 1] = (void*)b;
+                    data[it->GetPosition() - 1] = (void*)b;
                     break;
                 }
                 case ValueType::Integer:
                 {
                     auto dVal = std::dynamic_pointer_cast<IntegerValue>(val);
                     int* b = new int(*dVal->GetValue());
-                    data[fn->GetParamsIndex() - 1] = (void*)b;
+                    data[it->GetPosition() - 1] = (void*)b;
                     break;
                 }
                 // TODO: Implement list

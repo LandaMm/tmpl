@@ -1,6 +1,7 @@
 
 
 #include "../../include/typechecker.h"
+#include "include/iterator.h"
 
 namespace Runtime
 {
@@ -25,10 +26,12 @@ namespace Runtime
     // Look for return statement inside block and check the type of returned value
     void TypeChecker::AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, ValueType expected)
     {
-        body->ResetIterator();
+        auto it = std::make_shared<Common::Iterator>(body->GetSize());
 
-        while (auto stmt = body->Next())
+        while (it->HasItems())
         {
+            auto stmt = body->GetItem(it->GetPosition());
+            it->Next();
             if (stmt->GetType() == NodeType::Return)
             {
                 auto ret = std::dynamic_pointer_cast<ReturnNode>(stmt);
@@ -49,8 +52,6 @@ namespace Runtime
                 DiagnoseNode(stmt);
             }
         }
-
-        body->ResetIterator();
     }
 }
 

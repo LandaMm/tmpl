@@ -4,6 +4,8 @@
 #include "../../include/interpreter.h"
 #include "../../include/node/statement.h"
 #include "../../include/typechecker.h"
+#include "include/iterator.h"
+#include "include/node/function.h"
 
 namespace Runtime
 {
@@ -17,16 +19,16 @@ namespace Runtime
 
         std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType, GetFilename(), exported, externed, fnDecl->GetLocation());
 
-        fnDecl->ResetIterator();
-        while (fnDecl->HasParams())
+        auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
+        while (it->HasItems())
         {
-            std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
+            auto param = fnDecl->GetItem(it->GetPosition());
+            it->Next();
             ValueType paramType = TypeChecker::EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);
         }
-        fnDecl->ResetIterator();
 
         m_functions->AddItem(name, fn);
     }

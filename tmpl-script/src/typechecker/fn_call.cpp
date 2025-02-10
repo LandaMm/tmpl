@@ -1,6 +1,8 @@
 
 
 #include "../../include/typechecker.h"
+#include "include/interpreter/environment.h"
+#include "include/iterator.h"
 
 namespace Runtime
 {
@@ -50,11 +52,12 @@ namespace Runtime
             return fn->GetReturnType();
         }
 
-        fn->ResetIterator();
-        while (fn->HasParams())
+        auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
+        while (it->HasItems())
         {
-            std::shared_ptr<Node> arg = (*args)[fn->GetParamsIndex()];
-            std::shared_ptr<FnParam> param = fn->GetNextParam();
+            auto param = fn->GetItem(it->GetPosition());
+            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            it->Next();
             ValueType valType = DiagnoseNode(arg);
             if (valType != param->GetType())
             {
@@ -71,7 +74,6 @@ namespace Runtime
                 break; // will get to return of the fn's return type (+4 lines)
             }
         }
-        fn->ResetIterator();
 
         return fn->GetReturnType();
     }

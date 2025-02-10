@@ -1,6 +1,7 @@
 
 
 #include "../../include/typechecker.h"
+#include "include/iterator.h"
 
 namespace Runtime
 {
@@ -18,10 +19,11 @@ namespace Runtime
         auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
 
-        fnDecl->ResetIterator();
-        while (fnDecl->HasParams())
+        auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
+        while (it->HasItems())
         {
-            std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
+            auto param = fnDecl->GetItem(it->GetPosition());
+            it->Next();
             ValueType paramType = EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
@@ -29,7 +31,6 @@ namespace Runtime
             auto typeVar = std::make_shared<TypeVariable>(paramType, false);
             variables->AddItem(paramName, typeVar);
         }
-        fnDecl->ResetIterator();
 
         m_functions->AddItem(name, fn);
 
@@ -51,10 +52,11 @@ namespace Runtime
         auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
 
-        fnDecl->ResetIterator();
-        while (fnDecl->HasParams())
+        auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
+        while (it->HasItems())
         {
-            std::shared_ptr<FunctionParam> param = fnDecl->GetNextParam();
+            auto param = fnDecl->GetItem(it->GetPosition());
+            it->Next();
             ValueType paramType = EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
@@ -62,7 +64,6 @@ namespace Runtime
             auto typeVar = std::make_shared<TypeVariable>(paramType, false);
             variables->AddItem(paramName, typeVar);
         }
-        fnDecl->ResetIterator();
 
         m_functions->AddItem(name, fn);
     }

@@ -11,7 +11,8 @@
 #include "../include/node/unary.h"
 #include "../include/interpreter/value.h"
 #include "../include/node/logical.h"
-#include "include/node/macros.h"
+#include "../include/node/macros.h"
+#include "../include/iterator.h"
 
 namespace Runtime
 {
@@ -57,10 +58,11 @@ namespace Runtime
                 auto scope = std::make_shared<Environment<TypeVariable>>(m_variables);
                 m_variables = scope;
                 ValueType value = ValueType::Null;
-                block->ResetIterator();
-                while (block->HasItems())
+                auto it = std::make_shared<Common::Iterator>(block->GetSize());
+                while (it->HasItems())
                 {
-                    std::shared_ptr<Node> node = block->Next();
+                    auto node = block->GetItem(it->GetPosition());
+                    it->Next();
                     if (node->GetType() == NodeType::Return)
                     {
                         value = DiagnoseNode(node);
@@ -76,7 +78,6 @@ namespace Runtime
                         }
                     }
                 }
-                block->ResetIterator();
                 assert(scope->GetParent() != nullptr && "Scope parent gone.");
                 m_variables = scope->GetParent();
                 assert(m_variables != scope && "Parent and child are located at the same memory space.");
@@ -90,8 +91,11 @@ namespace Runtime
 
     void TypeChecker::RunChecker(std::shared_ptr<ProgramNode> program)
     {
-        while(auto stmt = program->Next())
+        auto it = std::make_shared<Common::Iterator>(program->Size());
+        while(it->HasItems())
         {
+            auto stmt = program->GetItem(it->GetPosition());
+            it->Next();
             // procedures, macros and exports
             switch(stmt->GetType())
             {
@@ -117,6 +121,5 @@ namespace Runtime
                     break;
             }
         }
-        program->ResetIterator();
     }
  }

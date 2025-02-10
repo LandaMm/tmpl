@@ -74,10 +74,10 @@ namespace AST
             inline std::string GetName() const { return m_name->GetName(); }
             inline std::shared_ptr<Node> GetReturnType() const { return m_ret_type; }
             inline std::shared_ptr<Statements::StatementsBody> GetBody() const { return m_body; }
-        public: // Iterate
-            inline bool HasParams() { return m_params.size() > m_index; }
-            std::shared_ptr<FunctionParam> GetNextParam() { return m_params[m_index++]; }
-            void ResetIterator() { m_index = 0; }
+        public:
+            inline std::shared_ptr<FunctionParam> GetItem(unsigned int index)
+                { return m_params[index]; }
+            inline unsigned int GetSize() const { return m_params.size(); }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
             std::string Format() const override;

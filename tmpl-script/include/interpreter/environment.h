@@ -86,19 +86,17 @@ namespace Runtime
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
+    public:
+        inline std::shared_ptr<FnParam> GetItem(unsigned int index) { return m_params[index]; }
 
 	public:
 		inline std::shared_ptr<Node> GetBody() const { return m_body; }
-        inline bool HasParams() const { return m_index < m_params.size(); }
-        inline std::shared_ptr<FnParam> GetNextParam() { return m_params[m_index++]; }
         inline size_t GetParamsSize() const { return m_params.size(); }
-        inline size_t GetParamsIndex() const { return m_index; }
         inline ValueType GetReturnType() const { return m_ret_type; }
         inline std::string GetModuleName() const { return m_module_name; }
         inline bool IsExported() const { return m_exported; }
         inline bool IsExterned() const { return m_externed; }
         inline Location GetLocation() const { return m_loc; }
-        void ResetIterator() { m_index = 0; }
 
 		friend std::ostream &operator<<(std::ostream &stream, const Fn &fn)
 		{

@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <memory>
 #include "../../include/typechecker.h"
+#include "include/iterator.h"
 #include "include/node/function.h"
 
 namespace fs = std::filesystem;
@@ -61,9 +62,11 @@ namespace Runtime
 
     void TypeChecker::HandleModule(std::shared_ptr<ProgramNode> program)
     {
-        program->ResetIterator();
-        while (auto stmt = program->Next())
+        auto it = std::make_shared<Common::Iterator>(program->Size());
+        while (it->HasItems())
         {
+            auto stmt = program->GetItem(it->GetPosition());
+            it->Next();
             switch (stmt->GetType())
             {
                 case NodeType::Require:

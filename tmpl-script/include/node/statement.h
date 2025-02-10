@@ -25,17 +25,13 @@ namespace AST
 			void AddItem(std::shared_ptr<Node> item);
 
         public:
+            inline std::shared_ptr<Node> GetItem(unsigned int index) { return m_body[index]; }
+
+        public:
             inline bool IsBlock() override { return true; }
 
-		public: // Iterate
-			void ResetIterator() { m_index = 0; }
-			std::shared_ptr<Node> Next()
-            {
-                if (m_index >= m_body.size()) return nullptr;
-                return m_body[m_index++];
-            }
-			bool HasItems() { return m_index < m_body.size(); }
-			size_t GetSize() { return m_body.size(); }
+		public:
+			inline size_t GetSize() const { return m_body.size(); }
 		};
 
 		class StatementsBody : public StatementsNode

@@ -23,15 +23,15 @@ namespace AST
 			~ProgramNode() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::Program; }
+            inline std::vector<std::shared_ptr<Node>>* GetItemsPtr() { return &m_statements; }
 		public:
 			void AddStatement(std::shared_ptr<Node> statement);
-            void ResetIterator() { m_index = 0; }
 		public:
 			std::shared_ptr<Node> operator[](size_t index) { return m_statements[index]; }
+        public:
+            inline std::shared_ptr<Node> GetItem(unsigned int index) { return m_statements[index]; }
 		public:
 			inline size_t Size() { return m_statements.size(); }
-			std::shared_ptr<Node> Next();
-			void Reset();
 		};
 	}
 }

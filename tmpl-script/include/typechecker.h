@@ -41,14 +41,11 @@ namespace Runtime
         std::string m_module_name;
         bool m_exported;
         Location m_loc;
-    private:
-        size_t m_index;
 
 	public:
 		TypeFn(ValueType retType, std::string module, bool exported, Location loc)
 			: m_ret_type(retType),
             m_params(std::vector<std::shared_ptr<FnParam>>()),
-            m_index(0),
             m_module_name(module),
             m_exported(exported),
             m_loc(loc) {}
@@ -57,11 +54,10 @@ namespace Runtime
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
 
 	public:
-        void ResetIterator() { m_index = 0; }
-        inline bool HasParams() const { return m_index < m_params.size(); }
-        inline std::shared_ptr<FnParam> GetNextParam() { return m_params[m_index++]; }
+        inline std::shared_ptr<FnParam> GetItem(unsigned int index) const
+            { return m_params[index]; }
         inline size_t GetParamsSize() const { return m_params.size(); }
-        inline size_t GetParamsIndex() const { return m_index; }
+    public:
         inline ValueType GetReturnType() const { return m_ret_type; }
         inline std::string GetModuleName() const { return m_module_name; }
         inline bool IsExported() const { return m_exported; }
