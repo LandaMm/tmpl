@@ -48,8 +48,9 @@ int main(int argc, char **argv)
 	auto variables = std::make_shared<Environment<Variable>>();
 	auto procedures = std::make_shared<Environment<Procedure>>();
 	auto functions = std::make_shared<Environment<Fn>>();
+    auto typeFunctions = std::make_shared<Environment<Environment<Fn>, Runtime::ValueType>>();
 
-	Interpreter intrpt(parser, variables, procedures, functions);
+	Interpreter intrpt(parser, variables, procedures, functions, typeFunctions);
 
 	std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot());
 
