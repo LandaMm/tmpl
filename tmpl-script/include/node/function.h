@@ -48,7 +48,7 @@ namespace AST
         class FunctionDeclaration : public Node
         {
         private:
-            std::shared_ptr<IdentifierNode> m_name;
+            std::shared_ptr<Node> m_name;
             std::vector<std::shared_ptr<FunctionParam>> m_params;
             std::shared_ptr<Node> m_ret_type;
             std::shared_ptr<Statements::StatementsBody> m_body;
@@ -56,7 +56,7 @@ namespace AST
             size_t m_index;
         public:
             FunctionDeclaration(
-                    std::shared_ptr<IdentifierNode> name,
+                    std::shared_ptr<Node> name,
                     std::shared_ptr<Statements::StatementsBody> body,
                     Location loc
                     )
@@ -71,7 +71,7 @@ namespace AST
             void AddParam(std::shared_ptr<FunctionParam> param);
             void SetReturnType(std::shared_ptr<Node> retType) { m_ret_type = retType; }
         public:
-            inline std::string GetName() const { return m_name->GetName(); }
+            inline std::shared_ptr<Node> GetName() const { return m_name; }
             inline std::shared_ptr<Node> GetReturnType() const { return m_ret_type; }
             inline std::shared_ptr<Statements::StatementsBody> GetBody() const { return m_body; }
         public:
