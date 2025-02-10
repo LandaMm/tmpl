@@ -7,6 +7,9 @@
 #include "../../include/interpreter.h"
 #include "include/interpreter/value.h"
 #include "include/iterator.h"
+#include "include/node.h"
+#include "include/node/identifier.h"
+#include "include/node/object_member.h"
 
 namespace Runtime
 {
@@ -14,23 +17,72 @@ namespace Runtime
 
     std::shared_ptr<Value> Interpreter::EvaluateFunctionCall(std::shared_ptr<FunctionCall> fnCall)
     {
-        // TODO: support for object member calls
-        assert(fnCall->GetCallee()->GetType() == NodeType::Identifier
-                && "Unimplemented fn call callee node type");
+        std::shared_ptr<Node> callee = fnCall->GetCallee();
 
-        std::shared_ptr<IdentifierNode> callee =
-            std::dynamic_pointer_cast<IdentifierNode>(fnCall->GetCallee());
+        std::shared_ptr<Fn> fn;
+        std::string fnName;
 
-        std::string fnName = callee->GetName();
+        std::shared_ptr<Environment<Variable>> currentScope = m_variables;
+        std::shared_ptr<Environment<Variable>> variables = std::make_shared<Environment<Variable>>(m_variables);
 
-        if (!m_functions->HasItem(fnName))
+        switch(callee->GetType())
         {
-            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-            errorManager.UndeclaredFunction(GetFilename(), callee, "RuntimeError");
-            return nullptr;
+            case AST::NodeType::ObjectMember:
+            {
+                auto obj = std::dynamic_pointer_cast<ObjectMember>(callee);
+                std::shared_ptr<Value> targetVal = Execute(obj->GetObject());
+                ValueType targetType = targetVal->GetType();
+                if (!m_type_functions->HasItem(targetType))
+                {
+                    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                    errManager.UndeclaredFunction(GetFilename(), obj, targetType, "RuntimeError");
+                    return nullptr;
+                }
+
+                std::shared_ptr<Environment<Fn>> typeEnv = m_type_functions->LookUp(targetType);
+                assert(typeEnv != nullptr && "Type env should have been created.");
+
+                std::shared_ptr<Node> fnNameNode = obj->GetMember();
+                fnName = std::dynamic_pointer_cast<IdentifierNode>(fnNameNode)->GetName();
+                // TODO: think if "Contains" is better in that case
+                if (!typeEnv->HasItem(fnName))
+                {
+                    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                    errManager.UndeclaredFunction(GetFilename(), obj, targetType, "RuntimeError");
+                    return nullptr;
+                }
+
+                auto selfVar = std::make_shared<Variable>(targetType, targetVal, false);
+                variables->AddItem("self", selfVar);
+
+                fn = typeEnv->LookUp(fnName);
+                break;
+            }
+            case AST::NodeType::Identifier:
+            {
+                auto idCallee = std::dynamic_pointer_cast<IdentifierNode>(callee);
+                fnName = idCallee->GetName();
+
+                if (!m_functions->HasItem(fnName))
+                {
+                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                    errorManager.UndeclaredFunction(GetFilename(), idCallee, "RuntimeError");
+                    return nullptr;
+                }
+
+                fn = m_functions->LookUp(fnName);
+                break;
+            }
+            default:
+            {
+                Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                errorManager.RaiseError("Invalid node for function call", "RuntimeError");
+                return nullptr;
+            }
         }
 
-        std::shared_ptr<Fn> fn = m_functions->LookUp(fnName);
+        assert(fn != nullptr && "Fn should not be left with nullptr");
+        assert(!fnName.empty() && "Function name should not have been left empty");
 
         if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
         {
@@ -38,9 +90,6 @@ namespace Runtime
             errorManager.PrivateFunctionError(GetFilename(), fnName, fn->GetModuleName(), callee->GetLocation(), fn->GetLocation(), "RuntimeError");
             return nullptr;
         }
-
-        std::shared_ptr<Environment<Variable>> currentScope = m_variables;
-        std::shared_ptr<Environment<Variable>> variables = std::make_shared<Environment<Variable>>(m_variables);
 
         auto args = fnCall->GetArgs();
 
@@ -76,9 +125,12 @@ namespace Runtime
                         );
                 return nullptr;
             }
-            std::shared_ptr<Variable> var =
-                std::make_shared<Variable>(val->GetType(), val, false);
-            variables->AddItem(param->GetName(), var);
+            if (!fn->IsExterned())
+            {
+                std::shared_ptr<Variable> var =
+                    std::make_shared<Variable>(val->GetType(), val, false);
+                variables->AddItem(param->GetName(), var);
+            }
         }
 
         if (fn->IsExterned()) {
