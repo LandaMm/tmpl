@@ -17,6 +17,9 @@ namespace Runtime
         fs::path currentPath = GetFilename();
         fs::path modulePath = currentPath.parent_path() / (module + ".tmpl");
 
+        if (m_modules->HasItem(modulePath.string()))
+            return;
+
         std::cout << "[DEBUG] Import module from '" << modulePath << "'" << std::endl;
 
         std::ifstream moduleFile(modulePath);
@@ -40,6 +43,7 @@ namespace Runtime
         HandleModule(program);
         SetFilename(currentPath.string());
 
+        m_modules->AddItem(modulePath.string(), std::make_shared<std::string>(currentPath.string()));
     }
 
     void TypeChecker::HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt)
