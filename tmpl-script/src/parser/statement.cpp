@@ -48,7 +48,11 @@ namespace AST
         auto fnLoc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Fn);
 
-        std::shared_ptr<Nodes::IdentifierNode> fnName = Id();
+        std::shared_ptr<Node> fnName = Id();
+        if (m_lexer->GetToken()->GetType() == TokenType::Point)
+        {
+            fnName = ObjectMember(fnName);
+        }
 
         Eat(TokenType::OpenBracket);
 
