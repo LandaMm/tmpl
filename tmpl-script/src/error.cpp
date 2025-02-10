@@ -1,6 +1,7 @@
 
 #include <cassert>
 #include <filesystem>
+#include <memory>
 #include "../include/error.h"
 #include "include/interpreter/value.h"
 
@@ -180,6 +181,16 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
+    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::ValueType valType, std::string prefix)
+    {
+        auto loc = obj->GetLocation();
+        LogFileLocation(filename, loc, prefix);
+        assert(obj->GetMember()->GetType() == NodeType::Identifier && "Object member for fn call should be an identifier.");
+        auto id = std::dynamic_pointer_cast<Nodes::IdentifierNode>(obj->GetMember());
+        std::cerr << "Calling undeclared function '" << id->GetName() << "' for type '" << Runtime::HumanValueType(valType) << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
     // CliRunner
     void ErrorManager::NotEnoughArgs(int expected, int got, bool atLeast)
     {
@@ -224,13 +235,23 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
+        void ErrorManager::FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix)
+        {
+            LogFileLocation(filename, loc, prefix);
+            std::cerr << "Cannot redeclare already existing function '"
+                << name << "' at ";
+            LogFileLocation(declFilename, declLoc);
+            std::cerr << std::endl;
+            if (prefix != "TypeError") std::exit(-1);
+        }
+
     void ErrorManager::PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, Location loc, Location mLoc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Cannot call a private function '" << fnName
             << "' outside of it's module ";
         LogFileLocation(fnModule, mLoc);
-        std::cout << std::endl;
+        std::cerr << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 
