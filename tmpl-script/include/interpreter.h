@@ -29,6 +29,7 @@ namespace Runtime
 		std::shared_ptr<Environment<Procedure>> m_procedures;
 		std::shared_ptr<Environment<Fn>> m_functions;
         std::shared_ptr<Environment<Environment<Fn>, ValueType>> m_type_functions;
+        std::shared_ptr<Environment<std::string>> m_modules;
 
         std::string m_filename;
 
@@ -37,12 +38,14 @@ namespace Runtime
                 std::shared_ptr<Environment<Variable>> env_vars,
                 std::shared_ptr<Environment<Procedure>> env_procedures,
                 std::shared_ptr<Environment<Fn>> env_functions,
+                std::shared_ptr<Environment<std::string>> env_modules,
                 std::shared_ptr<Environment<Environment<Fn>, ValueType>> env_type_functions)
             : m_parser(parser),
             m_variables(env_vars),
             m_procedures(env_procedures),
             m_functions(env_functions),
             m_type_functions(env_type_functions),
+            m_modules(env_modules),
             m_filename(parser->GetFilename()) { }
 
 	public:
