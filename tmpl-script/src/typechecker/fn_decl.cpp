@@ -66,6 +66,7 @@ namespace Runtime
                     auto existingFn = typeEnv->LookUp(fnName);
                     assert(existingFn != nullptr && "Existing fn should not be nullptr");
                     errManager.FunctionRedeclaration(GetFilename(), fnName, fnDecl->GetLocation(), existingFn->GetModuleName(), existingFn->GetLocation(), "TypeError");
+                    ReportError();
                     return;
                 }
 
@@ -79,6 +80,7 @@ namespace Runtime
             {
                 Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                 errManager.RaiseError("Unsupported node for fn declaration", "TypeError");
+                ReportError();
                 return;
             }
         }
