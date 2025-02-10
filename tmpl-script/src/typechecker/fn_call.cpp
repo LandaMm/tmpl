@@ -1,7 +1,7 @@
 
 
 #include "../../include/typechecker.h"
-#include "include/interpreter/environment.h"
+#include "include/interpreter/value.h"
 #include "include/iterator.h"
 
 namespace Runtime
@@ -11,23 +11,62 @@ namespace Runtime
     ValueType TypeChecker::DiagnoseFnCall(std::shared_ptr<FunctionCall> fnCall)
     {
         // TODO: support for object member calls
-        assert(fnCall->GetCallee()->GetType() == NodeType::Identifier
-                && "Unimplemented fn call callee node type");
+        std::shared_ptr<Node> callee = fnCall->GetCallee();
 
-        std::shared_ptr<IdentifierNode> callee =
-            std::dynamic_pointer_cast<IdentifierNode>(fnCall->GetCallee());
+        std::shared_ptr<TypeFn> fn;
+        std::string fnName;
 
-        std::string fnName = callee->GetName();
-
-        if (!m_functions->HasItem(fnName))
+        switch(callee->GetType())
         {
-            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-            errorManager.UndeclaredFunction(GetFilename(), callee, "TypeError");
-            ReportError();
-            return ValueType::Null;
-        }
+            case AST::NodeType::ObjectMember:
+            {
+                auto obj = std::dynamic_pointer_cast<ObjectMember>(callee);
+                ValueType targetType = DiagnoseNode(obj->GetObject());
+                if (!m_type_functions->HasItem(targetType))
+                {
+                    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                    errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
+                    return ValueType::Null;
+                }
 
-        std::shared_ptr<TypeFn> fn = m_functions->LookUp(fnName);
+                std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType);
+                assert(typeEnv != nullptr && "Type env should have been created.");
+
+                std::shared_ptr<Node> fnNameNode = obj->GetMember();
+                fnName = std::dynamic_pointer_cast<IdentifierNode>(fnNameNode)->GetName();
+                // TODO: think if "Contains" is better in that case
+                if (!typeEnv->HasItem(fnName))
+                {
+                    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                    errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
+                    return ValueType::Null;
+                }
+
+                fn = typeEnv->LookUp(fnName);
+                break;
+            }
+            case AST::NodeType::Identifier:
+            {
+                auto idCallee = std::dynamic_pointer_cast<IdentifierNode>(callee);
+                fnName = idCallee->GetName();
+
+                if (!m_functions->HasItem(fnName))
+                {
+                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                    errorManager.UndeclaredFunction(GetFilename(), idCallee, "TypeError");
+                    return ValueType::Null;
+                }
+
+                fn = m_functions->LookUp(fnName);
+                break;
+            }
+            default:
+            {
+                Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                errorManager.RaiseError("Invalid node for function call", "TypeError");
+                return ValueType::Null;
+            }
+        }
 
         if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
         {
