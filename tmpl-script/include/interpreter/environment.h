@@ -133,6 +133,11 @@ namespace Runtime
 			return true;
 		}
 
+        bool Contains(std::string name)
+        {
+			return m_declarations.find(name) != m_declarations.end();
+        }
+
 		std::shared_ptr<T> LookUp(std::string name)
 		{
 			if (m_declarations.find(name) == m_declarations.end())

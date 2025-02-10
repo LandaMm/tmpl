@@ -21,7 +21,7 @@ namespace Runtime
 
 		std::shared_ptr<Variable> var = std::make_shared<Variable>(varType, varValue, varDecl->Editable());
 
-        if (m_variables->HasItem(varName))
+        if (m_variables->Contains(varName))
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.VarAlreadyExists(GetFilename(), varName, varDecl->GetLocation(), "RuntimeError");
