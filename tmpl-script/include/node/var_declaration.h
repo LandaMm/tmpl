@@ -3,6 +3,7 @@
 #ifndef VAR_DECLARATION_H
 #define VAR_DECLARATION_H
 #include<string>
+#include<memory>
 #include"../node.h"
 
 namespace AST
