@@ -1,0 +1,22 @@
+@require"std/io"
+@require"std/convert"
+
+->main {
+    var double d = 3.546879874986;
+    var float f = 3.14151;
+    var int i = 5979874;
+
+    println("d: " + d.tostring());
+    println("f: " + f.tostring());
+    println("i: " + i.tostring());
+
+    println("d->f: " + d.tofloat().tostring());
+    println("d->i: " + d.toint().tostring());
+
+    println("f->d: " + f.todouble().tostring());
+    println("f->i: " + f.toint().tostring());
+
+    println("i->d: " + i.todouble().tostring());
+    println("i->f: " + i.tofloat().tostring());
+}
+

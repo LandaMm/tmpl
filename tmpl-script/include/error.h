@@ -2,6 +2,7 @@
 #define ERROR_H
 #include <string>
 #include <memory>
+#include "include/node/object_member.h"
 #include "location.h"
 #include "token.h"
 #include "interpreter/value.h"
@@ -62,11 +63,13 @@ namespace Prelude
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
 		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc, std::string prefix);
 		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
+		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::ValueType valType, std::string prefix);
 		void OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, AST::Location loc, std::string prefix);
 		void UndeclaredVariable(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
 		void UndefinedType(std::string filename, std::string name, AST::Location loc, std::string prefix);
 		void VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc, std::string prefix);
         void VarAlreadyExists(std::string filename, std::string name, AST::Location loc, std::string prefix);
+        void FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix);
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);
         void InvalidArgument(std::string arg, std::string message);

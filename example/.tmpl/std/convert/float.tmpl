@@ -1,0 +1,15 @@
+@extern fn f_tod(float value) : double;
+@extern fn f_toi(float value) : int;
+@extern fn f_tos(float value) : string;
+
+export fn float.todouble() : double {
+    return f_tod(self);
+}
+
+export fn float.toint() : int {
+    return f_toi(self);
+}
+
+export fn float.tostring() : string {
+    return f_tos(self);
+}

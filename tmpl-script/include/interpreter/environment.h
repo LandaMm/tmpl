@@ -105,12 +105,12 @@ namespace Runtime
 		}
 	};
 
-	template <typename T>
+	template <typename T, typename K = std::string>
 	class Environment
 	{
 	private:
-		std::shared_ptr<Environment<T>> m_parent;
-		std::unordered_map<std::string, std::shared_ptr<T>> m_declarations;
+		std::shared_ptr<Environment<T, K>> m_parent;
+		std::unordered_map<K, std::shared_ptr<T>> m_declarations;
 
 	public:
 		Environment()
@@ -120,7 +120,7 @@ namespace Runtime
 
 	public:
         inline std::shared_ptr<Environment<T>> GetParent() const { return m_parent; }
-		bool HasItem(std::string name)
+		bool HasItem(K name)
 		{
 			if (m_declarations.find(name) == m_declarations.end())
 			{
@@ -133,12 +133,12 @@ namespace Runtime
 			return true;
 		}
 
-        bool Contains(std::string name)
+        bool Contains(K name)
         {
 			return m_declarations.find(name) != m_declarations.end();
         }
 
-		std::shared_ptr<T> LookUp(std::string name)
+		std::shared_ptr<T> LookUp(K name)
 		{
 			if (m_declarations.find(name) == m_declarations.end())
 			{
@@ -151,7 +151,7 @@ namespace Runtime
 				return m_declarations.at(name);
 		}
 
-		void AddItem(std::string name, std::shared_ptr<T> var)
+		void AddItem(K name, std::shared_ptr<T> var)
 		{
 			m_declarations.insert(std::make_pair(name, var));
 		}

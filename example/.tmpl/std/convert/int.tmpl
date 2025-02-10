@@ -1,0 +1,15 @@
+@extern fn i_tod(int value) : double;
+@extern fn i_tos(int value) : string;
+@extern fn i_tof(int value) : float;
+
+export fn int.todouble() : double {
+    return i_tod(self);
+}
+
+export fn int.tofloat() : float {
+    return i_tof(self);
+}
+
+export fn int.tostring() : string {
+    return i_tos(self);
+}
