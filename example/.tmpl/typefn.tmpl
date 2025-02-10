@@ -1,0 +1,15 @@
+@require"std/io"
+@require"std/convert"
+
+fn string.len() : int {
+    return strlen(self);
+}
+
+->main {
+    var string test = "Hello, World!";
+    var int len = test.len();
+    print("Length of the string '" + test + "': ");
+    println(itos(len));
+    return len;
+}
+
