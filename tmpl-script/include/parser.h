@@ -48,6 +48,9 @@ namespace AST
 	private: // Object Member
 		std::shared_ptr<Node> ObjectMember(std::shared_ptr<Node> obj);
 
+	private: // Generic Node
+		std::shared_ptr<Node> GenericType(std::shared_ptr<Nodes::IdentifierNode> target);
+
 	private: // Statements
 		std::shared_ptr<Node> Statement();
 		std::shared_ptr<Node> IfElseStatement();
