@@ -74,10 +74,6 @@ namespace Runtime
 		inline ValueType GetType() const override { return ValueType::List; }
 
 	public:
-		inline std::vector<std::shared_ptr<Value>> GetValue() const
-            { return m_value; }
-
-	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
 		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 
