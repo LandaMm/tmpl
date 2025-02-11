@@ -32,14 +32,24 @@ namespace Runtime
 #endif
 
         fs::path libPath = fnModule.replace_filename(libBase);
-        
-#ifdef _WIN32
-        HMODULE handle = LoadLibrary(libPath.string().c_str());
-#else
-        void* handle = dlopen(libPath.c_str(), RTLD_NOW);
-#endif
 
-        if (!handle)
+        std::shared_ptr<void*> handle;
+
+        if (m_handles->Contains(libPath.string()))
+        {
+            handle = m_handles->LookUp(libPath.string());
+        }
+        else
+        {
+#ifdef _WIN32
+            handle = std::make_shared<void*>((void*)LoadLibrary(libPath.string().c_str()));
+#else
+            handle = std::make_shared<void*>(dlopen(libPath.c_str(), RTLD_LAZY));
+#endif
+            m_handles->AddItem(libPath.string(), handle);
+        }
+
+        if (!(*handle))
         {
 #ifdef _WIN32
             errManager.RaiseError("failed to open c library at '" + libPath.string() + "': " + std::to_string(GetLastError()), "RuntimeError");
@@ -107,9 +117,9 @@ namespace Runtime
         using LibFn = void*(*)(void**data, unsigned int argc);
 
 #ifdef _WIN32
-        LibFn plugfn = (LibFn)GetProcAddress(handle, fnName.c_str());
+        LibFn plugfn = (LibFn)GetProcAddress(*handle, fnName.c_str());
 #else
-        LibFn plugfn = (LibFn)dlsym(handle, fnName.c_str());
+        LibFn plugfn = (LibFn)dlsym(*handle, fnName.c_str());
 #endif
 
         if (!plugfn)
@@ -126,11 +136,7 @@ namespace Runtime
             }
             free(data);
 
-#ifdef _WIN32
-            FreeLibrary(handle);
-#else
-            dlclose(handle);
-#endif
+            CloseHandle(libPath.string());
             return nullptr; 
         }
 
@@ -141,12 +147,6 @@ namespace Runtime
             free(data[i]);
         }
         free(data);
-
-#ifdef _WIN32
-        FreeLibrary(handle);
-#else
-        dlclose(handle);
-#endif
 
         if (ret) {
             switch(fn->GetReturnType())

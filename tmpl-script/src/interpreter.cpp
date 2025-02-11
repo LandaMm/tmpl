@@ -1,6 +1,11 @@
 
 #include <cassert>
 #include <memory>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 #include "../include/interpreter.h"
 #include "../include/error.h"
 #include "../include/interpreter/value.h"
@@ -11,6 +16,24 @@
 namespace Runtime
 {
 	using namespace AST::Nodes;
+
+    Interpreter::~Interpreter()
+    {
+        for (auto it = m_handles->Begin(); it != m_handles->End(); it++)
+        {
+            CloseHandle(it->first);
+        }
+    }
+
+    void Interpreter::CloseHandle(std::string handleKey)
+    {
+        auto handle = m_handles->LookUp(handleKey);
+#ifdef _WIN32
+        FreeLibrary((HMODULE)*handle);
+#else
+        dlclose(*handle);
+#endif
+    }
 
     void Interpreter::Evaluate(std::shared_ptr<ProgramNode> program)
     {

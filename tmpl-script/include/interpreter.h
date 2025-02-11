@@ -31,6 +31,8 @@ namespace Runtime
         std::shared_ptr<Environment<Environment<Fn>, ValueType>> m_type_functions;
         std::shared_ptr<Environment<std::string>> m_modules;
 
+        std::shared_ptr<Environment<void*>> m_handles;
+
         std::string m_filename;
 
 	public:
@@ -46,7 +48,12 @@ namespace Runtime
             m_functions(env_functions),
             m_type_functions(env_type_functions),
             m_modules(env_modules),
+            m_handles(std::make_shared<Environment<void*>>()),
             m_filename(parser->GetFilename()) { }
+        ~Interpreter();
+
+    private:
+        void CloseHandle(std::string handleKey);
 
 	public:
 		std::shared_ptr<Value> Execute(std::shared_ptr<Node> node);
