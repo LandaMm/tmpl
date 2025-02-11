@@ -5,20 +5,20 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::DiagnoseLiteral(std::shared_ptr<LiteralNode> literal)
+    std::shared_ptr<ComplexValueType> TypeChecker::DiagnoseLiteral(std::shared_ptr<LiteralNode> literal)
     {
         switch(literal->GetLiteralType())
         {
             case LiteralType::INT:
-                return ValueType::Integer;
+                return std::make_shared<ComplexValueType>(ValueType::Integer);
             case LiteralType::DOUBLE:
-                return ValueType::Double;
+                return std::make_shared<ComplexValueType>(ValueType::Double);
             case LiteralType::FLOAT:
-                return ValueType::Float;
+                return std::make_shared<ComplexValueType>(ValueType::Float);
             case LiteralType::STRING:
-                return ValueType::String;
+                return std::make_shared<ComplexValueType>(ValueType::String);
             case LiteralType::BOOL:
-                return ValueType::Bool;
+                return std::make_shared<ComplexValueType>(ValueType::Bool);
             default:
                 break;
         }
@@ -27,7 +27,7 @@ namespace Runtime
                 "Literal type shouldn't be left null");
         assert(false && "Unreachable. Should handle all literal types");
 
-        return ValueType::Null;
+        return std::make_shared<ComplexValueType>(ValueType::Null);
     }
 }
 
