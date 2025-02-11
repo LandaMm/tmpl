@@ -51,23 +51,34 @@ namespace Prelude
 		void MissingConstantDefinition(std::string filename, std::shared_ptr<AST::Token> token);
 
 	public: // Interpreter
-        // TODO:
-		// void UndeclaredFunction(std::shared_ptr<Nodes::ObjectMember> member);
 		void ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc);
         void UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, AST::Location loc);
     public: // TypeChecker
+        // FIXME: remove unexpected return type function for valuetype
+        // and keep only for complex type
         void UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, AST::Location loc);
+        void UnexpectedReturnType(std::string filename, std::shared_ptr<Runtime::ComplexValueType> expected, std::shared_ptr<Runtime::ComplexValueType> gotType, AST::Location loc);
+        // FIXME: remove me
         void TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, AST::Location loc);
+        void TypeMismatch(std::string filename, std::shared_ptr<Runtime::ComplexValueType> left, std::shared_ptr<Runtime::ComplexValueType> right, AST::Location loc);
     public: // TypeChecker + Interpreter
         void PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, AST::Location loc, AST::Location mLoc, std::string prefix);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
+        // FIXME: remove me
 		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc, std::string prefix);
+		void ArgMismatchType(std::string filename, std::string name, std::shared_ptr<Runtime::ComplexValueType> type, std::shared_ptr<Runtime::ComplexValueType> expectedType, AST::Location loc, std::string prefix);
 		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
+        // FIXME: remove me
 		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::ValueType valType, std::string prefix);
+		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, std::shared_ptr<Runtime::ComplexValueType> valType, std::string prefix);
+        // FIXME: remove me
 		void OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, AST::Location loc, std::string prefix);
+		void OperandMismatchType(std::string filename, std::shared_ptr<Runtime::ComplexValueType> leftType, std::shared_ptr<Runtime::ComplexValueType> rightType, AST::Location loc, std::string prefix);
 		void UndeclaredVariable(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
 		void UndefinedType(std::string filename, std::string name, AST::Location loc, std::string prefix);
+        // FIXME: remove me
 		void VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc, std::string prefix);
+		void VarMismatchType(std::string filename, std::string name, std::shared_ptr<Runtime::ComplexValueType> type, std::shared_ptr<Runtime::ComplexValueType> expectedType, AST::Location loc, std::string prefix);
         void VarAlreadyExists(std::string filename, std::string name, AST::Location loc, std::string prefix);
         void FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix);
     public: // CliRunner
