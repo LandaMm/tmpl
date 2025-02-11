@@ -84,19 +84,32 @@ namespace Prelude
 	}
 	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
 	{
-        // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name
             << "'. Expected type '" << Runtime::HumanValueType(expectedType)
             << "' but got '" << Runtime::HumanValueType(type) << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
+    void ErrorManager::VarMismatchType(std::string filename, std::string name, std::shared_ptr<Runtime::ComplexValueType> type, std::shared_ptr<Runtime::ComplexValueType> expectedType, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type mismatch for variable '" << name
+            << "'. Expected type '" << Runtime::HumanValueType(expectedType)
+            << "' but got '" << Runtime::HumanValueType(type) << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Mismatch type of left and right operands '" << Runtime::HumanValueType(leftType) << "' != '" << Runtime::HumanValueType(rightType) << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
+    void ErrorManager::OperandMismatchType(std::string filename, std::shared_ptr<Runtime::ComplexValueType> leftType, std::shared_ptr<Runtime::ComplexValueType> rightType, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Mismatch type of left and right operands '" << Runtime::HumanValueType(leftType) << "' != '" << Runtime::HumanValueType(rightType) << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
@@ -111,6 +124,17 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
 	}
     void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Argument type '"
+            << Runtime::HumanValueType(type)
+            << "' of parameter '" << name << "' doesn't match parameter type '"
+            << Runtime::HumanValueType(expectedType)
+            << "'" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::ArgMismatchType(std::string filename, std::string name, std::shared_ptr<Runtime::ComplexValueType> type, std::shared_ptr<Runtime::ComplexValueType> expectedType, AST::Location loc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Argument type '"
@@ -138,8 +162,21 @@ namespace Prelude
         std::cerr << "Unexpected return type '" << Runtime::HumanValueType(gotType) << "' when '" << Runtime::HumanValueType(expected) << "' type was expected" << std::endl;
         /*exit(-1);*/
     }
+    void ErrorManager::UnexpectedReturnType(std::string filename, std::shared_ptr<Runtime::ComplexValueType> expected, std::shared_ptr<Runtime::ComplexValueType> gotType, AST::Location loc)
+    {
+        LogFileLocation(filename, loc, "TypeError");
+        std::cerr << "Unexpected return type '" << Runtime::HumanValueType(gotType) << "' when '" << Runtime::HumanValueType(expected) << "' type was expected" << std::endl;
+    }
 
     void ErrorManager::TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, Location loc)
+    {
+        LogFileLocation(filename, loc, "TypeError");
+        std::cerr << "Different return types '" << Runtime::HumanValueType(left)
+            << "' and '" << Runtime::HumanValueType(right) << "'" << std::endl;
+        /*exit(-1);*/
+    }
+
+    void ErrorManager::TypeMismatch(std::string filename, std::shared_ptr<Runtime::ComplexValueType> left, std::shared_ptr<Runtime::ComplexValueType> right, AST::Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
         std::cerr << "Different return types '" << Runtime::HumanValueType(left)
