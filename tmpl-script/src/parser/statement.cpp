@@ -8,6 +8,7 @@
 #include "../../include/node/return.h"
 #include "../../include/node/function.h"
 #include "../../include/node/export.h"
+#include "include/node/identifier.h"
 
 namespace AST
 {
@@ -71,8 +72,15 @@ namespace AST
             {
                 Eat(TokenType::Comma);
             }
-            // TODO: support for complex types
+
             std::shared_ptr<Node> type = Id();
+
+            if (m_lexer->GetToken()->GetType() == TokenType::Less)
+            {
+                assert(type->GetType() == NodeType::Identifier && "Type should be an identifier");
+                type = GenericType(std::dynamic_pointer_cast<Nodes::IdentifierNode>(type));
+            }
+
             std::shared_ptr<Nodes::IdentifierNode> name = Id();
             std::shared_ptr<Nodes::FunctionParam> param = std::make_shared<Nodes::FunctionParam>(type, name);
             fn->AddParam(param);
@@ -83,8 +91,13 @@ namespace AST
 
         Eat(TokenType::Colon);
 
-        // TODO: support for complex types
         std::shared_ptr<Node> retType = Id();
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            assert(retType->GetType() == NodeType::Identifier && "Type should be an identifier");
+            retType = GenericType(std::dynamic_pointer_cast<Nodes::IdentifierNode>(retType));
+        }
 
         fn->SetReturnType(retType);
 
@@ -154,8 +167,13 @@ namespace AST
 		else
 			Eat(TokenType::Const);
 
-        // TODO: support for complex types
 		std::shared_ptr<Node> type = Id();
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            assert(type->GetType() == NodeType::Identifier && "Type should be an identifier");
+            type = GenericType(std::dynamic_pointer_cast<Nodes::IdentifierNode>(type));
+        }
 
 		std::shared_ptr<Nodes::IdentifierNode> nameNode = Id();
 		std::shared_ptr<std::string> name = std::make_shared<std::string>(nameNode->GetName());
