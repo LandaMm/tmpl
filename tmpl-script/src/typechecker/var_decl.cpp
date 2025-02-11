@@ -8,9 +8,9 @@ namespace Runtime
 
     void TypeChecker::HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl)
     {
-		ValueType varType = EvaluateType(GetFilename(), varDecl->GetType());
+		std::shared_ptr<ComplexValueType> varType = EvaluateType(GetFilename(), varDecl->GetType());
 		std::string varName = *varDecl->GetName();
-		ValueType varValueType = DiagnoseNode(varDecl->GetValue());
+		std::shared_ptr<ComplexValueType> varValueType = DiagnoseNode(varDecl->GetValue());
 
 		if (varType != varValueType)
 		{
