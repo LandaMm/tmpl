@@ -1,39 +1,41 @@
 
 
 #include "../../include/typechecker.h"
+#include "../../include/node/generic.h"
+#include <memory>
 
 namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<Node> typeNode)
+    std::shared_ptr<ComplexValueType> TypeChecker::EvaluateType(std::string filename, std::shared_ptr<Node> typeNode)
     {
 		if (typeNode->GetType() == NodeType::Identifier)
 		{
 			auto id = std::dynamic_pointer_cast<IdentifierNode>(typeNode);
 			if (id->GetName() == "string")
 			{
-				return ValueType::String;
+				return std::make_shared<ComplexValueType>(ValueType::String);
 			}
 			else if (id->GetName() == "double")
 			{
-				return ValueType::Double;
+				return std::make_shared<ComplexValueType>(ValueType::Double);
 			}
 			else if (id->GetName() == "float")
 			{
-				return ValueType::Float;
+				return std::make_shared<ComplexValueType>(ValueType::Float);
 			}
 			else if (id->GetName() == "int")
 			{
-				return ValueType::Integer;
+				return std::make_shared<ComplexValueType>(ValueType::Integer);
 			}
 			else if (id->GetName() == "bool")
             {
-                return ValueType::Bool;
+                return std::make_shared<ComplexValueType>(ValueType::Bool);
             }
 			else if (id->GetName() == "void")
             {
-                return ValueType::Null;
+                return std::make_shared<ComplexValueType>(ValueType::Null);
             }
 			else
 			{
@@ -43,6 +45,14 @@ namespace Runtime
                 exit(-1);
 			}
 		}
+		else if (typeNode->GetType() == NodeType::Generic)
+        {
+            auto generic = std::dynamic_pointer_cast<GenericNode>(typeNode);
+            auto baseType = EvaluateType(filename, generic->GetTarget());
+            auto complexType = EvaluateType(filename, generic->GetTypeNode());
+            baseType->SetGenericType(complexType);
+            return baseType;
+        }
 		else
 		{
 			// TODO: support for complex types, e.g. inline objects, generic types
@@ -52,7 +62,7 @@ namespace Runtime
             exit(-1);
 		}
 
-		return ValueType::Null;
+		return std::make_shared<ComplexValueType>(ValueType::Null);
     }
 }
 
