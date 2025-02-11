@@ -51,13 +51,13 @@ namespace Runtime
     class FnParam
     {
     private:
-        ValueType m_type;
+        std::shared_ptr<ComplexValueType> m_type;
         std::string m_name;
     public:
-        FnParam(ValueType type, std::string name) : m_type(type), m_name(name) { }
+        FnParam(std::shared_ptr<ComplexValueType> type, std::string name) : m_type(type), m_name(name) { }
         ~FnParam() = default;
     public:
-        inline ValueType GetType() const { return m_type; }
+        inline std::shared_ptr<ComplexValueType> GetType() const { return m_type; }
         inline std::string GetName() const { return m_name; }
     };
 
