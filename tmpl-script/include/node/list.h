@@ -19,7 +19,8 @@ namespace AST
 		public:
 			inline NodeType GetType() const override { return NodeType::List; }
 		public:
-			std::string Format() const override { return "List"; };
+			std::string Format() const override { return "List("
+                + std::to_string(m_items.size()) + " items)"; };
 		public:
 			void AddItem(std::shared_ptr<Node> item);
 		};
