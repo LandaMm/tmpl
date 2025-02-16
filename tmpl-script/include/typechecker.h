@@ -6,6 +6,7 @@
 #include "include/node/logical.h"
 #include "include/node/type.h"
 #include "include/node/unary.h"
+#include "include/typechecker/typedf.h"
 #include "interpreter/environment.h"
 #include "interpreter/value.h"
 #include "parser.h"
@@ -67,6 +68,8 @@ namespace Runtime
 
     class TypeChecker
     {
+    public:
+        using PTypeDfs = std::shared_ptr<Environment<TypeDf>>;
     private:
         std::shared_ptr<Parser> m_parser;
         std::string m_filename;
@@ -74,6 +77,7 @@ namespace Runtime
         std::shared_ptr<Environment<TypeFn>> m_functions;
         std::shared_ptr<Environment<std::string>> m_modules;
         std::shared_ptr<Environment<Environment<TypeFn>, ValueType>> m_type_functions;
+        PTypeDfs m_type_definitions;
         int m_errors;
         
     public:
@@ -117,6 +121,7 @@ namespace Runtime
 
 	public:
 		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode);
+        static PValType CastType(std::string filename, PValType from, PValType to, PTypeDfs typeDfs);
 
     private:
         std::string GetFilename() const { return m_filename; }
