@@ -31,6 +31,7 @@ namespace AST
         Require, // 
         Export, // 
         Extern, //
+        Type,
     };
 
 	class Node
