@@ -82,13 +82,13 @@ namespace Prelude
 				  << "but got unexpected '" << Token::GetTokenTypeCharacter(token->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
+	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
 	{
         // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name
-            << "'. Expected type '" << Runtime::HumanValueType(expectedType)
-            << "' but got '" << Runtime::HumanValueType(type) << "'" << std::endl;
+            << "'. Expected type '" << expectedType
+            << "' but got '" << type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
