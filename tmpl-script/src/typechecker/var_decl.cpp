@@ -1,6 +1,7 @@
 
 
 #include "../../include/typechecker.h"
+#include "include/interpreter/value.h"
 
 namespace Runtime
 {
@@ -8,9 +9,9 @@ namespace Runtime
 
     void TypeChecker::HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl)
     {
-		ValueType varType = EvaluateType(GetFilename(), varDecl->GetType());
+		PValType varType = EvaluateType(GetFilename(), varDecl->GetType());
 		std::string varName = *varDecl->GetName();
-		ValueType varValueType = DiagnoseNode(varDecl->GetValue());
+		PValType varValueType = DiagnoseNode(varDecl->GetValue());
 
 		if (varType != varValueType)
 		{
