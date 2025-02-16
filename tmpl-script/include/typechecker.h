@@ -4,6 +4,7 @@
 #include <memory>
 #include "include/interpreter.h"
 #include "include/node/logical.h"
+#include "include/node/type.h"
 #include "include/node/unary.h"
 #include "interpreter/environment.h"
 #include "interpreter/value.h"
@@ -23,13 +24,13 @@ namespace Runtime
     class TypeVariable
     {
     private:
-        ValueType m_type;
+        PValType m_type;
         bool m_editable;
     public:
-        TypeVariable(ValueType type, bool editable)
+        TypeVariable(PValType type, bool editable)
             : m_type(type), m_editable(editable) { }
     public:
-        inline ValueType GetType() const { return m_type; }
+        inline PValType GetType() const { return m_type; }
         inline bool IsEditable() const { return m_editable; }
     };
 
@@ -87,7 +88,7 @@ namespace Runtime
         void RunChecker(std::shared_ptr<ProgramNode> program);
         void RunModuleChecker(std::shared_ptr<RequireMacro> require);
     private:
-        ValueType DiagnoseNode(std::shared_ptr<Node> node);
+        PValType DiagnoseNode(std::shared_ptr<Node> node);
         ValueType DiagnoseExpression(std::shared_ptr<ExpressionNode> expr);
         ValueType DiagnoseLiteral(std::shared_ptr<LiteralNode> literal);
         ValueType DiagnoseId(std::shared_ptr<IdentifierNode> identifier);
@@ -115,7 +116,7 @@ namespace Runtime
         int GetErrorReport() { return m_errors; }
 
 	public:
-		static ValueType EvaluateType(std::string filename, std::shared_ptr<Node> typeNode);
+		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode);
 
     private:
         std::string GetFilename() const { return m_filename; }
