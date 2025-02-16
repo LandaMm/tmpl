@@ -24,6 +24,10 @@ namespace AST
                 : m_typename(target), Node(loc) { }
 
         public:
+            inline NodeType GetType() const override { return NodeType::Type; };
+            std::string Format() const override;
+
+        public:
             inline PId GetTypeName() const { return m_typename; }
         };
     }
