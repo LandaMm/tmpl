@@ -72,7 +72,7 @@ namespace AST
                 Eat(TokenType::Comma);
             }
             // TODO: support for complex types
-            std::shared_ptr<Node> type = Id();
+            std::shared_ptr<Nodes::TypeNode> type = Type();
             std::shared_ptr<Nodes::IdentifierNode> name = Id();
             std::shared_ptr<Nodes::FunctionParam> param = std::make_shared<Nodes::FunctionParam>(type, name);
             fn->AddParam(param);
@@ -84,7 +84,7 @@ namespace AST
         Eat(TokenType::Colon);
 
         // TODO: support for complex types
-        std::shared_ptr<Node> retType = Id();
+        std::shared_ptr<Nodes::TypeNode> retType = Type();
 
         fn->SetReturnType(retType);
 
@@ -154,8 +154,7 @@ namespace AST
 		else
 			Eat(TokenType::Const);
 
-        // TODO: support for complex types
-		std::shared_ptr<Node> type = Id();
+		std::shared_ptr<Nodes::TypeNode> type = Type();
 
 		std::shared_ptr<Nodes::IdentifierNode> nameNode = Id();
 		std::shared_ptr<std::string> name = std::make_shared<std::string>(nameNode->GetName());
