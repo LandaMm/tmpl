@@ -6,6 +6,7 @@
 #include "node/identifier.h"
 #include "node/function.h"
 #include "node/list.h"
+#include "node/type.h"
 #include "error.h"
 #include <memory>
 
@@ -47,6 +48,9 @@ namespace AST
 
 	private: // Object Member
 		std::shared_ptr<Node> ObjectMember(std::shared_ptr<Node> obj);
+
+    private: // Types
+        std::shared_ptr<Nodes::TypeNode> Type();
 
 	private: // Statements
 		std::shared_ptr<Node> Statement();
