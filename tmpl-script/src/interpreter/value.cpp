@@ -6,6 +6,13 @@
 namespace Runtime
 {
 	// Common
+    
+    std::ostream &operator<<(std::ostream& stream, const CustomValueType &x)
+    {
+        stream << x.m_name;
+
+        return stream;
+    }
 
 	std::ostream &operator<<(std::ostream &stream, const Value &value)
 	{

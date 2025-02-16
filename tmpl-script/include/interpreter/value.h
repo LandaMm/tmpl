@@ -1,6 +1,7 @@
 #ifndef RUNTIME_VALUE_H
 #define RUNTIME_VALUE_H
 #include <memory>
+#include <ostream>
 #include <string>
 #include <cassert>
 #include <vector>
@@ -28,9 +29,16 @@ namespace Runtime
     public:
         CustomValueType(std::string name)
             : m_name(name) { }
+
+    public:
+        bool Compare(const CustomValueType& other) { return m_name == other.m_name; }
+
+    public:
+        friend std::ostream &operator<<(std::ostream& stream, const CustomValueType &x);
     };
 
-    typedef std::shared_ptr<CustomValueType> PValType;
+    typedef CustomValueType ValType;
+    typedef std::shared_ptr<ValType> PValType;
 
     static std::string HumanValueType(ValueType type)
     {
