@@ -30,6 +30,8 @@ namespace Runtime
             : m_name(name) { }
     };
 
+    typedef std::shared_ptr<CustomValueType> PValType;
+
     static std::string HumanValueType(ValueType type)
     {
         switch(type)
