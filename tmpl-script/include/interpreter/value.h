@@ -20,6 +20,16 @@ namespace Runtime
 		Null,
 	};
 
+    struct CustomValueType
+    {
+    private:
+        std::string m_name;
+
+    public:
+        CustomValueType(std::string name)
+            : m_name(name) { }
+    };
+
     static std::string HumanValueType(ValueType type)
     {
         switch(type)
@@ -40,10 +50,6 @@ namespace Runtime
 	{
 	public:
 		inline virtual ValueType GetType() const = 0;
-
-	public:
-		template <typename T>
-		inline T *Get() { return static_cast<T *>(this); }
 
 	public:
 		virtual std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) = 0;
