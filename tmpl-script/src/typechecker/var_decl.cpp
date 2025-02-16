@@ -13,7 +13,7 @@ namespace Runtime
 		std::string varName = *varDecl->GetName();
 		PValType varValueType = DiagnoseNode(varDecl->GetValue());
 
-		if (varType != varValueType)
+		if (!varType->Compare(*varValueType))
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.VarMismatchType(GetFilename(), varName, varValueType, varType, varDecl->GetLocation(), "TypeError");

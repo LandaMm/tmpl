@@ -16,6 +16,7 @@ namespace Runtime
     PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, TypeChecker::PTypeDfs typeDfs)
     {
         // TODO:
+        // 0. check if "from" and "to" types are equal
         // 1. check if "from" type exists in typeDfs
         // 2. check if "to" type exists in typeDfs
         // 3. check if "to" type's name is "from" type's basename
