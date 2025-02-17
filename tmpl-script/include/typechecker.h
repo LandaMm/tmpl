@@ -69,6 +69,7 @@ namespace Runtime
     class TypeChecker
     {
     public:
+        using TypeDfs = Environment<TypeDf>;
         using PTypeDfs = std::shared_ptr<Environment<TypeDf>>;
     private:
         std::shared_ptr<Parser> m_parser;
@@ -87,20 +88,20 @@ namespace Runtime
               m_functions(std::make_shared<Environment<TypeFn>>()),
               m_modules(std::make_shared<Environment<std::string>>()),
               m_type_functions(std::make_shared<Environment<Environment<TypeFn>, ValueType>>()),
+              m_type_definitions(std::make_shared<TypeDfs>()),
               m_errors(0) { }
     public:
         void RunChecker(std::shared_ptr<ProgramNode> program);
         void RunModuleChecker(std::shared_ptr<RequireMacro> require);
     private:
         PValType DiagnoseNode(std::shared_ptr<Node> node);
-        ValueType DiagnoseExpression(std::shared_ptr<ExpressionNode> expr);
-        ValueType DiagnoseLiteral(std::shared_ptr<LiteralNode> literal);
-        ValueType DiagnoseId(std::shared_ptr<IdentifierNode> identifier);
-        ValueType DiagnoseFnCall(std::shared_ptr<FunctionCall> fnCall);
-        ValueType DiagnoseUnary(std::shared_ptr<UnaryNode> unary);
-        ValueType DiagnoseCondition(std::shared_ptr<Condition> condition);
-        ValueType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary);
-        // TODO:
+        PValType DiagnoseExpression(std::shared_ptr<ExpressionNode> expr);
+        PValType DiagnoseLiteral(std::shared_ptr<LiteralNode> literal);
+        PValType DiagnoseId(std::shared_ptr<IdentifierNode> identifier);
+        PValType DiagnoseFnCall(std::shared_ptr<FunctionCall> fnCall);
+        PValType DiagnoseUnary(std::shared_ptr<UnaryNode> unary);
+        PValType DiagnoseCondition(std::shared_ptr<Condition> condition);
+        PValType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary);
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl);
@@ -110,8 +111,8 @@ namespace Runtime
         void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt);
 
     private:
-        void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, ValueType expected);
-        void AssumeIfElse(std::shared_ptr<Statements::IfElseStatement> ifElse, ValueType expected);
+        void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected);
+        void AssumeIfElse(std::shared_ptr<Statements::IfElseStatement> ifElse, PValType expected);
 
     private:
         void ReportError() { m_errors++; };
