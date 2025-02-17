@@ -18,7 +18,7 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::DiagnoseNode(std::shared_ptr<Node> node)
+    PValType TypeChecker::DiagnoseNode(std::shared_ptr<Node> node)
     {
         switch(node->GetType())
         {
@@ -34,7 +34,7 @@ namespace Runtime
                 return DiagnoseFnCall(std::dynamic_pointer_cast<FunctionCall>(node));
             case NodeType::VarDecl:
                 HandleVarDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
-                return ValueType::Null;
+                return nullptr;
             case NodeType::Condition:
                 return DiagnoseCondition(std::dynamic_pointer_cast<Condition>(node));
             case NodeType::Ternary:
@@ -50,14 +50,14 @@ namespace Runtime
                 DiagnoseNode(ifElse->GetCondition());
                 DiagnoseNode(ifElse->GetBody());
                 if (ifElse->GetElseNode() != nullptr) DiagnoseNode(ifElse->GetElseNode());
-                return ValueType::Null;
+                return nullptr;
             }
             case NodeType::Block:
             {
                 auto block = std::dynamic_pointer_cast<Statements::StatementsBody>(node);
                 auto scope = std::make_shared<Environment<TypeVariable>>(m_variables);
                 m_variables = scope;
-                ValueType value = ValueType::Null;
+                PValType value = nullptr;
                 auto it = std::make_shared<Common::Iterator>(block->GetSize());
                 while (it->HasItems())
                 {
@@ -71,7 +71,7 @@ namespace Runtime
                     else
                     {
                         auto localVal = DiagnoseNode(node);
-                        if (node->IsBlock())
+                        if (node->IsBlock() && localVal != nullptr)
                         {
                             value = localVal;
                             break;
@@ -85,7 +85,7 @@ namespace Runtime
             }
             default:
                 // just skip the nodes we cannot typecheck
-                return ValueType::Null;
+                return nullptr;
         }
     }
 

@@ -13,7 +13,13 @@ namespace Runtime
 		std::string varName = *varDecl->GetName();
 		PValType varValueType = DiagnoseNode(varDecl->GetValue());
 
-        CastType(GetFilename(), varValueType, varType, m_type_definitions);
+        if (!varType->Compare(*varValueType))
+        {
+			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+			errorManager.VarMismatchType(GetFilename(), varName, varValueType, varType, varDecl->GetLocation(), "TypeError");
+            ReportError();
+			return;
+        }
 
 		std::shared_ptr<TypeVariable> var = std::make_shared<TypeVariable>(varType, varDecl->Editable());
 
