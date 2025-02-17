@@ -15,14 +15,6 @@ namespace Runtime
 
         CastType(GetFilename(), varValueType, varType, m_type_definitions);
 
-        // This check should be unnecessary as cast type will throw error if failed casting
-		/*if (!varType->Compare(*varValueType))*/
-		/*{*/
-		/*	Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();*/
-		/*	errorManager.VarMismatchType(GetFilename(), varName, varValueType, varType, varDecl->GetLocation(), "TypeError");*/
-		/*          ReportError();*/
-		/*}*/
-
 		std::shared_ptr<TypeVariable> var = std::make_shared<TypeVariable>(varType, varDecl->Editable());
 
         if (m_variables->Contains(varName))
