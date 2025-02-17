@@ -51,13 +51,13 @@ namespace Runtime
     class FnParam
     {
     private:
-        ValueType m_type;
+        PValType m_type;
         std::string m_name;
     public:
-        FnParam(ValueType type, std::string name) : m_type(type), m_name(name) { }
+        FnParam(PValType type, std::string name) : m_type(type), m_name(name) { }
         ~FnParam() = default;
     public:
-        inline ValueType GetType() const { return m_type; }
+        inline PValType GetType() const { return m_type; }
         inline std::string GetName() const { return m_name; }
     };
 
