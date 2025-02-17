@@ -16,11 +16,35 @@ namespace Runtime
     PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, TypeChecker::PTypeDfs typeDfs)
     {
         // TODO:
-        // 0. check if "from" and "to" types are equal
-        // 1. check if "from" type exists in typeDfs
-        // 2. check if "to" type exists in typeDfs
-        // 3. check if "to" type's name is "from" type's basename
+        // 0. check if "from" type exists in typeDfs
+        if (!typeDfs->HasItem(from->GetName()))
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(filename, from, "TypeError");
+            return nullptr;
+        }
+        // 1. check if "to" type exists in typeDfs
+        if (!typeDfs->HasItem(to->GetName()))
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(filename, to, "TypeError");
+            return nullptr;
+        }
+        // 2. check if "from" and "to" types are equal
+        if (from->Compare(*to)) return to;
+        // 3. check if "from" type's name is "to" type's basename
+        auto toDf = typeDfs->LookUp(to->GetName());
+        assert(toDf != nullptr && "To type's definition should not be null");
+        if (toDf->GetBaseName() == from->GetName()) return to;
         // 4. otherwise check if "from" type contains cast to "to" type in typeDf
+        auto fromDf = typeDfs->LookUp(from->GetName());
+        assert(fromDf != nullptr && "From type's definition should not be null");
+        auto casts = fromDf->GetCastsEnv();
+        if (casts->HasItem(to->GetName())) return to;
+
+        Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+        errManager.TypeCastNotPossible(filename, from, to, "TypeError");
+        return nullptr;
     }
 }
 
