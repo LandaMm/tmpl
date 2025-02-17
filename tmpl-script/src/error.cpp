@@ -87,8 +87,8 @@ namespace Prelude
         // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name
-            << "'. Expected type '" << expectedType
-            << "' but got '" << type << "'" << std::endl;
+            << "'. Expected type '" << *expectedType
+            << "' but got '" << *type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
@@ -145,6 +145,21 @@ namespace Prelude
         std::cerr << "Different return types '" << Runtime::HumanValueType(left)
             << "' and '" << Runtime::HumanValueType(right) << "'" << std::endl;
         /*exit(-1);*/
+    }
+
+    void ErrorManager::TypeDoesNotExist(std::string filename, Runtime::PValType typ, std::string prefix)
+    {
+        LogFileLocation(filename, typ->GetLocation(), prefix);
+        std::cerr << "Type '" << *typ << "' is not defined" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, std::string prefix)
+    {
+        LogFileLocation(filename, from->GetLocation(), prefix);
+        std::cerr << "Type '" << *from << "' cannot be converted to type '"
+            << *to << "'" << std::endl;
+        if (prefix != "TypeError") exit(-1);
     }
 
     void ErrorManager::ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc, std::string prefix)

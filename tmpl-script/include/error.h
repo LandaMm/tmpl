@@ -58,6 +58,8 @@ namespace Prelude
     public: // TypeChecker
         void UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, AST::Location loc);
         void TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, AST::Location loc);
+        void TypeDoesNotExist(std::string filename, Runtime::PValType typ, std::string prefix);
+        void TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, std::string prefix);
     public: // TypeChecker + Interpreter
         void PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, AST::Location loc, AST::Location mLoc, std::string prefix);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
