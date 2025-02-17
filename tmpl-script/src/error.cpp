@@ -91,10 +91,10 @@ namespace Prelude
             << "' but got '" << *type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
-	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
+	void ErrorManager::OperandMismatchType(std::string filename, Runtime::PValType leftType, Runtime::PValType rightType, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
-        std::cerr << "Mismatch type of left and right operands '" << Runtime::HumanValueType(leftType) << "' != '" << Runtime::HumanValueType(rightType) << "'" << std::endl;
+        std::cerr << "Mismatch type of left and right operands '" << *leftType << "' != '" << *rightType << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc, std::string prefix)
@@ -110,13 +110,13 @@ namespace Prelude
         std::cerr << "Undeclared variable '" << id->GetName() << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
-    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
+    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Argument type '"
-            << Runtime::HumanValueType(type)
+            << *type
             << "' of parameter '" << name << "' doesn't match parameter type '"
-            << Runtime::HumanValueType(expectedType)
+            << *expectedType
             << "'" << std::endl;
         if (prefix != "TypeError") exit(-1);
     }
@@ -132,31 +132,31 @@ namespace Prelude
         exit(-1);
     }
 
-    void ErrorManager::UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, Location loc)
+    void ErrorManager::UnexpectedReturnType(std::string filename, Runtime::PValType expected, Runtime::PValType gotType, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
-        std::cerr << "Unexpected return type '" << Runtime::HumanValueType(gotType) << "' when '" << Runtime::HumanValueType(expected) << "' type was expected" << std::endl;
+        std::cerr << "Unexpected return type '" << *gotType << "' when '" << *expected << "' type was expected" << std::endl;
         /*exit(-1);*/
     }
 
-    void ErrorManager::TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, Location loc)
+    void ErrorManager::TypeMismatch(std::string filename, Runtime::PValType left, Runtime::PValType right, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
-        std::cerr << "Different return types '" << Runtime::HumanValueType(left)
-            << "' and '" << Runtime::HumanValueType(right) << "'" << std::endl;
+        std::cerr << "Different return types '" << *left
+            << "' and '" << *right << "'" << std::endl;
         /*exit(-1);*/
     }
 
-    void ErrorManager::TypeDoesNotExist(std::string filename, Runtime::PValType typ, std::string prefix)
+    void ErrorManager::TypeDoesNotExist(std::string filename, Runtime::PValType typ, AST::Location loc, std::string prefix)
     {
-        LogFileLocation(filename, typ->GetLocation(), prefix);
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Type '" << *typ << "' is not defined" << std::endl;
         if (prefix != "TypeError") exit(-1);
     }
 
-    void ErrorManager::TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, std::string prefix)
+    void ErrorManager::TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix)
     {
-        LogFileLocation(filename, from->GetLocation(), prefix);
+        LogFileLocation(filename, loc, prefix);
         std::cerr << "Type '" << *from << "' cannot be converted to type '"
             << *to << "'" << std::endl;
         if (prefix != "TypeError") exit(-1);

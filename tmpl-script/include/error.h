@@ -56,17 +56,17 @@ namespace Prelude
 		void ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc);
         void UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, AST::Location loc);
     public: // TypeChecker
-        void UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, AST::Location loc);
-        void TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, AST::Location loc);
-        void TypeDoesNotExist(std::string filename, Runtime::PValType typ, std::string prefix);
-        void TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, std::string prefix);
+        void UnexpectedReturnType(std::string filename, Runtime::PValType expected, Runtime::PValType gotType, AST::Location loc);
+        void TypeMismatch(std::string filename, Runtime::PValType left, Runtime::PValType right, AST::Location loc);
+        void TypeDoesNotExist(std::string filename, Runtime::PValType typ, AST::Location loc, std::string prefix);
+        void TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix);
     public: // TypeChecker + Interpreter
         void PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, AST::Location loc, AST::Location mLoc, std::string prefix);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
-		void ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc, std::string prefix);
+		void ArgMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
 		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
-		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::ValueType valType, std::string prefix);
-		void OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, AST::Location loc, std::string prefix);
+		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::PValType valType, std::string prefix);
+		void OperandMismatchType(std::string filename, Runtime::PValType leftType, Runtime::PValType rightType, AST::Location loc, std::string prefix);
 		void UndeclaredVariable(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
 		void UndefinedType(std::string filename, std::string name, AST::Location loc, std::string prefix);
 		void VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
