@@ -13,21 +13,20 @@ namespace Runtime
         return std::make_shared<ValType>(typeNode->GetTypeName()->GetName());
     }
 
-    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, TypeChecker::PTypeDfs typeDfs)
+    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs)
     {
-        // TODO:
         // 0. check if "from" type exists in typeDfs
         if (!typeDfs->HasItem(from->GetName()))
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeDoesNotExist(filename, from, "TypeError");
+            errManager.TypeDoesNotExist(filename, from, loc, "TypeError");
             return nullptr;
         }
         // 1. check if "to" type exists in typeDfs
         if (!typeDfs->HasItem(to->GetName()))
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeDoesNotExist(filename, to, "TypeError");
+            errManager.TypeDoesNotExist(filename, to, loc, "TypeError");
             return nullptr;
         }
         // 2. check if "from" and "to" types are equal
@@ -43,7 +42,7 @@ namespace Runtime
         if (casts->HasItem(to->GetName())) return to;
 
         Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-        errManager.TypeCastNotPossible(filename, from, to, "TypeError");
+        errManager.TypeCastNotPossible(filename, from, to, loc, "TypeError");
         return nullptr;
     }
 }

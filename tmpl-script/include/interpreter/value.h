@@ -25,18 +25,16 @@ namespace Runtime
     {
     private:
         std::string m_name;
-        AST::Location m_loc;
 
     public:
-        CustomValueType(std::string name, AST::Location loc)
-            : m_name(name), m_loc(loc) { }
+        CustomValueType(std::string name)
+            : m_name(name) { }
 
     public:
         bool Compare(const CustomValueType& other) { return m_name == other.m_name; }
 
     public:
         inline std::string GetName() const { return m_name; }
-        inline AST::Location GetLocation() const { return m_loc; }
 
     public:
         friend std::ostream &operator<<(std::ostream& stream, const CustomValueType &x);
