@@ -2,12 +2,20 @@
 
 typedf Integer = int;
 
-fn @construct Integer() : Integer {
-    return self;
+fn @construct Integer(int initialValue) : Integer {
+    return initialValue;
+}
+
+typedf Number = Integer;
+
+fn @construct Number(int initialValue) : Number {
+    var Integer integerVal = new Integer(initialValue);
+    return integerVal;
 }
 
 ->main {
-    var Integer test = new Integer(50);
+    var Number num = new Number(100);
+    println(num);
     println("Hello, World!");
 }
 
