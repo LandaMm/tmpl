@@ -2,7 +2,12 @@
 
 typedf Integer = int;
 
+fn @construct Integer() : Integer {
+    return self;
+}
+
 ->main {
+    var Integer test = new Integer(50);
     println("Hello, World!");
 }
 
