@@ -2,6 +2,7 @@
 #define INTERPRETER_H
 #include <memory>
 #include "include/node/statement.h"
+#include "include/node/type.h"
 #include "node/return.h"
 #include "node/program.h"
 #include "parser.h"
@@ -17,18 +18,25 @@
 #include "node/unary.h"
 #include "interpreter/environment.h"
 #include "interpreter/value.h"
+#include "typechecker/typedf.h"
 
 namespace Runtime
 {
 	using namespace AST::Nodes;
 	class Interpreter
 	{
+    public:
+        using TypeDfs = Environment<TypeDf>;
+        using PTypeDfs = std::shared_ptr<Environment<TypeDf>>;
 	private:
 		std::shared_ptr<Parser> m_parser;
 		std::shared_ptr<Environment<Variable>> m_variables;
 		std::shared_ptr<Environment<Procedure>> m_procedures;
 		std::shared_ptr<Environment<Fn>> m_functions;
+
         std::shared_ptr<Environment<Environment<Fn>>> m_type_functions;
+        PTypeDfs m_type_definitions;
+
         std::shared_ptr<Environment<std::string>> m_modules;
 
         std::shared_ptr<Environment<void*>> m_handles;
@@ -41,12 +49,14 @@ namespace Runtime
                 std::shared_ptr<Environment<Procedure>> env_procedures,
                 std::shared_ptr<Environment<Fn>> env_functions,
                 std::shared_ptr<Environment<std::string>> env_modules,
-                std::shared_ptr<Environment<Environment<Fn>>> env_type_functions)
+                std::shared_ptr<Environment<Environment<Fn>>> env_type_functions,
+                PTypeDfs env_type_definitions)
             : m_parser(parser),
             m_variables(env_vars),
             m_procedures(env_procedures),
             m_functions(env_functions),
             m_type_functions(env_type_functions),
+            m_type_definitions(env_type_definitions),
             m_modules(env_modules),
             m_handles(std::make_shared<Environment<void*>>()),
             m_filename(parser->GetFilename()) { }
@@ -78,6 +88,7 @@ namespace Runtime
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl); // DONE
         void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed); // DONE
         void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt); // DONE
+        void EvaluateTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn);
 
     private:
         inline std::string GetFilename() const { return m_filename; }
