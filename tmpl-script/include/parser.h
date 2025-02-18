@@ -51,6 +51,8 @@ namespace AST
 
     private: // Types
         std::shared_ptr<Nodes::TypeNode> Type();
+        std::shared_ptr<Nodes::TypeTemplateNode> TypeTemplate();
+        std::shared_ptr<Nodes::TypeDfNode> TypeDfStatement();
 
 	private: // Statements
 		std::shared_ptr<Node> Statement();
