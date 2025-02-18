@@ -86,6 +86,9 @@ namespace Runtime
                 case NodeType::FnDecl:
                     HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
+                case NodeType::TypeDf:
+                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt));
+                    break;
                 default:
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
