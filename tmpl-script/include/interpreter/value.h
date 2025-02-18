@@ -61,8 +61,11 @@ namespace Runtime
 
 	class Value
 	{
+    private:
+        PValType m_value_type;
+
 	public:
-		inline virtual PValType GetType() const = 0;
+		inline PValType GetType() const { return m_value_type; };
 
 	public:
 		virtual std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) = 0;
@@ -71,8 +74,14 @@ namespace Runtime
 	public:
 		virtual ~Value() = default;
 
+    public:
+        Value(PValType valType) : m_value_type(valType) { }
+
 	public:
 		virtual std::string format() const = 0;
+    
+    public:
+        void SetType(PValType newTyp) { m_value_type = newTyp; }
 	};
 
 	std::ostream &operator<<(std::ostream &stream, const Value &value);
@@ -85,12 +94,12 @@ namespace Runtime
 		std::vector<std::shared_ptr<Value>> m_value;
 
 	public:
-		ListValue() : m_value(std::vector<std::shared_ptr<Value>>()) {}
+		ListValue()
+            : m_value(std::vector<std::shared_ptr<Value>>()),
+              Value(std::make_shared<ValType>("list")) {}
 		ListValue(std::vector<std::shared_ptr<Value>> values)
-            : m_value(values) {}
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("list"); }
+            : m_value(values),
+              Value(std::make_shared<ValType>("list")) {}
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
@@ -107,10 +116,7 @@ namespace Runtime
 	class VoidValue : public Value
 	{
 	public:
-		VoidValue() { }
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("void"); }
+		VoidValue() : Value(std::make_shared<ValType>("void")) { }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
@@ -126,10 +132,7 @@ namespace Runtime
 		bool m_value;
 
 	public:
-		BoolValue(bool value) : m_value(value) {}
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("bool"); }
+		BoolValue(bool value) : m_value(value), Value(std::make_shared<ValType>("bool")) {}
 
 	public:
 		inline bool GetValue() const { return m_value; }
@@ -148,11 +151,8 @@ namespace Runtime
 		std::shared_ptr<int> m_value;
 
 	public:
-		IntegerValue(std::shared_ptr<int> value) : m_value(value) {}
-		IntegerValue(int value) : m_value(std::make_shared<int>(value)) {}
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("int"); }
+		IntegerValue(std::shared_ptr<int> value) : m_value(value), Value(std::make_shared<ValType>("int")) {}
+		IntegerValue(int value) : m_value(std::make_shared<int>(value)), Value(std::make_shared<ValType>("int")) {}
 
 	public:
 		inline std::shared_ptr<int> GetValue() const { return m_value; }
@@ -170,11 +170,8 @@ namespace Runtime
 		std::shared_ptr<float> m_value;
 
 	public:
-		FloatValue(std::shared_ptr<float> value) : m_value(value) {}
-		FloatValue(float value) : m_value(std::make_shared<float>(value)) {}
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("float"); }
+		FloatValue(std::shared_ptr<float> value) : m_value(value), Value(std::make_shared<ValType>("float")) {}
+		FloatValue(float value) : m_value(std::make_shared<float>(value)), Value(std::make_shared<ValType>("float")) {}
 
 	public:
 		inline std::shared_ptr<float> GetValue() const { return m_value; }
@@ -192,11 +189,8 @@ namespace Runtime
 		std::shared_ptr<double> m_value;
 
 	public:
-		DoubleValue(std::shared_ptr<double> value) : m_value(value) {}
-		DoubleValue(double value) : m_value(std::make_shared<double>(value)) {}
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("double"); }
+		DoubleValue(std::shared_ptr<double> value) : m_value(value), Value(std::make_shared<ValType>("double")) {}
+		DoubleValue(double value) : m_value(std::make_shared<double>(value)), Value(std::make_shared<ValType>("double")) {}
 
 	public:
 		inline std::shared_ptr<double> GetValue() const { return m_value; }
@@ -214,11 +208,8 @@ namespace Runtime
 		std::shared_ptr<std::string> m_value;
 
 	public:
-		StringValue(std::shared_ptr<std::string> value) : m_value(value) {}
-		StringValue(std::string value) : m_value(std::make_shared<std::string>(value)) {}
-
-	public:
-		inline PValType GetType() const override { return std::make_shared<ValType>("string"); }
+		StringValue(std::shared_ptr<std::string> value) : m_value(value), Value(std::make_shared<ValType>("string")) {}
+		StringValue(std::string value) : m_value(std::make_shared<std::string>(value)), Value(std::make_shared<ValType>("string")) {}
 
 	public:
 		inline std::shared_ptr<std::string> GetValue() const { return m_value; }
