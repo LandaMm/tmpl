@@ -77,6 +77,9 @@ namespace AST
         case TokenType::Export:
             stmt = ExportStmt();
             break;
+        case TokenType::TypeDf:
+            stmt = TypeDfStatement();
+            break;
         case TokenType::At:
         {
             auto tokenType = Peek();
