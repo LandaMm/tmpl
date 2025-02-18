@@ -48,11 +48,19 @@ namespace AST
         auto fnLoc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Fn);
 
-        std::shared_ptr<Node> fnName = Id();
-        if (m_lexer->GetToken()->GetType() == TokenType::Point)
+        std::shared_ptr<Node> fnName;
+
+        if (m_lexer->SeekToken()->GetType() == TokenType::Point)
         {
+            fnName = Type();
             fnName = ObjectMember(fnName);
         }
+        else
+        {
+            fnName = Id();
+        }
+
+        assert(fnName != nullptr && "Fn name shouldn't be left null in signature");
 
         Eat(TokenType::OpenBracket);
 
