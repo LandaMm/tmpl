@@ -61,6 +61,7 @@ namespace AST
                 case TokenType::Construct:
                     Eat(TokenType::Construct);
                     modifier = Nodes::FunctionModifier::Construct;
+                    break;
                 default:
                 {
                     Prelude::ErrorManager& errManager = GetErrorManager();
@@ -72,7 +73,7 @@ namespace AST
 
         std::shared_ptr<Node> fnName;
 
-        if (m_lexer->SeekToken()->GetType() == TokenType::Point)
+        if (m_lexer->SeekToken()->GetType() == TokenType::Point && modifier == Nodes::FunctionModifier::None)
         {
             fnName = Type();
             fnName = ObjectMember(fnName);

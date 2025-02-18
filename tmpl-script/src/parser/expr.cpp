@@ -4,6 +4,7 @@
 #include "../../include/node/literal.h"
 #include "../../include/node/logical.h"
 #include "../../include/node/unary.h"
+#include "include/node/instance.h"
 #include "include/token.h"
 
 namespace AST
@@ -273,6 +274,14 @@ namespace AST
 			Eat(TokenType::CloseBracket);
 			return res;
 		}
+		else if (token->GetType() == TokenType::New)
+        {
+            auto loc = m_lexer->GetToken()->GetLocation();
+            Eat(TokenType::New);
+            auto fnName = Type();
+            auto fCall = FunctionCall(fnName);
+            return std::make_shared<Nodes::InstanceNode>(fnName, fCall, loc);
+        }
 		// unknown
 		else
 		{
