@@ -182,7 +182,7 @@ namespace Runtime
             // TODO: Implement list
         }
 
-        return std::make_shared<NullValue>();
+        return std::make_shared<VoidValue>();
     }
 }
 

@@ -116,7 +116,7 @@ namespace Runtime
 			return EvaluateLiteral(std::dynamic_pointer_cast<LiteralNode>(node));
 		case NodeType::VarDecl:
 			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
-			return std::make_shared<NullValue>();
+			return std::make_shared<VoidValue>();
 		case NodeType::Identifier:
 			return EvaluateIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
 		case NodeType::Condition:
@@ -136,7 +136,7 @@ namespace Runtime
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);
             auto scope = std::make_shared<Environment<Variable>>(m_variables);
             m_variables = scope;
-            std::shared_ptr<Value> value = std::make_shared<NullValue>();
+            std::shared_ptr<Value> value = std::make_shared<VoidValue>();
             auto it = std::make_shared<Common::Iterator>(block->GetSize());
             while (it->HasItems())
             {
@@ -170,6 +170,6 @@ namespace Runtime
             }
 		}
 
-		return std::make_shared<NullValue>();
+		return std::make_shared<VoidValue>();
 	}
 }

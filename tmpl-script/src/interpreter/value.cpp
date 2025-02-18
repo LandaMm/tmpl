@@ -149,14 +149,14 @@ namespace Runtime
 		return nullptr;
 	}
 
-    // NullValue
+    // VoidValue
 
-	std::string NullValue::format() const
+	std::string VoidValue::format() const
 	{
-		return "NullValue()";
+		return "VoidValue()";
 	}
 
-	std::shared_ptr<Value> Runtime::NullValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
+	std::shared_ptr<Value> Runtime::VoidValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
 	{
 		std::shared_ptr<Value> iright = std::dynamic_pointer_cast<Value>(right);
 
@@ -180,7 +180,7 @@ namespace Runtime
 		return nullptr;
 	}
 
-	std::shared_ptr<Value> Runtime::NullValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
+	std::shared_ptr<Value> Runtime::VoidValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
 	{
 		std::shared_ptr<IntegerValue> iright = std::dynamic_pointer_cast<IntegerValue>(right);
 

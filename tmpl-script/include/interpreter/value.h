@@ -104,10 +104,10 @@ namespace Runtime
 		std::string format() const override;
 	};
 
-	class NullValue : public Value
+	class VoidValue : public Value
 	{
 	public:
-		NullValue() { }
+		VoidValue() { }
 
 	public:
 		inline PValType GetType() const override { return std::make_shared<ValType>("void"); }
