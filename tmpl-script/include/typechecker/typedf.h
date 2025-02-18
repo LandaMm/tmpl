@@ -30,19 +30,29 @@ namespace Runtime
     public:
         using Casts = Environment<TypeDfCast>;
         using PCasts = std::shared_ptr<Casts>;
+        using PFn = std::shared_ptr<Fn>;
     private:
         std::string m_typename;
-        std::string m_basename;
+        PValType m_basename;
         PCasts m_casts;
+        PFn m_constructor;
 
     public:
-        TypeDf(std::string tName, std::string basename)
-            : m_typename(tName), m_basename(basename), m_casts(std::make_shared<Casts>()) { }
+        TypeDf(std::string tName, PValType basename)
+            : m_typename(tName), m_basename(basename),
+              m_casts(std::make_shared<Casts>()),
+              m_constructor(nullptr) { }
     
     public:
         inline std::string GetTypeName() const { return m_typename; }
-        inline std::string GetBaseName() const { return m_basename; }
+        inline PValType GetBaseType() const { return m_basename; }
         inline PCasts GetCastsEnv() const { return m_casts; }
+
+        inline bool HasConstructor() const { return m_constructor != nullptr; }
+        inline PFn GetConstructor() const { return m_constructor; }
+
+    public:
+        void SetConstructor(PFn constructor) { m_constructor = constructor; }
     };
 }
 
