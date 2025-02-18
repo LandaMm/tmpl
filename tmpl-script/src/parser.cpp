@@ -79,6 +79,7 @@ namespace AST
             break;
         case TokenType::TypeDf:
             stmt = TypeDfStatement();
+            Eat(TokenType::Semicolon);
             break;
         case TokenType::At:
         {
