@@ -121,13 +121,13 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
-    void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
+    void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
         std::cerr << "Return value type '"
-            << Runtime::HumanValueType(type)
+            << *type
             << "' of the function '" << name << "' doesn't match function's signature type '"
-            << Runtime::HumanValueType(expectedType)
+            << *expectedType
             << "'" << std::endl;
         exit(-1);
     }
@@ -180,11 +180,11 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
-    void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, Location loc)
+    void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::PValType metType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
         std::cerr << "Unary operator '" << op
-            << "' is not allowed with type '" << Runtime::HumanValueType(metType) << "'" << std::endl;
+            << "' is not allowed with type '" << *metType << "'" << std::endl;
         std::exit(-1);
     }
 
@@ -196,13 +196,13 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
-    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::ValueType valType, std::string prefix)
+    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::PValType valType, std::string prefix)
     {
         auto loc = obj->GetLocation();
         LogFileLocation(filename, loc, prefix);
         assert(obj->GetMember()->GetType() == NodeType::Identifier && "Object member for fn call should be an identifier.");
         auto id = std::dynamic_pointer_cast<Nodes::IdentifierNode>(obj->GetMember());
-        std::cerr << "Calling undeclared function '" << id->GetName() << "' for type '" << Runtime::HumanValueType(valType) << "'" << std::endl;
+        std::cerr << "Calling undeclared function '" << id->GetName() << "' for type '" << *valType << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 

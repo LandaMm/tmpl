@@ -53,8 +53,8 @@ namespace Prelude
 	public: // Interpreter
         // TODO:
 		// void UndeclaredFunction(std::shared_ptr<Nodes::ObjectMember> member);
-		void ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, AST::Location loc);
-        void UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, AST::Location loc);
+		void ReturnMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc);
+        void UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::PValType metType, AST::Location loc);
     public: // TypeChecker
         void UnexpectedReturnType(std::string filename, Runtime::PValType expected, Runtime::PValType gotType, AST::Location loc);
         void TypeMismatch(std::string filename, Runtime::PValType left, Runtime::PValType right, AST::Location loc);
