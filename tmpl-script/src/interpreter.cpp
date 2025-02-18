@@ -1,4 +1,5 @@
 
+#include "include/node/instance.h"
 #include <cassert>
 #include <memory>
 #ifdef _WIN32
@@ -137,6 +138,8 @@ namespace Runtime
             return EvaluateFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
         case NodeType::IfElse:
             return EvaluateIfElseStatement(std::dynamic_pointer_cast<Statements::IfElseStatement>(node));
+        case NodeType::Instance:
+            return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
         case NodeType::Block:
         {
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);

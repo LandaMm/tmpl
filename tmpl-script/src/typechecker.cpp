@@ -13,6 +13,7 @@
 #include "../include/node/logical.h"
 #include "../include/node/macros.h"
 #include "../include/iterator.h"
+#include "include/node/instance.h"
 
 namespace Runtime
 {
@@ -39,6 +40,8 @@ namespace Runtime
                 return DiagnoseCondition(std::dynamic_pointer_cast<Condition>(node));
             case NodeType::Ternary:
                 return DiagnoseTernary(std::dynamic_pointer_cast<TernaryNode>(node));
+            case NodeType::Instance:
+                return DiagnoseInstance(std::dynamic_pointer_cast<InstanceNode>(node));
             case NodeType::Return:
             {
                 auto ret = std::dynamic_pointer_cast<ReturnNode>(node);
@@ -110,6 +113,9 @@ namespace Runtime
                     break;
                 case NodeType::FnDecl:
                     HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
+                    break;
+                case NodeType::TypeDf:
+                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt));
                     break;
                 case NodeType::Extern:
                 {
