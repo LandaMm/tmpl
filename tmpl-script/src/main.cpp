@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	auto procedures = std::make_shared<Environment<Procedure>>();
 	auto functions = std::make_shared<Environment<Fn>>();
 	auto modules = std::make_shared<Environment<std::string>>();
-    auto typeFunctions = std::make_shared<Environment<Environment<Fn>, Runtime::ValueType>>();
+    auto typeFunctions = std::make_shared<Environment<Environment<Fn>>>();
 
 	Interpreter intrpt(parser, variables, procedures, functions, modules, typeFunctions);
 
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     }
 
     std::shared_ptr<Variable> argsVar = std::make_shared<Variable>(
-        ValueType::List,
+        std::make_shared<ValType>("list"),
         argsList,
         false
     );
