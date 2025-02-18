@@ -7,6 +7,8 @@
 #include "../../include/node/object_member.h"
 #include "include/interpreter/environment.h"
 #include "include/interpreter/value.h"
+#include "include/node/function.h"
+#include "include/node/type.h"
 #include <error.h>
 #include <memory>
 
@@ -18,6 +20,7 @@ namespace Runtime
     {
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
         PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        PValType baseType;
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
 
@@ -39,13 +42,65 @@ namespace Runtime
             variables->AddItem(paramName, typeVar);
         }
 
+        switch(fnDecl->GetModifier())
+        {
+            case AST::Nodes::FunctionModifier::Construct:
+            {
+                assert(nameNode->GetType() == AST::NodeType::Identifier && "Name should be a type template by construct fn");
+                auto id = std::dynamic_pointer_cast<AST::Nodes::IdentifierNode>(nameNode);
+
+                std::string typeName = id->GetName();
+
+                if (!m_type_definitions->HasItem(typeName))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeDoesNotExist(GetFilename(), typeName, id->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto typeDf = m_type_definitions->LookUp(typeName);
+                assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                // TODO: compare generics amount and names
+                if (typeDf->HasConstructor())
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeConstructorRedeclaration(GetFilename(), typeName, fnDecl->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                baseType = typeDf->GetBaseType();
+
+                auto constructorFn =
+                    std::make_shared<Fn>(nullptr, baseType, GetFilename(), false, false, fnDecl->GetLocation());
+
+                auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
+                while (it->HasItems())
+                {
+                    auto param = fn->GetItem(it->GetPosition());
+                    it->Next();
+                    constructorFn->AddParam(param);
+                }
+
+                typeDf->SetConstructor(constructorFn);
+
+                break;
+            }
+            default:
+                // skip, no additional actions required
+                break;
+        }
+
         switch(nameNode->GetType())
         {
             case AST::NodeType::Identifier:
             {
                 std::string name = std::dynamic_pointer_cast<IdentifierNode>(nameNode)->GetName();
 
-                m_functions->AddItem(name, fn);
+                if (fnDecl->GetModifier() == FunctionModifier::None)
+                    m_functions->AddItem(name, fn);
                 break;
             }
             case AST::NodeType::ObjectMember:
@@ -89,7 +144,13 @@ namespace Runtime
 
         m_variables = variables;
 
-        AssumeBlock(body, retType);
+        if (fnDecl->GetModifier() == AST::Nodes::FunctionModifier::Construct)
+        {
+            assert(baseType != nullptr && "Base type should have been set.");
+            AssumeBlock(body, baseType);
+        }
+        else
+            AssumeBlock(body, retType);
 
         m_variables = currentScope;
     }

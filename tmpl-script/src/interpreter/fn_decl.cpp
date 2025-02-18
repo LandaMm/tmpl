@@ -19,6 +19,8 @@ namespace Runtime
 
         std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType, GetFilename(), exported, externed, fnDecl->GetLocation());
 
+        std::shared_ptr<Node> nameNode = fnDecl->GetName();
+
         auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
         while (it->HasItems())
         {
@@ -30,7 +32,45 @@ namespace Runtime
             fn->AddParam(fnParam);
         }
 
-        std::shared_ptr<Node> nameNode = fnDecl->GetName();
+        switch(fnDecl->GetModifier())
+        {
+            case AST::Nodes::FunctionModifier::Construct:
+            {
+                assert(nameNode->GetType() == AST::NodeType::Identifier && "Name should be a type template by construct fn");
+                auto id = std::dynamic_pointer_cast<AST::Nodes::IdentifierNode>(nameNode);
+
+                std::string typeName = id->GetName();
+
+                if (!m_type_definitions->HasItem(typeName))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeDoesNotExist(GetFilename(), typeName, id->GetLocation(), "RuntimeError");
+                    return;
+                }
+
+                auto typeDf = m_type_definitions->LookUp(typeName);
+                assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                // TODO: compare generics amount and names
+                if (typeDf->HasConstructor())
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeConstructorRedeclaration(GetFilename(), typeName, fnDecl->GetLocation(), "RuntimeError");
+                    return;
+                }
+
+                auto baseType = typeDf->GetBaseType();
+
+                fn->SetReturnType(baseType);
+
+                typeDf->SetConstructor(fn);
+
+                break;
+            }
+            default:
+                // skip, no additional actions required
+                break;
+        }
 
         switch(nameNode->GetType())
         {
@@ -38,7 +78,8 @@ namespace Runtime
             {
                 std::string name = std::dynamic_pointer_cast<IdentifierNode>(nameNode)->GetName();
 
-                m_functions->AddItem(name, fn);
+                if (fnDecl->GetModifier() == FunctionModifier::None)
+                    m_functions->AddItem(name, fn);
                 break;
             }
             case AST::NodeType::ObjectMember:
