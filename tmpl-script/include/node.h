@@ -34,6 +34,7 @@ namespace AST
         Type,
         TypeTemplate,
         TypeDf,
+        Instance,
     };
 
 	class Node
