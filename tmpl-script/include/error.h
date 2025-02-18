@@ -50,6 +50,7 @@ namespace Prelude
 		void UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> locToken);
 		void UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> locToken, std::shared_ptr<AST::Token> gotToken, AST::TokenType expectedTokenType);
 		void MissingConstantDefinition(std::string filename, std::shared_ptr<AST::Token> token);
+        void UnexpectedFnModifier(std::string filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc);
 
 	public: // Interpreter
         // TODO:

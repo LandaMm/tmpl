@@ -75,6 +75,13 @@ namespace Prelude
         std::cerr << "Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
+    void ErrorManager::UnexpectedFnModifier(std::string filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc)
+    {
+        LogFileLocation(filename, loc, "ParseError");
+        std::cerr << "Unexpected token used for fn modifier '"
+            << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
+		std::exit(-1);
+    }
 	void ErrorManager::MissingConstantDefinition(std::string filename, std::shared_ptr<Token> token)
 	{
         LogFileLocation(filename, token->GetLocation(), "ParseError");
