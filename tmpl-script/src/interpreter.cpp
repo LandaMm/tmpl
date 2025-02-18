@@ -59,6 +59,9 @@ namespace Runtime
                 case NodeType::ProcedureDecl:
                     EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(stmt));
                     break;
+                case NodeType::Export:
+                    // Ignore export in the tmpl executable
+                    break;
                 default:
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -147,7 +150,7 @@ namespace Runtime
                 else
                 {
                     auto localVal = Execute(node);
-                    if (node->IsBlock() && (localVal != nullptr && localVal->GetType() != ValueType::Null))
+                    if (node->IsBlock() && (localVal != nullptr && !localVal->GetType()->Compare(ValType("void"))))
                     {
                         value = localVal;
                         break;
