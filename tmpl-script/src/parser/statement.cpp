@@ -8,6 +8,7 @@
 #include "../../include/node/return.h"
 #include "../../include/node/function.h"
 #include "../../include/node/export.h"
+#include "include/token.h"
 
 namespace AST
 {
@@ -48,6 +49,27 @@ namespace AST
         auto fnLoc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Fn);
 
+        Nodes::FunctionModifier modifier = Nodes::FunctionModifier::None;
+
+        if (m_lexer->GetToken()->GetType() == TokenType::At)
+        {
+            auto atToken = m_lexer->GetToken();
+            Eat(TokenType::At);
+
+            switch(m_lexer->GetToken()->GetType())
+            {
+                case TokenType::Construct:
+                    Eat(TokenType::Construct);
+                    modifier = Nodes::FunctionModifier::Construct;
+                default:
+                {
+                    Prelude::ErrorManager& errManager = GetErrorManager();
+                    errManager.UnexpectedFnModifier(GetFilename(), m_lexer->GetToken(), atToken->GetLocation());
+                    return nullptr;
+                }
+            }
+        }
+
         std::shared_ptr<Node> fnName;
 
         if (m_lexer->SeekToken()->GetType() == TokenType::Point)
@@ -68,7 +90,7 @@ namespace AST
             std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
         std::shared_ptr<Nodes::FunctionDeclaration> fn =
-            std::make_shared<Nodes::FunctionDeclaration>(fnName, body, fnLoc);
+            std::make_shared<Nodes::FunctionDeclaration>(fnName, body, modifier, fnLoc);
 
         auto currToken = m_lexer->GetToken()->GetType();
 
