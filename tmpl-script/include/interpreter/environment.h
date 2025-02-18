@@ -86,6 +86,7 @@ namespace Runtime
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
+		void SetReturnType(PValType newTyp) { m_ret_type = newTyp; }
     public:
         inline std::shared_ptr<FnParam> GetItem(unsigned int index) { return m_params[index]; }
 
