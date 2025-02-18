@@ -17,13 +17,13 @@ fn factorial(int n) : int {
     } else {
         println("is_good is false!");
     }
-    return PI + itof(factor);
+    return PI + factor.tofloat();
 }
 
 ->fact {
     var int num = 7;
     var int res = factorial(7);
-    println("Factorial of " + itos(num) + " is " + itos(res));
+    println("Factorial of " + itos(num) + " is " + res.tostring());
     return res;
 }
 
@@ -38,6 +38,6 @@ fn factorial(int n) : int {
     var string msg = "Hello, World!";
     print("Message to get length of: ");
     println(msg);
-    return strlen(msg);
+    return msg.len();
 }
 
