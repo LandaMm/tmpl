@@ -57,6 +57,7 @@ namespace AST
         False,
         TypeDf,
         Construct,
+        New,
 		_EOF,
 	};
 
@@ -111,6 +112,7 @@ namespace AST
         "false",
         "typedf",
         "construct",
+        "new",
 		"EOF",
 	};
 
