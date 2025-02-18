@@ -161,6 +161,20 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
+    void ErrorManager::TypeDoesNotExist(std::string filename, std::string typName, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type with name '" << typName << "' is not defined" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::TypeConstructorDoesNotExist(std::string filename, Runtime::PValType targetTyp, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "No constructor found for type '" << *targetTyp << "'" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
     void ErrorManager::TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
@@ -264,6 +278,15 @@ namespace Prelude
         // TODO: show generics as well
         std::cerr << "Cannot redeclare already existing type '"
             << typeNode->GetTypeName()->GetName() << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::TypeConstructorRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        // TODO: show generics as well
+        std::cerr << "Cannot redeclare type constructor for '"
+            << typeName << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 
