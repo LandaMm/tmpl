@@ -3,6 +3,7 @@
 #define TYPECHECKER_H
 #include <memory>
 #include "include/interpreter.h"
+#include "include/node/instance.h"
 #include "include/node/logical.h"
 #include "include/node/type.h"
 #include "include/node/unary.h"
@@ -104,6 +105,7 @@ namespace Runtime
         PValType DiagnoseUnary(std::shared_ptr<UnaryNode> unary); // DONE
         PValType DiagnoseCondition(std::shared_ptr<Condition> condition); // DONE
         PValType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary); // DONE
+        PValType DiagnoseInstance(std::shared_ptr<InstanceNode> instance);
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE
