@@ -66,6 +66,10 @@ namespace AST
                 : m_template(tmpl), m_value(value), Node(loc) { }
 
         public:
+            inline NodeType GetType() const override { return NodeType::TypeDf; };
+            std::string Format() const override;
+
+        public:
             inline PTypeTmpl GetTypeTemplate() const { return m_template; }
             inline PType GetTypeValue() const { return m_value; }
         };

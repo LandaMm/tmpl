@@ -32,6 +32,7 @@ namespace AST
         Export, // 
         Extern, //
         Type,
+        TypeTemplate,
     };
 
 	class Node
