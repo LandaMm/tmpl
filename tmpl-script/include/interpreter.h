@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 #include <memory>
+#include "include/node/instance.h"
 #include "include/node/statement.h"
 #include "include/node/type.h"
 #include "node/return.h"
@@ -82,6 +83,7 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret); // DONE
         std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse); // DONE
         std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args); // DONE
+        std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance); // DONE
 
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE
