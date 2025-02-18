@@ -33,6 +33,7 @@ namespace AST
         Extern, //
         Type,
         TypeTemplate,
+        TypeDf,
     };
 
 	class Node
