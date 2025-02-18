@@ -19,7 +19,7 @@ namespace Runtime
                 // TODO: return list<char>
                 return std::make_shared<ValType>("string");
             case LiteralType::BOOL:
-                return std::make_shared<ValType>("int");
+                return std::make_shared<ValType>("bool");
             default:
                 break;
         }

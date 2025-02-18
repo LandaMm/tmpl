@@ -27,7 +27,7 @@ namespace Runtime
                     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                     errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
                     ReportError();
-                    return nullptr;
+                    return std::make_shared<ValType>("void");
                 }
 
                 std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
@@ -41,7 +41,7 @@ namespace Runtime
                     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                     errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
                     ReportError();
-                    return nullptr;
+                    return std::make_shared<ValType>("void");
                 }
 
                 fn = typeEnv->LookUp(fnName);
@@ -57,7 +57,7 @@ namespace Runtime
                     Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                     errorManager.UndeclaredFunction(GetFilename(), idCallee, "TypeError");
                     ReportError();
-                    return nullptr;
+                    return std::make_shared<ValType>("void");
                 }
 
                 fn = m_functions->LookUp(fnName);
@@ -68,7 +68,7 @@ namespace Runtime
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.RaiseError("Invalid node for function call", "TypeError");
                 ReportError();
-                return nullptr;
+                return std::make_shared<ValType>("void");
             }
         }
 
@@ -77,7 +77,7 @@ namespace Runtime
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.PrivateFunctionError(GetFilename(), fnName, fn->GetModuleName(), callee->GetLocation(), fn->GetLocation(), "TypeError");
             ReportError();
-            return nullptr;
+            return std::make_shared<ValType>("void");
         }
 
         auto args = fnCall->GetArgs();

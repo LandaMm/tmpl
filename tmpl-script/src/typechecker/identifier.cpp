@@ -12,7 +12,7 @@ namespace Runtime
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.UndeclaredVariable(GetFilename(), identifier, "TypeError");
             ReportError();
-			return nullptr;
+			return std::make_shared<ValType>("void");
 		}
 		std::shared_ptr<TypeVariable> var = m_variables->LookUp(identifier->GetName());
 		return var->GetType();
