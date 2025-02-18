@@ -31,15 +31,15 @@ namespace Runtime
             {
                 auto obj = std::dynamic_pointer_cast<ObjectMember>(callee);
                 std::shared_ptr<Value> targetVal = Execute(obj->GetObject());
-                ValueType targetType = targetVal->GetType();
-                if (!m_type_functions->HasItem(targetType))
+                PValType targetType = targetVal->GetType();
+                if (!m_type_functions->HasItem(targetType->GetName()))
                 {
                     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                     errManager.UndeclaredFunction(GetFilename(), obj, targetType, "RuntimeError");
                     return nullptr;
                 }
 
-                std::shared_ptr<Environment<Fn>> typeEnv = m_type_functions->LookUp(targetType);
+                std::shared_ptr<Environment<Fn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
                 assert(typeEnv != nullptr && "Type env should have been created.");
 
                 std::shared_ptr<Node> fnNameNode = obj->GetMember();
@@ -112,7 +112,7 @@ namespace Runtime
             std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
-            if (val->GetType() != param->GetType())
+            if (!val->GetType()->Compare(*param->GetType()))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgMismatchType(
@@ -145,7 +145,7 @@ namespace Runtime
             m_variables = currentScope;
             SetFilename(currentModule);
 
-            if (value->GetType() != fn->GetReturnType())
+            if (!value->GetType()->Compare(*fn->GetReturnType()))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ReturnMismatchType(GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());

@@ -18,28 +18,24 @@ namespace Runtime
 
         if (unary->GetOperator() == UnaryNode::UnaryOperator::Negative)
         {
-            switch(target->GetType())
+            if (target->GetType()->Compare(ValType("int")))
             {
-                case ValueType::Integer:
-                {
-                    std::shared_ptr<IntegerValue> val = std::dynamic_pointer_cast<IntegerValue>(target);
-                    return std::make_shared<IntegerValue>(std::make_shared<int>(-(*val->GetValue())));
-                }
-                case ValueType::Float:
-                {
-                    std::shared_ptr<FloatValue> val = std::dynamic_pointer_cast<FloatValue>(target);
-                    return std::make_shared<FloatValue>(std::make_shared<float>(-(*val->GetValue())));
-                }
-                case ValueType::Double:
-                {
-                    std::shared_ptr<DoubleValue> val = std::dynamic_pointer_cast<DoubleValue>(target);
-                    return std::make_shared<DoubleValue>(std::make_shared<double>(-(*val->GetValue())));
-                }
-                default:
-                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                    errorManager.UnaryOperatorNotSupported(GetFilename(), "-", target->GetType(), unary->GetLocation());
-                    return nullptr;
+                std::shared_ptr<IntegerValue> val = std::dynamic_pointer_cast<IntegerValue>(target);
+                return std::make_shared<IntegerValue>(std::make_shared<int>(-(*val->GetValue())));
             }
+            if (target->GetType()->Compare(ValType("float")))
+            {
+                std::shared_ptr<FloatValue> val = std::dynamic_pointer_cast<FloatValue>(target);
+                return std::make_shared<FloatValue>(std::make_shared<float>(-(*val->GetValue())));
+            }
+            if (target->GetType()->Compare(ValType("double")))
+            {
+                std::shared_ptr<DoubleValue> val = std::dynamic_pointer_cast<DoubleValue>(target);
+                return std::make_shared<DoubleValue>(std::make_shared<double>(-(*val->GetValue())));
+            }
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.UnaryOperatorNotSupported(GetFilename(), "-", target->GetType(), unary->GetLocation());
+            return nullptr;
         }
 
         if (unary->GetOperator() == UnaryNode::UnaryOperator::Not)
@@ -58,8 +54,7 @@ namespace Runtime
 	{
 		std::shared_ptr<Value> condition = Execute(ternary->GetCondition());
 
-        // TODO: boolean support
-		if (condition->GetType() != ValueType::Bool)
+		if (!condition->GetType()->Compare(ValType("bool")))
 		{
 			// should be unreachable
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -81,14 +76,14 @@ namespace Runtime
 		std::shared_ptr<Value> left = Execute(condition->GetLeft());
 		std::shared_ptr<Value> right = Execute(condition->GetRight());
 
-		if (left->GetType() != right->GetType() && left->GetType() != ValueType::Null && right->GetType() != ValueType::Null)
+		if (!left->GetType()->Compare(*right->GetType())/* && left->GetType() != ValueType::Null && right->GetType() != ValueType::Null*/)
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.OperandMismatchType(GetFilename(), left->GetType(), right->GetType(), condition->GetLocation(), "RuntimeError");
 			return nullptr;
 		}
 
-		if (left->GetType() != right->GetType() && (left->GetType() == ValueType::Null || right->GetType() == ValueType::Null))
+		if (!left->GetType()->Compare(*right->GetType())/* && (left->GetType() == ValueType::Null || right->GetType() == ValueType::Null)*/)
 		{
 			if (condition->GetOperator() != Condition::ConditionType::Compare && condition->GetOperator() != Condition::ConditionType::NotEqual)
 			{
@@ -110,11 +105,12 @@ namespace Runtime
 		std::shared_ptr<Value> left = Execute(expr->GetLeft());
 		std::shared_ptr<Value> right = Execute(expr->GetRight());
 
-		ValueType valueType = left->GetType();
-		if (valueType != right->GetType())
+		PValType valueType = left->GetType();
+		if (!valueType->Compare(*right->GetType()))
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported different types of operands: " + std::to_string((int)left->GetType()) + " != " + std::to_string((int)right->GetType()), "RuntimeError");
+            // TODO: provide better error + type formatting (e.g. generics)
+			errorManager.RaiseError("Unsupported different types of operands: " + left->GetType()->GetName() + " != " + right->GetType()->GetName(), "RuntimeError");
 			return nullptr;
 		}
 

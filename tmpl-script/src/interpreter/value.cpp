@@ -72,7 +72,7 @@ namespace Runtime
 
     std::shared_ptr<Value> Runtime::ListValue::GetItem(std::shared_ptr<Value> indexVal)
     {
-        if (indexVal->GetType() != ValueType::Integer)
+        if (!indexVal->GetType()->Compare(ValType("int")))
         {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Non-integers values cannot be used as index for a list", "RuntimeError");
@@ -163,9 +163,9 @@ namespace Runtime
 		switch (condition)
 		{
 		case AST::Nodes::Condition::ConditionType::Compare:
-			return std::make_shared<BoolValue>(iright->GetType() == ValueType::Null);
+			return std::make_shared<BoolValue>(iright->GetType()->Compare(ValType("void")));
 		case AST::Nodes::Condition::ConditionType::NotEqual:
-			return std::make_shared<BoolValue>(iright->GetType() != ValueType::Null);
+			return std::make_shared<BoolValue>(!iright->GetType()->Compare(ValType("void")));
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported operator for undefined: " + std::to_string((int)condition), "RuntimeError");

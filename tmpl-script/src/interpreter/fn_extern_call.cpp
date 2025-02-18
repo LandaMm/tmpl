@@ -68,50 +68,44 @@ namespace Runtime
             std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
-            switch(val->GetType()) {
-                case ValueType::String:
-                {
-                    auto sVal = std::dynamic_pointer_cast<StringValue>(val);
+            auto valType = val->GetType();
+            if (valType->Compare(ValType("string")))
+            {
+                auto sVal = std::dynamic_pointer_cast<StringValue>(val);
 #ifdef _WIN32
-                    char* str = _strdup(sVal->GetValue()->c_str());
+                char* str = _strdup(sVal->GetValue()->c_str());
 #else
-                    char* str = strdup(sVal->GetValue()->c_str());
+                char* str = strdup(sVal->GetValue()->c_str());
 #endif
-                    data[it->GetPosition() - 1] = (void*)str;
-                    break;
-                }
-                case ValueType::Bool:
-                {
-                    auto bVal = std::dynamic_pointer_cast<BoolValue>(val);
-                    int* b = new int(bVal->GetValue() ? 1 : 0);
-                    data[it->GetPosition() - 1] = (void*)b;
-                    break;
-                }
-                case ValueType::Float:
-                {
-                    auto fVal = std::dynamic_pointer_cast<FloatValue>(val);
-                    float* b = new float(*fVal->GetValue());
-                    data[it->GetPosition() - 1] = (void*)b;
-                    break;
-                }
-                case ValueType::Double:
-                {
-                    auto dVal = std::dynamic_pointer_cast<DoubleValue>(val);
-                    double* b = new double(*dVal->GetValue());
-                    data[it->GetPosition() - 1] = (void*)b;
-                    break;
-                }
-                case ValueType::Integer:
-                {
-                    auto dVal = std::dynamic_pointer_cast<IntegerValue>(val);
-                    int* b = new int(*dVal->GetValue());
-                    data[it->GetPosition() - 1] = (void*)b;
-                    break;
-                }
-                // TODO: Implement list
-                default:
-                    errManager.RaiseError("Value type '" + HumanValueType(val->GetType())+ "' is not supported in extern functions.", "RuntimeError");
+                data[it->GetPosition() - 1] = (void*)str;
             }
+            else if (valType->Compare(ValType("bool")))
+            {
+                auto bVal = std::dynamic_pointer_cast<BoolValue>(val);
+                int* b = new int(bVal->GetValue() ? 1 : 0);
+                data[it->GetPosition() - 1] = (void*)b;
+            }
+            else if (valType->Compare(ValType("float")))
+            {
+                auto fVal = std::dynamic_pointer_cast<FloatValue>(val);
+                float* b = new float(*fVal->GetValue());
+                data[it->GetPosition() - 1] = (void*)b;
+            }
+            else if (valType->Compare(ValType("double")))
+            {
+                auto dVal = std::dynamic_pointer_cast<DoubleValue>(val);
+                double* b = new double(*dVal->GetValue());
+                data[it->GetPosition() - 1] = (void*)b;
+            }
+            else if (valType->Compare(ValType("int")))
+            {
+                auto dVal = std::dynamic_pointer_cast<IntegerValue>(val);
+                int* b = new int(*dVal->GetValue());
+                data[it->GetPosition() - 1] = (void*)b;
+            }
+            else
+                // TODO: use format of valtype
+                errManager.RaiseError("Value type '" + valType->GetName() + "' is not supported in extern functions.", "RuntimeError");
         }
 
         using LibFn = void*(*)(void**data, unsigned int argc);
@@ -149,47 +143,43 @@ namespace Runtime
         free(data);
 
         if (ret) {
-            switch(fn->GetReturnType())
+            auto retType = fn->GetReturnType();
+            if (retType->Compare(ValType("string")))
             {
-                case ValueType::String:
-                {
-                    char* str = (char*)ret;
-                    auto val = std::make_shared<StringValue>(std::string(str));
-                    free(str);
-                    return val;
-                }
-                case ValueType::Integer:
-                {
-                    int* v = (int*)ret;
-                    auto val = std::make_shared<IntegerValue>(*v);
-                    free(v);
-                    return val;
-                }
-                case ValueType::Float:
-                {
-                    float* v = (float*)ret;
-                    auto val = std::make_shared<FloatValue>(*v);
-                    free(v);
-                    return val;
-                }
-                case ValueType::Double:
-                {
-                    double* v = (double*)ret;
-                    auto val = std::make_shared<DoubleValue>(*v);
-                    free(v);
-                    return val;
-                }
-                case ValueType::Bool:
-                {
-                    int* v = (int*)ret;
-                    auto val = std::make_shared<BoolValue>(*v == 1);
-                    free(v);
-                    return val;
-                }
-                // TODO: Implement list
-                default:
-                    break;
+                char* str = (char*)ret;
+                auto val = std::make_shared<StringValue>(std::string(str));
+                free(str);
+                return val;
             }
+            if (retType->Compare(ValType("int")))
+            {
+                int* v = (int*)ret;
+                auto val = std::make_shared<IntegerValue>(*v);
+                free(v);
+                return val;
+            }
+            if (retType->Compare(ValType("float")))
+            {
+                float* v = (float*)ret;
+                auto val = std::make_shared<FloatValue>(*v);
+                free(v);
+                return val;
+            }
+            if (retType->Compare(ValType("double")))
+            {
+                double* v = (double*)ret;
+                auto val = std::make_shared<DoubleValue>(*v);
+                free(v);
+                return val;
+            }
+            if (retType->Compare(ValType("bool")))
+            {
+                int* v = (int*)ret;
+                auto val = std::make_shared<BoolValue>(*v == 1);
+                free(v);
+                return val;
+            }
+            // TODO: Implement list
         }
 
         return std::make_shared<NullValue>();

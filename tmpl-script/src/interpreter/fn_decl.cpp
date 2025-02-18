@@ -15,7 +15,7 @@ namespace Runtime
     void Interpreter::EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed)
     {
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
-        ValueType retType = TypeChecker::EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        PValType retType = TypeChecker::EvaluateType(GetFilename(), fnDecl->GetReturnType());
 
         std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType, GetFilename(), exported, externed, fnDecl->GetLocation());
 
@@ -24,7 +24,7 @@ namespace Runtime
         {
             auto param = fnDecl->GetItem(it->GetPosition());
             it->Next();
-            ValueType paramType = TypeChecker::EvaluateType(GetFilename(), param->GetType());
+            PValType paramType = TypeChecker::EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);
@@ -44,11 +44,12 @@ namespace Runtime
             case AST::NodeType::ObjectMember:
             {
                 auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
-                ValueType targetType = TypeChecker::EvaluateType(GetFilename(), obj->GetObject());
-                if (!m_type_functions->HasItem(targetType))
-                    m_type_functions->AddItem(targetType, std::make_shared<Environment<Fn>>());
+                assert(obj->GetObject()->GetType() == NodeType::Type && "Object target should've been typenode for type function (interpreter)");
+                PValType targetType = TypeChecker::EvaluateType(GetFilename(), std::dynamic_pointer_cast<TypeNode>(obj->GetObject()));
+                if (!m_type_functions->HasItem(targetType->GetName()))
+                    m_type_functions->AddItem(targetType->GetName(), std::make_shared<Environment<Fn>>());
 
-                std::shared_ptr<Environment<Fn>> typeEnv = m_type_functions->LookUp(targetType);
+                std::shared_ptr<Environment<Fn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
                 assert(typeEnv != nullptr && "Type env should have been created.");
 
                 std::shared_ptr<Node> fnNameNode = obj->GetMember();

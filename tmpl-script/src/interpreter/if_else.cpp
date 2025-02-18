@@ -11,7 +11,7 @@ namespace Runtime
         auto condition = Execute(ifElse->GetCondition());
         auto condType = condition->GetType();
 
-        assert(condType == ValueType::Bool && "Condition returned non-boolean value. Should be handled by evaluate condition method");
+        assert(condType->Compare(ValType("bool")) && "Condition returned non-boolean value. Should be handled by evaluate condition method");
 
         auto condVal = std::dynamic_pointer_cast<BoolValue>(condition);
 
