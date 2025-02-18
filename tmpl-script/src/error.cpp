@@ -250,15 +250,25 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
-        void ErrorManager::FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix)
-        {
-            LogFileLocation(filename, loc, prefix);
-            std::cerr << "Cannot redeclare already existing function '"
-                << name << "' at ";
-            LogFileLocation(declFilename, declLoc);
-            std::cerr << std::endl;
-            if (prefix != "TypeError") std::exit(-1);
-        }
+
+    void ErrorManager::TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix)
+    {
+        LogFileLocation(filename, typeNode->GetLocation(), prefix);
+        // TODO: show generics as well
+        std::cerr << "Cannot redeclare already existing type '"
+            << typeNode->GetTypeName()->GetName() << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Cannot redeclare already existing function '"
+            << name << "' at ";
+        LogFileLocation(declFilename, declLoc);
+        std::cerr << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 
     void ErrorManager::PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, Location loc, Location mLoc, std::string prefix)
     {

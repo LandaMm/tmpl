@@ -7,6 +7,7 @@
 #include "token.h"
 #include "interpreter/value.h"
 #include "node/identifier.h"
+#include "node/type.h"
 
 namespace Prelude
 {
@@ -60,6 +61,7 @@ namespace Prelude
         void TypeMismatch(std::string filename, Runtime::PValType left, Runtime::PValType right, AST::Location loc);
         void TypeDoesNotExist(std::string filename, Runtime::PValType typ, AST::Location loc, std::string prefix);
         void TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix);
+        void TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix);
     public: // TypeChecker + Interpreter
         void PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, AST::Location loc, AST::Location mLoc, std::string prefix);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
