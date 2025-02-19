@@ -270,9 +270,17 @@ namespace AST
 		else if (token->GetType() == TokenType::OpenBracket)
 		{
 			Eat(TokenType::OpenBracket);
-			std::shared_ptr<Node> res = Ternary();
-			Eat(TokenType::CloseBracket);
-			return res;
+
+            if (IsTypeCastAhead())
+            {
+                auto typ = Type();
+
+                return Cast(typ);
+            }
+
+            std::shared_ptr<Node> res = Ternary();
+            Eat(TokenType::CloseBracket);
+            return res;
 		}
 		else if (token->GetType() == TokenType::New)
         {
