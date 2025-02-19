@@ -1,4 +1,5 @@
 #include "include/parser.h"
+#include "include/token.h"
 
 namespace AST
 {
@@ -14,6 +15,33 @@ namespace AST
         auto target = Id();
 
         return std::make_shared<Nodes::TypeTemplateNode>(target, target->GetLocation());
+    }
+
+    std::shared_ptr<Nodes::CastNode> Parser::Cast(std::shared_ptr<Nodes::TypeNode> typ)
+    {
+        Eat(TokenType::CloseBracket);
+
+        auto target = Factor();
+
+        return std::make_shared<Nodes::CastNode>(typ, target, typ->GetLocation());
+    }
+
+    bool Parser::IsTypeCastAhead()
+    {
+        m_lexer->SaveState();
+
+        while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+        {
+            Eat(m_lexer->GetToken()->GetType());
+        }
+
+        Eat(TokenType::CloseBracket);
+
+        auto curr = m_lexer->GetToken()->GetType();
+
+        m_lexer->RestoreState();
+
+        return curr == TokenType::Id || curr == TokenType::OpenBracket;
     }
 
     std::shared_ptr<Nodes::TypeDfNode> Parser::TypeDfStatement()

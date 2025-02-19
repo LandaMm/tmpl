@@ -1,5 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
+#include "include/node/cast.h"
 #include "lexer.h"
 #include "node.h"
 #include "node/program.h"
@@ -46,6 +47,9 @@ namespace AST
 		std::shared_ptr<Node> Cond();
 		std::shared_ptr<Node> Ternary();
 
+    private: // Checkers
+        bool IsTypeCastAhead();
+
 	private: // Object Member
 		std::shared_ptr<Node> ObjectMember(std::shared_ptr<Node> obj);
 
@@ -53,6 +57,7 @@ namespace AST
         std::shared_ptr<Nodes::TypeNode> Type();
         std::shared_ptr<Nodes::TypeTemplateNode> TypeTemplate();
         std::shared_ptr<Nodes::TypeDfNode> TypeDfStatement();
+        std::shared_ptr<Nodes::CastNode> Cast(std::shared_ptr<Nodes::TypeNode> typ);
 
 	private: // Statements
 		std::shared_ptr<Node> Statement();
