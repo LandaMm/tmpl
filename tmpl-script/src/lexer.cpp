@@ -401,6 +401,15 @@ namespace AST
 		return m_tokens[m_index];
 	}
 
+    void Lexer::RestoreState()
+    {
+        assert(m_state != nullptr && "State is required for restoring.");
+
+        m_index = m_state->index;
+
+        m_state = nullptr;
+    }
+
 	std::shared_ptr<Token> Lexer::SeekToken()
 	{
 		if (m_index + 1 >= m_tokens.size())

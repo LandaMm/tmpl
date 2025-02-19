@@ -8,6 +8,13 @@
 
 namespace AST
 {
+    struct LexerState
+    {
+        size_t index;
+
+        LexerState(size_t i) : index(i) {}
+    };
+
 	class Lexer
 	{
 	private:
@@ -22,6 +29,7 @@ namespace AST
 
 	private: // token manager
 		size_t m_index;
+        std::shared_ptr<LexerState> m_state;
 
 	public:
 		Lexer(std::string code) : m_code(code)
@@ -38,6 +46,10 @@ namespace AST
 
 	public:
 		std::vector<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
+
+    public:
+        void SaveState() { m_state = std::make_shared<LexerState>(m_index); }
+        void RestoreState();
 
 	public:
 		void Tokenize();
