@@ -1,0 +1,13 @@
+
+typedf Integer = int;
+
+fn @construct Integer(int value) : Integer {
+    return value;
+}
+
+->main {
+    var int expr = (5 - 2) * 5;
+    var Integer test = new Integer(50);
+    return (int)test;
+}
+
