@@ -290,6 +290,14 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
+    void ErrorManager::TypeCastRedeclaration(std::string filename, std::string typeName, Runtime::PValType castType, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Cast '" << typeName << "' -> '" << *castType
+            << "' already exists" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
     void ErrorManager::FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
