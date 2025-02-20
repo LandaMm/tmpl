@@ -5,18 +5,26 @@
 
 namespace Helper
 {
+    void Helper::DefineBuiltInType(std::string builtinName, std::string name, PTypeDfEnv env)
+    {
+        auto bTypeDf = std::make_shared<Runtime::TypeDf>(builtinName, nullptr);
+        auto bType = std::make_shared<Runtime::ValType>(builtinName);
+        env->AddItem(builtinName, bTypeDf);
+
+        auto Type = std::make_shared<Runtime::TypeDf>(name, bType);
+        env->AddItem(name, Type);
+    }
+
     Helper::PTypeDfEnv Helper::GetTypeDefinitions()
     {
         auto typeDefinitions = std::make_shared<Helper::TypeDfEnv>();
 
-        std::string bIntName = "#BUILTIN_INT";
-
-        auto bInt = std::make_shared<Runtime::TypeDf>(bIntName, nullptr);
-        auto bIntType = std::make_shared<Runtime::ValType>(bIntName);
-        typeDefinitions->AddItem(bIntName, bInt);
-
-        auto Int = std::make_shared<Runtime::TypeDf>("int", bIntType);
-        typeDefinitions->AddItem("int", Int);
+        DefineBuiltInType("#BUILTIN_INT", "int", typeDefinitions);
+        DefineBuiltInType("#BUILTIN_FLOAT", "float", typeDefinitions);
+        DefineBuiltInType("#BUILTIN_DOUBLE", "double", typeDefinitions);
+        DefineBuiltInType("#BUILTIN_STRING", "string", typeDefinitions);
+        DefineBuiltInType("#BUILTIN_BOOL", "bool", typeDefinitions);
+        // TODO: list type
 
         return typeDefinitions;
     }

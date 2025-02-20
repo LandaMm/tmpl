@@ -14,6 +14,7 @@ namespace Helper
         using PTypeDfEnv = std::shared_ptr<TypeDfEnv>;
     public:
         static PTypeDfEnv GetTypeDefinitions();
+        static void DefineBuiltInType(std::string builtinName, std::string name, PTypeDfEnv env);
     };
 }
 
