@@ -4,6 +4,7 @@
 #include <memory>
 #include <cassert>
 #include "../../include/interpreter.h"
+#include "include/node/type.h"
 
 namespace fs = std::filesystem;
 
@@ -21,6 +22,9 @@ namespace Runtime
                 break;
             case NodeType::VarDecl:
                 EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(target));
+                break;
+            case NodeType::TypeDf:
+                EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(target), true);
                 break;
             default:
                 assert(false && "Unreachable. Should be handled by parser.");

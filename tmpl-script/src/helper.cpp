@@ -1,17 +1,18 @@
 
 #include "include/helper.h"
 #include "include/interpreter/value.h"
+#include "include/location.h"
 #include "include/typechecker/typedf.h"
 
 namespace Helper
 {
     void Helper::DefineBuiltInType(std::string builtinName, std::string name, PTypeDfEnv env)
     {
-        auto bTypeDf = std::make_shared<Runtime::TypeDf>(builtinName, nullptr);
+        auto bTypeDf = std::make_shared<Runtime::TypeDf>(builtinName, nullptr, "#GLOBAL", true, AST::Location(-1, -1));
         auto bType = std::make_shared<Runtime::ValType>(builtinName);
         env->AddItem(builtinName, bTypeDf);
 
-        auto Type = std::make_shared<Runtime::TypeDf>(name, bType);
+        auto Type = std::make_shared<Runtime::TypeDf>(name, bType, "#GLOBAL", true, AST::Location(-1, -1));
         env->AddItem(name, Type);
     }
 

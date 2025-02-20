@@ -116,7 +116,7 @@ namespace Runtime
         void HandleFnSignature(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported); // DONE
         void HandleModule(std::shared_ptr<ProgramNode> program); // DONE
         void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt); // DONE
-        void HandleTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn);
+        void HandleTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported);
 
     private:
         void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected); // DONE

@@ -61,7 +61,7 @@ namespace Runtime
                     EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(stmt));
                     break;
                 case NodeType::TypeDf:
-                    EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt));
+                    EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
                     break;
                 case NodeType::Export:
                     // Ignore export in the tmpl executable
@@ -101,7 +101,7 @@ namespace Runtime
                     EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), true, false);
                     break;
                 case NodeType::TypeDf:
-                    EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt));
+                    EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
                     break;
                 default:
                     {

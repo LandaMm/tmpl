@@ -36,17 +36,26 @@ namespace Runtime
         PValType m_basename;
         PCasts m_casts;
         PFn m_constructor;
+        
+        std::string m_module;
+        bool m_exported;
+        AST::Location m_loc;
 
     public:
-        TypeDf(std::string tName, PValType basename)
+        TypeDf(std::string tName, PValType basename, std::string module, bool exported, AST::Location loc)
             : m_typename(tName), m_basename(basename),
               m_casts(std::make_shared<Casts>()),
-              m_constructor(nullptr) { }
+              m_constructor(nullptr),
+              m_exported(exported), m_module(module), m_loc(loc) { }
     
     public:
         inline std::string GetTypeName() const { return m_typename; }
         inline PValType GetBaseType() const { return m_basename; }
         inline PCasts GetCastsEnv() const { return m_casts; }
+
+        inline std::string GetModuleName() const { return m_module; }
+        inline bool IsExported() const { return m_exported; }
+        inline AST::Location GetLocation() const { return m_loc; }
 
         inline bool HasConstructor() const { return m_constructor != nullptr; }
         inline PFn GetConstructor() const { return m_constructor; }

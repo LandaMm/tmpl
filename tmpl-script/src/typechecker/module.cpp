@@ -4,6 +4,7 @@
 #include "../../include/typechecker.h"
 #include "include/iterator.h"
 #include "include/node/function.h"
+#include "include/node/type.h"
 
 namespace fs = std::filesystem;
 
@@ -55,6 +56,9 @@ namespace Runtime
             case NodeType::VarDecl:
                 HandleVarDeclaration(std::dynamic_pointer_cast<VarDeclaration>(target));
                 break;
+            case NodeType::TypeDf:
+                HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(target), true);
+                break;
             default:
                 assert(false && "Unreachable. Should be handled by parser.");
                 return;
@@ -87,7 +91,7 @@ namespace Runtime
                     HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
                 case NodeType::TypeDf:
-                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt));
+                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
                     break;
                 default:
                     {

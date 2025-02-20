@@ -117,7 +117,7 @@ namespace Runtime
                     HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
                     break;
                 case NodeType::TypeDf:
-                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt));
+                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
                     break;
                 case NodeType::Extern:
                 {
