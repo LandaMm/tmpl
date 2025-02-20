@@ -5,9 +5,14 @@ fn @construct Integer(int value) : Integer {
     return value;
 }
 
+fn Integer.getInt() : int {
+    return (int)self;
+}
+
 ->main {
     var int expr = (5 - 2) * 5;
-    var Integer test = new Integer(50);
-    return (int)test;
+    var int nExpr = -expr;
+    var Integer test = new Integer(nExpr);
+    return test.getInt();
 }
 
