@@ -86,6 +86,9 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance); // DONE
         std::shared_ptr<Value> EvaluateTypeCasting(std::shared_ptr<CastNode> cast); // DONE
 
+    private:
+        std::shared_ptr<Value> CastValue(std::shared_ptr<Value> val, PValType to, Location loc);
+
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl); // DONE
