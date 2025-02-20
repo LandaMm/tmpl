@@ -117,6 +117,12 @@ namespace Runtime
 	public:
 		BoolValue(bool value) : m_value(value), Value(std::make_shared<ValType>("bool")) {}
 
+    public:
+        BoolValue(const BoolValue* val) : Value(val->GetType())
+        {
+            m_value = val->m_value;
+        }
+
 	public:
 		inline bool GetValue() const { return m_value; }
 
@@ -130,7 +136,7 @@ namespace Runtime
     public:
         std::shared_ptr<Value> Clone() const override
         {
-            return std::make_shared<BoolValue>(m_value);
+            return std::make_shared<BoolValue>(this);
         }
 	};
 
@@ -142,6 +148,12 @@ namespace Runtime
 	public:
 		IntegerValue(std::shared_ptr<int> value) : m_value(value), Value(std::make_shared<ValType>("int")) {}
 		IntegerValue(int value) : m_value(std::make_shared<int>(value)), Value(std::make_shared<ValType>("int")) {}
+
+    public:
+        IntegerValue(const IntegerValue* val) : Value(val->GetType())
+        {
+            m_value = val->m_value;
+        }
 
 	public:
 		inline std::shared_ptr<int> GetValue() const { return m_value; }
@@ -156,7 +168,7 @@ namespace Runtime
     public:
         std::shared_ptr<Value> Clone() const override
         {
-            return std::make_shared<IntegerValue>(m_value);
+            return std::make_shared<IntegerValue>(this);
         }
 	};
 
@@ -178,6 +190,12 @@ namespace Runtime
 		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 
     public:
+        ListValue(const ListValue* val) : Value(val->GetType())
+        {
+            m_value = val->m_value;
+        }
+
+    public:
         void AddItem(std::shared_ptr<Value> item);
         std::shared_ptr<Value> GetItem(std::shared_ptr<IntegerValue> indexVal);
 
@@ -187,7 +205,7 @@ namespace Runtime
     public:
         std::shared_ptr<Value> Clone() const override
         {
-            return std::make_shared<ListValue>(m_value);
+            return std::make_shared<ListValue>(this);
         }
 	};
 
@@ -203,6 +221,12 @@ namespace Runtime
 	public:
 		inline std::shared_ptr<float> GetValue() const { return m_value; }
 
+    public:
+        FloatValue(const FloatValue* val) : Value(val->GetType())
+        {
+            m_value = val->m_value;
+        }
+
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
 		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
@@ -213,7 +237,7 @@ namespace Runtime
     public:
         std::shared_ptr<Value> Clone() const override
         {
-            return std::make_shared<FloatValue>(m_value);
+            return std::make_shared<FloatValue>(this);
         }
 	};
 	class DoubleValue : public Value
@@ -232,13 +256,19 @@ namespace Runtime
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
 		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 
+    public:
+        DoubleValue(const DoubleValue* val) : Value(val->GetType())
+        {
+            m_value = val->m_value;
+        }
+
 	public:
 		std::string format() const override;
 
     public:
         std::shared_ptr<Value> Clone() const override
         {
-            return std::make_shared<DoubleValue>(m_value);
+            return std::make_shared<DoubleValue>(this);
         }
 	};
 	class StringValue : public Value
@@ -257,13 +287,19 @@ namespace Runtime
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
 		std::shared_ptr<Value> Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType) override;
 
+    public:
+        StringValue(const StringValue* val) : Value(val->GetType())
+        {
+            m_value = val->m_value;
+        }
+
 	public:
 		std::string format() const override;
 
     public:
         std::shared_ptr<Value> Clone() const override
         {
-            return std::make_shared<StringValue>(m_value);
+            return std::make_shared<StringValue>(this);
         }
 	};
 }
