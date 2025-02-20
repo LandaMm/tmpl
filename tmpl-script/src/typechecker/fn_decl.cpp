@@ -9,6 +9,7 @@
 #include "include/interpreter/value.h"
 #include "include/node/function.h"
 #include "include/node/type.h"
+#include "include/typechecker/typedf.h"
 #include <error.h>
 #include <memory>
 
@@ -74,7 +75,7 @@ namespace Runtime
                 baseType = typeDf->GetBaseType();
 
                 auto constructorFn =
-                    std::make_shared<Fn>(nullptr, baseType, GetFilename(), false, false, fnDecl->GetLocation());
+                    std::make_shared<Fn>(nullptr, baseType, GetFilename(), exported, false, fnDecl->GetLocation());
 
                 auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
                 while (it->HasItems())
@@ -85,6 +86,54 @@ namespace Runtime
                 }
 
                 typeDf->SetConstructor(constructorFn);
+
+                break;
+            }
+            case AST::Nodes::FunctionModifier::Cast:
+            {
+                assert(nameNode->GetType() == AST::NodeType::TypeTemplate && "Name should be a type template by construct fn");
+                // TODO: support generics
+                auto id = std::dynamic_pointer_cast<AST::Nodes::TypeTemplateNode>(nameNode);
+
+                std::string typeName = id->GetTypeName()->GetName();
+
+                if (!m_type_definitions->HasItem(typeName))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeDoesNotExist(GetFilename(), typeName, id->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto typeDf = m_type_definitions->LookUp(typeName);
+                assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                auto casts = typeDf->GetCastsEnv();
+
+                // TODO: compare generics amount and names
+                if (casts->HasItem(retType->GetName()))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeCastRedeclaration(GetFilename(), typeName, retType, fnDecl->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto castFn =
+                    std::make_shared<Fn>(nullptr, retType, GetFilename(), exported, false, fnDecl->GetLocation());
+
+                auto typDfCast =
+                    std::make_shared<TypeDfCast>(typeName, retType->GetName(), castFn);
+
+                casts->AddItem(retType->GetName(), typDfCast);
+
+                // TODO: generics support
+                auto dummTypNode =
+                    std::make_shared<TypeNode>(id->GetTypeName(), id->GetTypeName()->GetLocation());
+                PValType targetType = EvaluateType(GetFilename(), dummTypNode);
+
+                auto typeVar = std::make_shared<TypeVariable>(targetType, false);
+                variables->AddItem("self", typeVar);
 
                 break;
             }
@@ -105,6 +154,9 @@ namespace Runtime
             }
             case AST::NodeType::ObjectMember:
             {
+                assert(fnDecl->GetModifier() != FunctionModifier::Cast && "Object members are not supported in cast functions as names.");
+                assert(fnDecl->GetModifier() != FunctionModifier::Construct && "Object members are not supported in cast functions as names.");
+
                 auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
                 assert(obj->GetObject()->GetType() == NodeType::Type && "Object target should be a type for type fn");
                 PValType targetType = EvaluateType(GetFilename(), std::dynamic_pointer_cast<TypeNode>(obj->GetObject()));
@@ -133,10 +185,13 @@ namespace Runtime
                 variables->AddItem("self", typeVar);
                 break;
             }
+            case AST::NodeType::TypeTemplate:
+                // skip (cast function)
+                break;
             default:
             {
                 Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-                errManager.RaiseError("Unsupported node for fn declaration", "TypeError");
+                errManager.RaiseError("Unsupported node for fn declaration: " + nameNode->Format(), "TypeError");
                 ReportError();
                 return;
             }
