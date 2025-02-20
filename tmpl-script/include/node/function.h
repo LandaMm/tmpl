@@ -49,6 +49,7 @@ namespace AST
         enum class FunctionModifier
         {
             Construct,
+            Cast,
             None,
         };
 
