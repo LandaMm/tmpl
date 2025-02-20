@@ -70,17 +70,9 @@ namespace Runtime
         m_value.push_back(item);
     }
 
-    std::shared_ptr<Value> Runtime::ListValue::GetItem(std::shared_ptr<Value> indexVal)
+    std::shared_ptr<Value> Runtime::ListValue::GetItem(std::shared_ptr<IntegerValue> indexVal)
     {
-        if (!indexVal->GetType()->Compare(ValType("int")))
-        {
-			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Non-integers values cannot be used as index for a list", "RuntimeError");
-			return nullptr;
-        }
-
-        std::shared_ptr<IntegerValue> vl = std::dynamic_pointer_cast<IntegerValue>(indexVal);
-        std::shared_ptr<int> index = vl->GetValue();
+        std::shared_ptr<int> index = indexVal->GetValue();
 
         if (*index < 0)
         {
