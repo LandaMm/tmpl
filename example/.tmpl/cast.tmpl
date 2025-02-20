@@ -1,28 +1,12 @@
-
-typedf Integer = int;
-
-fn @construct Integer(int value) : Integer {
-    return value;
-}
+@require"integer"
 
 fn @cast(int) : float {
     # Dummy
     return 3.1415;
 }
 
-fn @cast(Integer) : float {
-    return (float)(int)self;
-}
-
-fn Integer.getInt() : int {
-    return (int)self;
-}
-
 ->main {
-    var int expr = (5 - 2) * 5;
-    var int nExpr = -expr;
-    var Integer test = new Integer(nExpr);
-    var float testF = (float)test;
-    return testF;
+    var Integer test = new Integer(50);
+    return (string)test;
 }
 
