@@ -9,11 +9,9 @@ namespace Runtime
         auto target = Execute(cast->GetExpr());
         auto targetType = TypeChecker::EvaluateType(GetFilename(), cast->GetTypeNode());
 
-        TypeChecker::CastType(GetFilename(), target->GetType(), targetType, cast->GetTypeNode()->GetLocation(), m_type_definitions, "TypeError");
+        auto clonedValue = target->Clone();
 
-        target->SetType(targetType);
-
-        return target;
+        return CastValue(clonedValue, targetType, cast->GetTypeNode()->GetLocation());
     }
 }
 
