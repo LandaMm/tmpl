@@ -1,5 +1,6 @@
 
 #include "include/iterator.h"
+#include "include/typechecker.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -69,7 +70,8 @@ namespace Runtime
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
             auto valType = val->GetType();
-            if (valType->Compare(ValType("string")))
+            auto rootType = TypeChecker::GetRootType(GetFilename(), valType, arg->GetLocation(), m_type_definitions, "RuntimeError");
+            if (rootType->Compare(ValType("#BUILTIN_STRING")))
             {
                 auto sVal = std::dynamic_pointer_cast<StringValue>(val);
 #ifdef _WIN32
@@ -79,25 +81,25 @@ namespace Runtime
 #endif
                 data[it->GetPosition() - 1] = (void*)str;
             }
-            else if (valType->Compare(ValType("bool")))
+            else if (rootType->Compare(ValType("#BUILTIN_BOOL")))
             {
                 auto bVal = std::dynamic_pointer_cast<BoolValue>(val);
                 int* b = new int(bVal->GetValue() ? 1 : 0);
                 data[it->GetPosition() - 1] = (void*)b;
             }
-            else if (valType->Compare(ValType("float")))
+            else if (rootType->Compare(ValType("#BUILTIN_FLOAT")))
             {
                 auto fVal = std::dynamic_pointer_cast<FloatValue>(val);
                 float* b = new float(*fVal->GetValue());
                 data[it->GetPosition() - 1] = (void*)b;
             }
-            else if (valType->Compare(ValType("double")))
+            else if (rootType->Compare(ValType("#BUILTIN_DOUBLE")))
             {
                 auto dVal = std::dynamic_pointer_cast<DoubleValue>(val);
                 double* b = new double(*dVal->GetValue());
                 data[it->GetPosition() - 1] = (void*)b;
             }
-            else if (valType->Compare(ValType("int")))
+            else if (rootType->Compare(ValType("#BUILTIN_INT")))
             {
                 auto dVal = std::dynamic_pointer_cast<IntegerValue>(val);
                 int* b = new int(*dVal->GetValue());
@@ -144,35 +146,36 @@ namespace Runtime
 
         if (ret) {
             auto retType = fn->GetReturnType();
-            if (retType->Compare(ValType("string")))
+            auto rootType = TypeChecker::GetRootType(GetFilename(), retType, fn->GetLocation(), m_type_definitions, "RuntimeError");
+            if (rootType->Compare(ValType("#BUILTIN_STRING")))
             {
                 char* str = (char*)ret;
                 auto val = std::make_shared<StringValue>(std::string(str));
                 free(str);
                 return val;
             }
-            if (retType->Compare(ValType("int")))
+            if (rootType->Compare(ValType("#BUILTIN_INT")))
             {
                 int* v = (int*)ret;
                 auto val = std::make_shared<IntegerValue>(*v);
                 free(v);
                 return val;
             }
-            if (retType->Compare(ValType("float")))
+            if (rootType->Compare(ValType("#BUILTIN_FLOAT")))
             {
                 float* v = (float*)ret;
                 auto val = std::make_shared<FloatValue>(*v);
                 free(v);
                 return val;
             }
-            if (retType->Compare(ValType("double")))
+            if (rootType->Compare(ValType("#BUILTIN_DOUBLE")))
             {
                 double* v = (double*)ret;
                 auto val = std::make_shared<DoubleValue>(*v);
                 free(v);
                 return val;
             }
-            if (retType->Compare(ValType("bool")))
+            if (rootType->Compare(ValType("#BUILTIN_BOOL")))
             {
                 int* v = (int*)ret;
                 auto val = std::make_shared<BoolValue>(*v == 1);

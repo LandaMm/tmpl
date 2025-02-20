@@ -1,5 +1,6 @@
 
 #include "../../include/interpreter.h"
+#include "include/typechecker.h"
 #include <memory>
 #include <cassert>
 
@@ -18,17 +19,18 @@ namespace Runtime
 
         if (unary->GetOperator() == UnaryNode::UnaryOperator::Negative)
         {
-            if (target->GetType()->Compare(ValType("int")))
+            auto rootTyp = TypeChecker::GetRootType(GetFilename(), target->GetType(), unary->GetTarget()->GetLocation(), m_type_definitions, "RuntimeError");
+            if (rootTyp->Compare(ValType("#BUILTIN_INT")))
             {
                 std::shared_ptr<IntegerValue> val = std::dynamic_pointer_cast<IntegerValue>(target);
                 return std::make_shared<IntegerValue>(std::make_shared<int>(-(*val->GetValue())));
             }
-            if (target->GetType()->Compare(ValType("float")))
+            if (rootTyp->Compare(ValType("#BUILTIN_FLOAT")))
             {
                 std::shared_ptr<FloatValue> val = std::dynamic_pointer_cast<FloatValue>(target);
                 return std::make_shared<FloatValue>(std::make_shared<float>(-(*val->GetValue())));
             }
-            if (target->GetType()->Compare(ValType("double")))
+            if (rootTyp->Compare(ValType("#BUILTIN_DOUBLE")))
             {
                 std::shared_ptr<DoubleValue> val = std::dynamic_pointer_cast<DoubleValue>(target);
                 return std::make_shared<DoubleValue>(std::make_shared<double>(-(*val->GetValue())));
