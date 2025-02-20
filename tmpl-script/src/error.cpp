@@ -308,6 +308,16 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
+    void ErrorManager::PrivateTypeError(std::string filename, std::string typName, std::string typModule, AST::Location loc, AST::Location mLoc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Trying to access a private type '" << typName
+            << "' outside of it's module ";
+        LogFileLocation(typModule, mLoc);
+        std::cerr << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
     void ErrorManager::PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, Location loc, Location mLoc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);

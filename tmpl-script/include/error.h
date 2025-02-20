@@ -67,6 +67,7 @@ namespace Prelude
         void TypeConstructorRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix);
         void TypeCastRedeclaration(std::string filename, std::string typeName, Runtime::PValType castType, AST::Location loc, std::string prefix);
         void TypeConstructorDoesNotExist(std::string filename, Runtime::PValType targetTyp, AST::Location loc, std::string prefix);
+        void PrivateTypeError(std::string filename, std::string typName, std::string typModule, AST::Location loc, AST::Location mLoc, std::string prefix);
     public: // TypeChecker + Interpreter
         void PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, AST::Location loc, AST::Location mLoc, std::string prefix);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
