@@ -5,6 +5,11 @@ fn @construct Integer(int value) : Integer {
     return value;
 }
 
+fn @cast(int) : float {
+    # Dummy
+    return 3.1415;
+}
+
 fn @cast(Integer) : float {
     return (float)(int)self;
 }
@@ -17,6 +22,7 @@ fn Integer.getInt() : int {
     var int expr = (5 - 2) * 5;
     var int nExpr = -expr;
     var Integer test = new Integer(nExpr);
-    return test.getInt();
+    var float testF = (float)test;
+    return testF;
 }
 
