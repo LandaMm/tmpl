@@ -26,6 +26,10 @@ namespace AST
 
         public:
             std::string Format() const override;
+
+        public:
+            inline PTypeNode GetTypeNode() const { return m_type; }
+            inline PNode GetExpr() const { return m_expr; }
         };
     }
 }
