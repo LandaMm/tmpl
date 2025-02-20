@@ -58,6 +58,7 @@ namespace AST
         TypeDf,
         Construct,
         New,
+        Cast,
 		_EOF,
 	};
 
@@ -113,6 +114,7 @@ namespace AST
         "typedf",
         "construct",
         "new",
+        "cast",
 		"EOF",
 	};
 
