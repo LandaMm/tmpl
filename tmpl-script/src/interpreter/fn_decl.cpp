@@ -51,6 +51,13 @@ namespace Runtime
                 auto typeDf = m_type_definitions->LookUp(typeName);
                 assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
 
+                if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
+                {
+                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                    errorManager.PrivateTypeError(GetFilename(), typeDf->GetTypeName(), typeDf->GetModuleName(), nameNode->GetLocation(), typeDf->GetLocation(), "RuntimeError");
+                    return;
+                }
+
                 // TODO: compare generics amount and names
                 if (typeDf->HasConstructor())
                 {
@@ -84,6 +91,13 @@ namespace Runtime
 
                 auto typeDf = m_type_definitions->LookUp(typeName);
                 assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
+                {
+                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                    errorManager.PrivateTypeError(GetFilename(), typeDf->GetTypeName(), typeDf->GetModuleName(), nameNode->GetLocation(), typeDf->GetLocation(), "RuntimeError");
+                    return;
+                }
 
                 auto casts = typeDf->GetCastsEnv();
 

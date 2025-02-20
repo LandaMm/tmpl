@@ -20,6 +20,14 @@ namespace Runtime
         auto typeDf = m_type_definitions->LookUp(targetType->GetName());
         assert(typeDf != nullptr && "Type definition should not be not found at this point.");
 
+        if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.PrivateTypeError(GetFilename(), typeDf->GetTypeName(), typeDf->GetModuleName(), instance->GetLocation(), typeDf->GetLocation(), "TypeError");
+            ReportError();
+            return std::make_shared<ValType>("void");
+        }
+
         if (!typeDf->HasConstructor())
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
