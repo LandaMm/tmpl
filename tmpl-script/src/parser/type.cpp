@@ -30,12 +30,17 @@ namespace AST
     {
         m_lexer->SaveState();
 
+        if (m_lexer->GetToken()->GetType() != TokenType::Id)
+        {
+            return false;
+        }
+
         while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
         {
             Eat(m_lexer->GetToken()->GetType());
         }
 
-        Eat(TokenType::CloseBracket);
+        Eat(m_lexer->GetToken()->GetType());
 
         auto curr = m_lexer->GetToken()->GetType();
 
