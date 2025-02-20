@@ -2,7 +2,9 @@
 #ifndef TYPECHECKER_H
 #define TYPECHECKER_H
 #include <memory>
+#include "include/helper.h"
 #include "include/interpreter.h"
+#include "include/node/cast.h"
 #include "include/node/instance.h"
 #include "include/node/logical.h"
 #include "include/node/type.h"
@@ -91,7 +93,7 @@ namespace Runtime
               m_functions(std::make_shared<Environment<TypeFn>>()),
               m_modules(std::make_shared<Environment<std::string>>()),
               m_type_functions(std::make_shared<Environment<Environment<TypeFn>>>()),
-              m_type_definitions(std::make_shared<TypeDfs>()),
+              m_type_definitions(Helper::Helper::GetTypeDefinitions()),
               m_errors(0) { }
     public:
         void RunChecker(std::shared_ptr<ProgramNode> program); // DONE
@@ -106,6 +108,7 @@ namespace Runtime
         PValType DiagnoseCondition(std::shared_ptr<Condition> condition); // DONE
         PValType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary); // DONE
         PValType DiagnoseInstance(std::shared_ptr<InstanceNode> instance);
+        PValType DiagnoseTypeCasting(std::shared_ptr<CastNode> cast);
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE

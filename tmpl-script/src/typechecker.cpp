@@ -42,6 +42,8 @@ namespace Runtime
                 return DiagnoseTernary(std::dynamic_pointer_cast<TernaryNode>(node));
             case NodeType::Instance:
                 return DiagnoseInstance(std::dynamic_pointer_cast<InstanceNode>(node));
+            case NodeType::Cast:
+                return DiagnoseTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
             case NodeType::Return:
             {
                 auto ret = std::dynamic_pointer_cast<ReturnNode>(node);
