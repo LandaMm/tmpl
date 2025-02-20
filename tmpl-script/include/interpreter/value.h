@@ -79,6 +79,9 @@ namespace Runtime
 
 	public:
 		virtual std::string format() const = 0;
+
+    public:
+        virtual std::shared_ptr<Value> Clone() const = 0;
     
     public:
         void SetType(PValType newTyp) { m_value_type = newTyp; }
@@ -98,6 +101,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<VoidValue>();
+        }
 	};
 
 	class BoolValue : public Value
@@ -117,6 +126,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<BoolValue>(m_value);
+        }
 	};
 
 	class IntegerValue : public Value
@@ -137,6 +152,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<IntegerValue>(m_value);
+        }
 	};
 
 	class ListValue : public Value
@@ -162,6 +183,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<ListValue>(m_value);
+        }
 	};
 
 	class FloatValue : public Value
@@ -182,6 +209,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<FloatValue>(m_value);
+        }
 	};
 	class DoubleValue : public Value
 	{
@@ -201,6 +234,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<DoubleValue>(m_value);
+        }
 	};
 	class StringValue : public Value
 	{
@@ -220,6 +259,12 @@ namespace Runtime
 
 	public:
 		std::string format() const override;
+
+    public:
+        std::shared_ptr<Value> Clone() const override
+        {
+            return std::make_shared<StringValue>(m_value);
+        }
 	};
 }
 
