@@ -32,12 +32,10 @@ namespace Runtime
         // 2. check if "from" and "to" types are equal
         if (from->Compare(*to)) return to;
         // 3. check if "from" type's name is "to" type's basename
-        auto toDf = typeDfs->LookUp(to->GetName());
-        assert(toDf != nullptr && "To type's definition should not be null");
-        if (toDf->GetBaseType()->Compare(*from)) return to;
-        // 4. otherwise check if "from" type contains cast to "to" type in typeDf
         auto fromDf = typeDfs->LookUp(from->GetName());
         assert(fromDf != nullptr && "From type's definition should not be null");
+        if (fromDf->GetBaseType()->Compare(*to)) return to;
+        // 4. otherwise check if "from" type contains cast to "to" type in typeDf
         auto casts = fromDf->GetCastsEnv();
         if (casts->HasItem(to->GetName())) return to;
 
