@@ -32,6 +32,10 @@ namespace AST
                 target = VariableDeclaration();
                 Eat(TokenType::Semicolon);
                 break;
+            case TokenType::TypeDf:
+                target = TypeDfStatement();
+                Eat(TokenType::Semicolon);
+                break;
             default:
                 Prelude::ErrorManager &manager = GetErrorManager();
                 manager.UnexpectedToken(GetFilename(), token);
