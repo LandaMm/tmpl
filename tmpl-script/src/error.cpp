@@ -178,7 +178,7 @@ namespace Prelude
     void ErrorManager::TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
-        std::cerr << "Type '" << *from << "' cannot be converted to type '"
+        std::cerr << "Type '" << *from << "' cannot be casted to type '"
             << *to << "'" << std::endl;
         if (prefix != "TypeError") exit(-1);
     }
