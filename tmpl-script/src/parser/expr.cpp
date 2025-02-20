@@ -280,6 +280,23 @@ namespace AST
 
             std::shared_ptr<Node> res = Ternary();
             Eat(TokenType::CloseBracket);
+
+			TokenType current_type = m_lexer->GetToken()->GetType();
+			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
+			{
+				if (current_type == TokenType::OpenBracket)
+				{
+					std::shared_ptr<Node> fcall = FunctionCall(res);
+					res = fcall;
+				}
+				else if (current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
+				{
+					std::shared_ptr<Node> objm = ObjectMember(res);
+					res = objm;
+				}
+				current_type = m_lexer->GetToken()->GetType();
+			}
+
             return res;
 		}
 		else if (token->GetType() == TokenType::New)
