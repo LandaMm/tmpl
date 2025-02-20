@@ -84,6 +84,7 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse); // DONE
         std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args); // DONE
         std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance); // DONE
+        std::shared_ptr<Value> EvaluateTypeCasting(std::shared_ptr<CastNode> cast); // DONE
 
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE

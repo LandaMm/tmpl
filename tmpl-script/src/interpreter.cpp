@@ -140,6 +140,8 @@ namespace Runtime
             return EvaluateIfElseStatement(std::dynamic_pointer_cast<Statements::IfElseStatement>(node));
         case NodeType::Instance:
             return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
+        case NodeType::Cast:
+            return EvaluateTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
         case NodeType::Block:
         {
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);
