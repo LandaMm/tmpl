@@ -6,7 +6,9 @@ fn @cast(int) : float {
 }
 
 ->main {
-    var Integer test = new Integer(50);
-    return (string)test;
+    var Integer a = new Integer(50);
+    var Integer b = new Integer(100);
+    var Integer res = a + b;
+    return (string)res;
 }
 
