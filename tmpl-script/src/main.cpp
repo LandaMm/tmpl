@@ -10,7 +10,7 @@
 #include "../include/cli.h"
 #include "../include/error.h"
 #include "../include/typechecker.h"
-#include "include/typechecker/typedf.h"
+#include "../include/helper.h"
 
 int main(int argc, char **argv)
 {
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 	auto functions = std::make_shared<Environment<Fn>>();
 	auto modules = std::make_shared<Environment<std::string>>();
     auto typeFunctions = std::make_shared<Environment<Environment<Fn>>>();
-    auto typeDefinitions = std::make_shared<Environment<TypeDf>>();
+    auto typeDefinitions = Helper::Helper::GetTypeDefinitions();
 
 	Interpreter intrpt(parser, variables, procedures, functions, modules, typeFunctions, typeDefinitions);
 
