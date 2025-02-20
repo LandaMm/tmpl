@@ -131,6 +131,7 @@ namespace Runtime
 	public:
 		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode); // DONE
         static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix); // DONE
+        static PValType GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix);
 
     private:
         std::string GetFilename() const { return m_filename; }

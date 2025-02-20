@@ -8,6 +8,31 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
+    PValType TypeChecker::GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
+    {
+        auto typ = target;
+
+        while (typ != nullptr)
+        {
+            if (!typeDfs->HasItem(typ->GetName()))
+            {
+                Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                errManager.TypeDoesNotExist(filename, typ, loc, prefix);
+                return std::make_shared<ValType>("void");
+            }
+
+            auto typDf = typeDfs->LookUp(typ->GetName());
+            assert(typDf != nullptr && "Found typ df should not be nullptr");
+
+            if (typDf->GetBaseType() == nullptr)
+                break;
+            else
+                typ = typDf->GetBaseType();
+        }
+
+        return typ;
+    }
+
     PValType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode)
     {
         return std::make_shared<ValType>(typeNode->GetTypeName()->GetName());
