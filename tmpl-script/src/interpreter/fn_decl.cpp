@@ -67,6 +67,41 @@ namespace Runtime
 
                 break;
             }
+            case AST::Nodes::FunctionModifier::Cast:
+            {
+                assert(nameNode->GetType() == AST::NodeType::TypeTemplate && "Name should be a type template by construct fn");
+                // TODO: support generics
+                auto id = std::dynamic_pointer_cast<AST::Nodes::TypeTemplateNode>(nameNode);
+
+                std::string typeName = id->GetTypeName()->GetName();
+
+                if (!m_type_definitions->HasItem(typeName))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeDoesNotExist(GetFilename(), typeName, id->GetLocation(), "RuntimeError");
+                    return;
+                }
+
+                auto typeDf = m_type_definitions->LookUp(typeName);
+                assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                auto casts = typeDf->GetCastsEnv();
+
+                // TODO: compare generics amount and names
+                if (casts->HasItem(retType->GetName()))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeCastRedeclaration(GetFilename(), typeName, retType, fnDecl->GetLocation(), "RuntimeError");
+                    return;
+                }
+
+                auto typDfCast =
+                    std::make_shared<TypeDfCast>(typeName, retType->GetName(), fn);
+
+                casts->AddItem(retType->GetName(), typDfCast);
+
+                break;
+            }
             default:
                 // skip, no additional actions required
                 break;
@@ -102,17 +137,20 @@ namespace Runtime
                     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                     auto existingFn = typeEnv->LookUp(fnName);
                     assert(existingFn != nullptr && "Existing fn should not be nullptr");
-                    errManager.FunctionRedeclaration(GetFilename(), fnName, fnDecl->GetLocation(), existingFn->GetModuleName(), existingFn->GetLocation(), "TypeError");
+                    errManager.FunctionRedeclaration(GetFilename(), fnName, fnDecl->GetLocation(), existingFn->GetModuleName(), existingFn->GetLocation(), "RuntimeError");
                     return;
                 }
 
                 typeEnv->AddItem(fnName, fn);
                 break;
             }
+            case AST::NodeType::TypeTemplate:
+                // skip (cast function)
+                break;
             default:
             {
                 Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-                errManager.RaiseError("Unsupported node for fn declaration", "TypeError");
+                errManager.RaiseError("Unsupported node for fn declaration", "RuntimeError");
                 return;
             }
         }
