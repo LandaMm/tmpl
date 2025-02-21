@@ -125,6 +125,7 @@ namespace Runtime
 
 	public:
 		inline bool GetValue() const { return m_value; }
+        void SetValue(bool newValue) { m_value = newValue; }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
@@ -157,6 +158,7 @@ namespace Runtime
 
 	public:
 		inline std::shared_ptr<int> GetValue() const { return m_value; }
+        void SetValue(int newValue) { *m_value = newValue; }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
@@ -220,6 +222,7 @@ namespace Runtime
 
 	public:
 		inline std::shared_ptr<float> GetValue() const { return m_value; }
+        void SetValue(float newValue) { *m_value = newValue; }
 
     public:
         FloatValue(const FloatValue* val) : Value(val->GetType())
@@ -251,6 +254,7 @@ namespace Runtime
 
 	public:
 		inline std::shared_ptr<double> GetValue() const { return m_value; }
+        void SetValue(double newValue) { *m_value = newValue; }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
@@ -282,6 +286,7 @@ namespace Runtime
 
 	public:
 		inline std::shared_ptr<std::string> GetValue() const { return m_value; }
+        void SetValue(std::string newValue) { *m_value = newValue; }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
