@@ -33,7 +33,7 @@ namespace Runtime
         auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
         while (it->HasItems())
         {
-            auto param = fnDecl->GetItem(it->GetPosition());
+            auto param = fnDecl->GetParam(it->GetPosition());
             it->Next();
             PValType paramType = EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
@@ -239,7 +239,7 @@ namespace Runtime
         auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
         while (it->HasItems())
         {
-            auto param = fnDecl->GetItem(it->GetPosition());
+            auto param = fnDecl->GetParam(it->GetPosition());
             it->Next();
             PValType paramType = EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
