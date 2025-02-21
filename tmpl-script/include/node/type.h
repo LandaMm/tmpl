@@ -31,6 +31,28 @@ namespace AST
             inline PId GetTypeName() const { return m_typename; }
         };
 
+        class GenericNode : public Node
+        {
+        public:
+            using PId = std::shared_ptr<IdentifierNode>;
+        private:
+            PId m_name;
+            // TODO:
+            // std::shared_ptr<TypeNode> m_basetype;
+            // std::shared_ptr<TypeNode> m_default;
+
+        public:
+            GenericNode(PId name, Location loc)
+                : m_name(name), Node(loc) { }
+
+        public:
+            inline NodeType GetType() const override { return NodeType::Generic; };
+            std::string Format() const override;
+
+        public:
+            PId GetName() const { return m_name; }
+        };
+
         class TypeTemplateNode : public Node
         {
         public:
