@@ -17,6 +17,15 @@ namespace AST
         return std::make_shared<Nodes::TypeTemplateNode>(target, target->GetLocation());
     }
 
+    std::shared_ptr<Nodes::GenericNode> Parser::Generic()
+    {
+        Eat(TokenType::Question);
+        auto genericName = Id();
+
+        // TODO: base and default types support
+        return std::make_shared<Nodes::GenericNode>(genericName, genericName->GetLocation());
+    }
+
     std::shared_ptr<Nodes::CastNode> Parser::Cast(std::shared_ptr<Nodes::TypeNode> typ)
     {
         Eat(TokenType::CloseBracket);
