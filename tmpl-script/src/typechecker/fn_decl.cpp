@@ -10,7 +10,7 @@
 #include "include/node/function.h"
 #include "include/node/type.h"
 #include "include/typechecker/typedf.h"
-#include <error.h>
+#include "include/error.h"
 #include <memory>
 
 namespace Runtime
@@ -27,8 +27,24 @@ namespace Runtime
 
         std::shared_ptr<TypeFn> fn = std::make_shared<TypeFn>(retType, GetFilename(), exported, fnDecl->GetLocation());
 
-        auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
+        auto typDefinitions = std::make_shared<Environment<Runtime::TypeDf>>(m_type_definitions);
+
+        auto tIt = std::make_shared<Common::Iterator>(fnDecl->GetGenericsSize());
+        while (tIt->HasItems())
+        {
+            auto generic = fnDecl->GetGeneric(tIt->GetPosition());
+            tIt->Next();
+            std::string name = generic->GetName()->GetName();
+            auto fnGeneric = std::make_shared<FnGeneric>(name);
+            fn->AddGeneric(fnGeneric);
+
+            auto dummBaseTyp = std::make_shared<ValType>("void");
+            auto typDf = std::make_shared<Runtime::TypeDf>(name, dummBaseTyp, GetFilename(), false, generic->GetLocation());
+            typDefinitions->AddItem(name, typDf);
+        }
+
+        m_type_definitions = typDefinitions;
 
         auto it = std::make_shared<Common::Iterator>(fnDecl->GetParamsSize());
         while (it->HasItems())
@@ -88,7 +104,7 @@ namespace Runtime
                 auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
                 while (it->HasItems())
                 {
-                    auto param = fn->GetItem(it->GetPosition());
+                    auto param = fn->GetParam(it->GetPosition());
                     it->Next();
                     constructorFn->AddParam(param);
                 }
@@ -223,7 +239,13 @@ namespace Runtime
         else
             AssumeBlock(body, retType);
 
-        m_variables = currentScope;
+        assert(variables->GetParent() != nullptr && "Variables parent gone.");
+        m_variables = variables->GetParent();
+        assert(m_variables != variables && "Parent and child are located at the same memory space.");
+
+        assert(typDefinitions->GetParent() != nullptr && "Type Definitions parent gone.");
+        m_type_definitions = typDefinitions->GetParent();
+        assert(m_type_definitions != typDefinitions && "Parent and child are located at the same memory space.");
     }
 
     void TypeChecker::HandleFnSignature(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
