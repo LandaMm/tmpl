@@ -39,3 +39,60 @@ After that you can define a variable with your custom type
     # use your type...
 }
 ```
+
+## Type Casting
+
+In order to cast one type to another you need to use following syntax
+
+```
+->main {
+    var float PI = 3.1415;
+    var int PI_int = (int)PI;
+    println(PI_int.tostring()); # expected "3"
+}
+```
+
+Going further with above example, you can do down-casting any time for any custom defined type. Down-casting is a casting of the type to it's parent type (base type).
+
+Here's an example of down-casting
+
+```
+typedf Integer = int;
+
+fn @construct Integer(int value) : Integer {
+    return value;
+}
+
+->main {
+    var Integer test = new Integer(50);
+    var int native = (int)test;
+    println(native.tostring()); # expected "50"
+}
+```
+
+In above example down-casting to `int` will only work if `Integer` inherits from `int`.
+
+## Custom Type Casters
+
+If you want your type to be casted to another type, for example our `Integer` to `string`, then you can implement custom caster for your type
+
+Here is an example of creating custom type caster for your own type
+
+```
+typedf Integer = int;
+
+fn @construct Integer(int value) : Integer {
+    return value;
+}
+
+fn @cast(Integer) -> string {
+    return ((int)self).tostring();
+}
+
+->main {
+    var Integer test = new Integer(100);
+    var string data = (string)test;
+    println(data); # expected: "100"
+}
+```
+
