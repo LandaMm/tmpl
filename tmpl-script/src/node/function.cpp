@@ -20,5 +20,10 @@ namespace AST
         {
             m_params.push_back(param);
         }
+
+        void FunctionDeclaration::AddGeneric(std::shared_ptr<GenericNode> generic)
+        {
+            m_generic_types.push_back(generic);
+        }
 	}
 }
