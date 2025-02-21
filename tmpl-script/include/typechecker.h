@@ -43,6 +43,7 @@ namespace Runtime
 	{
 	private:
         std::vector<std::shared_ptr<FnParam>> m_params;
+        std::vector<std::shared_ptr<FnGeneric>> m_generics;
         PValType m_ret_type;
         std::string m_module_name;
         bool m_exported;
@@ -52,17 +53,23 @@ namespace Runtime
 		TypeFn(PValType retType, std::string module, bool exported, Location loc)
 			: m_ret_type(retType),
             m_params(std::vector<std::shared_ptr<FnParam>>()),
+            m_generics(std::vector<std::shared_ptr<FnGeneric>>()),
             m_module_name(module),
             m_exported(exported),
             m_loc(loc) {}
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
+        void AddGeneric(std::shared_ptr<FnGeneric> generic) { m_generics.push_back(generic); }
 
-	public:
-        inline std::shared_ptr<FnParam> GetItem(unsigned int index) const
+	public: // Params
+        inline std::shared_ptr<FnParam> GetParam(unsigned int index) const
             { return m_params[index]; }
         inline size_t GetParamsSize() const { return m_params.size(); }
+	public: // Generics
+        inline std::shared_ptr<FnGeneric> GetGeneric(unsigned int index) const
+            { return m_generics[index]; }
+        inline size_t GetGenericsSize() const { return m_generics.size(); }
     public:
         inline PValType GetReturnType() const { return m_ret_type; }
         inline std::string GetModuleName() const { return m_module_name; }
