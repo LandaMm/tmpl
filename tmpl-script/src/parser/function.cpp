@@ -1,5 +1,6 @@
 
 #include "include/parser.h"
+#include "include/token.h"
 #include "include/node/function.h"
 
 namespace AST
@@ -64,6 +65,30 @@ namespace AST
 
         std::shared_ptr<Nodes::FunctionDeclaration> fn =
             std::make_shared<Nodes::FunctionDeclaration>(fnName, body, modifier, fnLoc);
+
+        // TODO: see if support generics for modified functions
+        if (modifier == Nodes::FunctionModifier::None)
+        {
+            // Generic Types
+            if (m_lexer->GetToken()->GetType() == TokenType::Less)
+            {
+                Eat(TokenType::Less);
+
+                while (m_lexer->GetToken()->GetType() != TokenType::Greater
+                        && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+                {
+                    if (m_lexer->GetToken()->GetType() == TokenType::Comma)
+                    {
+                        Eat(TokenType::Comma);
+                    }
+
+                    auto generic = Generic();
+                    fn->AddGeneric(generic);
+                }
+
+                Eat(TokenType::Greater);
+            }
+        }
 
         if (modifier != Nodes::FunctionModifier::Cast)
         {
