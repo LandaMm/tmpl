@@ -30,7 +30,7 @@ namespace Runtime
         auto currentScope = m_variables;
         auto variables = std::make_shared<Environment<TypeVariable>>(m_variables);
 
-        auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
+        auto it = std::make_shared<Common::Iterator>(fnDecl->GetParamsSize());
         while (it->HasItems())
         {
             auto param = fnDecl->GetParam(it->GetPosition());
@@ -236,7 +236,7 @@ namespace Runtime
 
         std::shared_ptr<TypeFn> fn = std::make_shared<TypeFn>(retType, GetFilename(), exported, fnDecl->GetLocation());
 
-        auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
+        auto it = std::make_shared<Common::Iterator>(fnDecl->GetParamsSize());
         while (it->HasItems())
         {
             auto param = fnDecl->GetParam(it->GetPosition());

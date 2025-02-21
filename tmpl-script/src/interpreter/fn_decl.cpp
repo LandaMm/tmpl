@@ -21,7 +21,7 @@ namespace Runtime
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
 
-        auto it = std::make_shared<Common::Iterator>(fnDecl->GetSize());
+        auto it = std::make_shared<Common::Iterator>(fnDecl->GetParamsSize());
         while (it->HasItems())
         {
             auto param = fnDecl->GetParam(it->GetPosition());
