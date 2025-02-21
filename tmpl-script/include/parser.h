@@ -58,6 +58,7 @@ namespace AST
         std::shared_ptr<Nodes::TypeTemplateNode> TypeTemplate();
         std::shared_ptr<Nodes::TypeDfNode> TypeDfStatement();
         std::shared_ptr<Nodes::CastNode> Cast(std::shared_ptr<Nodes::TypeNode> typ);
+        std::shared_ptr<Nodes::GenericNode> Generic();
 
 	private: // Statements
 		std::shared_ptr<Node> Statement();
