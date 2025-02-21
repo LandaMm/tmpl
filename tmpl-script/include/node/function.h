@@ -90,9 +90,13 @@ namespace AST
             inline std::shared_ptr<Statements::StatementsBody> GetBody() const { return m_body; }
             inline FunctionModifier GetModifier() const { return m_modifier; }
         public: // Params
-            inline std::shared_ptr<FunctionParam> GetParam(unsigned int index)
+            inline std::shared_ptr<FunctionParam> GetGeneric(unsigned int index)
                 { return m_params[index]; }
             inline unsigned int GetParamsSize() const { return m_params.size(); }
+        public: // Generics
+            inline std::shared_ptr<GenericNode> GetParam(unsigned int index)
+                { return m_generic_types[index]; }
+            inline unsigned int GetGenericsSize() const { return m_generic_types.size(); }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
             std::string Format() const override;
