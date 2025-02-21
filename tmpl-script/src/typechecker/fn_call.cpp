@@ -98,7 +98,7 @@ namespace Runtime
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while (it->HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
+            auto param = fn->GetParam(it->GetPosition());
             std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
             PValType valType = DiagnoseNode(arg);
