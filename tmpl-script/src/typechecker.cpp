@@ -13,12 +13,13 @@
 #include "../include/node/logical.h"
 #include "../include/node/macros.h"
 #include "../include/iterator.h"
+#include "include/node/instance.h"
 
 namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::DiagnoseNode(std::shared_ptr<Node> node)
+    PValType TypeChecker::DiagnoseNode(std::shared_ptr<Node> node)
     {
         switch(node->GetType())
         {
@@ -34,11 +35,15 @@ namespace Runtime
                 return DiagnoseFnCall(std::dynamic_pointer_cast<FunctionCall>(node));
             case NodeType::VarDecl:
                 HandleVarDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
-                return ValueType::Null;
+                return std::make_shared<ValType>("void");
             case NodeType::Condition:
                 return DiagnoseCondition(std::dynamic_pointer_cast<Condition>(node));
             case NodeType::Ternary:
                 return DiagnoseTernary(std::dynamic_pointer_cast<TernaryNode>(node));
+            case NodeType::Instance:
+                return DiagnoseInstance(std::dynamic_pointer_cast<InstanceNode>(node));
+            case NodeType::Cast:
+                return DiagnoseTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
             case NodeType::Return:
             {
                 auto ret = std::dynamic_pointer_cast<ReturnNode>(node);
@@ -50,14 +55,14 @@ namespace Runtime
                 DiagnoseNode(ifElse->GetCondition());
                 DiagnoseNode(ifElse->GetBody());
                 if (ifElse->GetElseNode() != nullptr) DiagnoseNode(ifElse->GetElseNode());
-                return ValueType::Null;
+                return std::make_shared<ValType>("void");
             }
             case NodeType::Block:
             {
                 auto block = std::dynamic_pointer_cast<Statements::StatementsBody>(node);
                 auto scope = std::make_shared<Environment<TypeVariable>>(m_variables);
                 m_variables = scope;
-                ValueType value = ValueType::Null;
+                PValType value = std::make_shared<ValType>("void");
                 auto it = std::make_shared<Common::Iterator>(block->GetSize());
                 while (it->HasItems())
                 {
@@ -71,7 +76,7 @@ namespace Runtime
                     else
                     {
                         auto localVal = DiagnoseNode(node);
-                        if (node->IsBlock())
+                        if (node->IsBlock() && localVal != nullptr && !localVal->Compare(ValType("void")))
                         {
                             value = localVal;
                             break;
@@ -85,7 +90,7 @@ namespace Runtime
             }
             default:
                 // just skip the nodes we cannot typecheck
-                return ValueType::Null;
+                return std::make_shared<ValType>("void");
         }
     }
 
@@ -110,6 +115,9 @@ namespace Runtime
                     break;
                 case NodeType::FnDecl:
                     HandleFnDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), false);
+                    break;
+                case NodeType::TypeDf:
+                    HandleTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
                     break;
                 case NodeType::Extern:
                 {

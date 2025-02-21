@@ -1,0 +1,12 @@
+@require"std/convert"
+
+export typedf Integer = int;
+
+export fn @construct Integer(int value) : Integer {
+    return value;
+}
+
+export fn @cast(Integer) : string {
+    return ((int)self).tostring();
+}
+

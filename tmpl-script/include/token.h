@@ -55,6 +55,10 @@ namespace AST
         Extern,
         True,
         False,
+        TypeDf,
+        Construct,
+        New,
+        Cast,
 		_EOF,
 	};
 
@@ -107,6 +111,10 @@ namespace AST
         "extern",
         "true",
         "false",
+        "typedf",
+        "construct",
+        "new",
+        "cast",
 		"EOF",
 	};
 

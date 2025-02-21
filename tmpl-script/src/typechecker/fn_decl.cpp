@@ -6,6 +6,10 @@
 #include "../../include/node/identifier.h"
 #include "../../include/node/object_member.h"
 #include "include/interpreter/environment.h"
+#include "include/interpreter/value.h"
+#include "include/node/function.h"
+#include "include/node/type.h"
+#include "include/typechecker/typedf.h"
 #include <error.h>
 #include <memory>
 
@@ -16,7 +20,8 @@ namespace Runtime
     void TypeChecker::HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
-        ValueType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        PValType baseType;
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
 
@@ -30,12 +35,127 @@ namespace Runtime
         {
             auto param = fnDecl->GetItem(it->GetPosition());
             it->Next();
-            ValueType paramType = EvaluateType(GetFilename(), param->GetType());
+            PValType paramType = EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);
             auto typeVar = std::make_shared<TypeVariable>(paramType, false);
             variables->AddItem(paramName, typeVar);
+        }
+
+        switch(fnDecl->GetModifier())
+        {
+            case AST::Nodes::FunctionModifier::Construct:
+            {
+                assert(nameNode->GetType() == AST::NodeType::Identifier && "Name should be a type template by construct fn");
+                auto id = std::dynamic_pointer_cast<AST::Nodes::IdentifierNode>(nameNode);
+
+                std::string typeName = id->GetName();
+
+                if (!m_type_definitions->HasItem(typeName))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeDoesNotExist(GetFilename(), typeName, id->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto typeDf = m_type_definitions->LookUp(typeName);
+                assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
+                {
+                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                    errorManager.PrivateTypeError(GetFilename(), typeDf->GetTypeName(), typeDf->GetModuleName(), nameNode->GetLocation(), typeDf->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                // TODO: compare generics amount and names
+                if (typeDf->HasConstructor())
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeConstructorRedeclaration(GetFilename(), typeName, fnDecl->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                baseType = typeDf->GetBaseType();
+
+                auto constructorFn =
+                    std::make_shared<Fn>(nullptr, baseType, GetFilename(), exported, false, fnDecl->GetLocation());
+
+                auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
+                while (it->HasItems())
+                {
+                    auto param = fn->GetItem(it->GetPosition());
+                    it->Next();
+                    constructorFn->AddParam(param);
+                }
+
+                typeDf->SetConstructor(constructorFn);
+
+                break;
+            }
+            case AST::Nodes::FunctionModifier::Cast:
+            {
+                assert(nameNode->GetType() == AST::NodeType::TypeTemplate && "Name should be a type template by construct fn");
+                // TODO: support generics
+                auto id = std::dynamic_pointer_cast<AST::Nodes::TypeTemplateNode>(nameNode);
+
+                std::string typeName = id->GetTypeName()->GetName();
+
+                if (!m_type_definitions->HasItem(typeName))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeDoesNotExist(GetFilename(), typeName, id->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto typeDf = m_type_definitions->LookUp(typeName);
+                assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+                if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
+                {
+                    Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                    errorManager.PrivateTypeError(GetFilename(), typeDf->GetTypeName(), typeDf->GetModuleName(), nameNode->GetLocation(), typeDf->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto casts = typeDf->GetCastsEnv();
+
+                // TODO: compare generics amount and names
+                if (casts->HasItem(retType->GetName()))
+                {
+                    Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+                    errManager.TypeCastRedeclaration(GetFilename(), typeName, retType, fnDecl->GetLocation(), "TypeError");
+                    ReportError();
+                    return;
+                }
+
+                auto castFn =
+                    std::make_shared<Fn>(nullptr, retType, GetFilename(), exported, false, fnDecl->GetLocation());
+
+                auto typDfCast =
+                    std::make_shared<TypeDfCast>(typeName, retType->GetName(), castFn);
+
+                casts->AddItem(retType->GetName(), typDfCast);
+
+                // TODO: generics support
+                auto dummTypNode =
+                    std::make_shared<TypeNode>(id->GetTypeName(), id->GetTypeName()->GetLocation());
+                PValType targetType = EvaluateType(GetFilename(), dummTypNode);
+
+                auto typeVar = std::make_shared<TypeVariable>(targetType, false);
+                variables->AddItem("self", typeVar);
+
+                break;
+            }
+            default:
+                // skip, no additional actions required
+                break;
         }
 
         switch(nameNode->GetType())
@@ -44,17 +164,22 @@ namespace Runtime
             {
                 std::string name = std::dynamic_pointer_cast<IdentifierNode>(nameNode)->GetName();
 
-                m_functions->AddItem(name, fn);
+                if (fnDecl->GetModifier() == FunctionModifier::None)
+                    m_functions->AddItem(name, fn);
                 break;
             }
             case AST::NodeType::ObjectMember:
             {
-                auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
-                ValueType targetType = EvaluateType(GetFilename(), obj->GetObject());
-                if (!m_type_functions->HasItem(targetType))
-                    m_type_functions->AddItem(targetType, std::make_shared<Environment<TypeFn>>());
+                assert(fnDecl->GetModifier() != FunctionModifier::Cast && "Object members are not supported in cast functions as names.");
+                assert(fnDecl->GetModifier() != FunctionModifier::Construct && "Object members are not supported in cast functions as names.");
 
-                std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType);
+                auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
+                assert(obj->GetObject()->GetType() == NodeType::Type && "Object target should be a type for type fn");
+                PValType targetType = EvaluateType(GetFilename(), std::dynamic_pointer_cast<TypeNode>(obj->GetObject()));
+                if (!m_type_functions->HasItem(targetType->GetName()))
+                    m_type_functions->AddItem(targetType->GetName(), std::make_shared<Environment<TypeFn>>());
+
+                std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
                 assert(typeEnv != nullptr && "Type env should have been created.");
 
                 std::shared_ptr<Node> fnNameNode = obj->GetMember();
@@ -76,10 +201,13 @@ namespace Runtime
                 variables->AddItem("self", typeVar);
                 break;
             }
+            case AST::NodeType::TypeTemplate:
+                // skip (cast function)
+                break;
             default:
             {
                 Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-                errManager.RaiseError("Unsupported node for fn declaration", "TypeError");
+                errManager.RaiseError("Unsupported node for fn declaration: " + nameNode->Format(), "TypeError");
                 ReportError();
                 return;
             }
@@ -87,14 +215,20 @@ namespace Runtime
 
         m_variables = variables;
 
-        AssumeBlock(body, retType);
+        if (fnDecl->GetModifier() == AST::Nodes::FunctionModifier::Construct)
+        {
+            assert(baseType != nullptr && "Base type should have been set.");
+            AssumeBlock(body, baseType);
+        }
+        else
+            AssumeBlock(body, retType);
 
         m_variables = currentScope;
     }
 
     void TypeChecker::HandleFnSignature(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
-        ValueType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
         assert(nameNode->GetType() == NodeType::Identifier && "Name should be identifier");
@@ -107,7 +241,7 @@ namespace Runtime
         {
             auto param = fnDecl->GetItem(it->GetPosition());
             it->Next();
-            ValueType paramType = EvaluateType(GetFilename(), param->GetType());
+            PValType paramType = EvaluateType(GetFilename(), param->GetType());
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);

@@ -4,6 +4,7 @@
 #include "../../include/node/literal.h"
 #include "../../include/node/logical.h"
 #include "../../include/node/unary.h"
+#include "include/node/instance.h"
 #include "include/token.h"
 
 namespace AST
@@ -269,10 +270,43 @@ namespace AST
 		else if (token->GetType() == TokenType::OpenBracket)
 		{
 			Eat(TokenType::OpenBracket);
-			std::shared_ptr<Node> res = Ternary();
-			Eat(TokenType::CloseBracket);
-			return res;
+
+            if (IsTypeCastAhead())
+            {
+                auto typ = Type();
+
+                return Cast(typ);
+            }
+
+            std::shared_ptr<Node> res = Ternary();
+            Eat(TokenType::CloseBracket);
+
+			TokenType current_type = m_lexer->GetToken()->GetType();
+			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
+			{
+				if (current_type == TokenType::OpenBracket)
+				{
+					std::shared_ptr<Node> fcall = FunctionCall(res);
+					res = fcall;
+				}
+				else if (current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
+				{
+					std::shared_ptr<Node> objm = ObjectMember(res);
+					res = objm;
+				}
+				current_type = m_lexer->GetToken()->GetType();
+			}
+
+            return res;
 		}
+		else if (token->GetType() == TokenType::New)
+        {
+            auto loc = m_lexer->GetToken()->GetLocation();
+            Eat(TokenType::New);
+            auto fnName = Type();
+            auto fCall = FunctionCall(fnName);
+            return std::make_shared<Nodes::InstanceNode>(fnName, fCall, loc);
+        }
 		// unknown
 		else
 		{

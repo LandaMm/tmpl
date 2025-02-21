@@ -1,0 +1,21 @@
+@require"std/io"
+
+typedf Integer = int;
+
+fn @construct Integer(int initialValue) : Integer {
+    return initialValue;
+}
+
+typedf Number = Integer;
+
+fn @construct Number(int initialValue) : Number {
+    var Integer integerVal = new Integer(initialValue);
+    return integerVal;
+}
+
+->main {
+    var Number num = new Number(100);
+    println(num);
+    println("Hello, World!");
+}
+

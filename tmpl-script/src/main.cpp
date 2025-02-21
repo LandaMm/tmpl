@@ -10,6 +10,7 @@
 #include "../include/cli.h"
 #include "../include/error.h"
 #include "../include/typechecker.h"
+#include "../include/helper.h"
 
 int main(int argc, char **argv)
 {
@@ -49,9 +50,10 @@ int main(int argc, char **argv)
 	auto procedures = std::make_shared<Environment<Procedure>>();
 	auto functions = std::make_shared<Environment<Fn>>();
 	auto modules = std::make_shared<Environment<std::string>>();
-    auto typeFunctions = std::make_shared<Environment<Environment<Fn>, Runtime::ValueType>>();
+    auto typeFunctions = std::make_shared<Environment<Environment<Fn>>>();
+    auto typeDefinitions = Helper::Helper::GetTypeDefinitions();
 
-	Interpreter intrpt(parser, variables, procedures, functions, modules, typeFunctions);
+	Interpreter intrpt(parser, variables, procedures, functions, modules, typeFunctions, typeDefinitions);
 
 	std::shared_ptr<ProgramNode> program = std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot());
 
@@ -76,7 +78,7 @@ int main(int argc, char **argv)
     }
 
     std::shared_ptr<Variable> argsVar = std::make_shared<Variable>(
-        ValueType::List,
+        std::make_shared<ValType>("list"),
         argsList,
         false
     );

@@ -6,6 +6,13 @@
 namespace Runtime
 {
 	// Common
+    
+    std::ostream &operator<<(std::ostream& stream, const CustomValueType &x)
+    {
+        stream << x.m_name;
+
+        return stream;
+    }
 
 	std::ostream &operator<<(std::ostream &stream, const Value &value)
 	{
@@ -53,9 +60,9 @@ namespace Runtime
     std::shared_ptr<Value> Runtime::ListValue::Operate(std::shared_ptr<Value> right,
             AST::Nodes::ExpressionNode::OperatorType opType)
     {
-			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Lists are not operateable", "RuntimeError");
-			return nullptr;
+        Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+        errorManager.RaiseError("Lists are not operateable", "RuntimeError");
+        return nullptr;
     }
 
     void Runtime::ListValue::AddItem(std::shared_ptr<Value> item)
@@ -63,17 +70,9 @@ namespace Runtime
         m_value.push_back(item);
     }
 
-    std::shared_ptr<Value> Runtime::ListValue::GetItem(std::shared_ptr<Value> indexVal)
+    std::shared_ptr<Value> Runtime::ListValue::GetItem(std::shared_ptr<IntegerValue> indexVal)
     {
-        if (indexVal->GetType() != ValueType::Integer)
-        {
-			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Non-integers values cannot be used as index for a list", "RuntimeError");
-			return nullptr;
-        }
-
-        std::shared_ptr<IntegerValue> vl = std::dynamic_pointer_cast<IntegerValue>(indexVal);
-        std::shared_ptr<int> index = vl->GetValue();
+        std::shared_ptr<int> index = indexVal->GetValue();
 
         if (*index < 0)
         {
@@ -130,10 +129,6 @@ namespace Runtime
 
 	std::shared_ptr<Value> Runtime::BoolValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
 	{
-		std::shared_ptr<BoolValue> iright = std::dynamic_pointer_cast<BoolValue>(right);
-		bool vleft = GetValue();
-		bool vright = iright->GetValue();
-
         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
         errorManager.RaiseError("Bool values do not support any operations", "RuntimeError");
 
@@ -142,23 +137,23 @@ namespace Runtime
 		return nullptr;
 	}
 
-    // NullValue
+    // VoidValue
 
-	std::string NullValue::format() const
+	std::string VoidValue::format() const
 	{
-		return "NullValue()";
+		return "VoidValue()";
 	}
 
-	std::shared_ptr<Value> Runtime::NullValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
+	std::shared_ptr<Value> Runtime::VoidValue::Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition)
 	{
 		std::shared_ptr<Value> iright = std::dynamic_pointer_cast<Value>(right);
 
 		switch (condition)
 		{
 		case AST::Nodes::Condition::ConditionType::Compare:
-			return std::make_shared<BoolValue>(iright->GetType() == ValueType::Null);
+			return std::make_shared<BoolValue>(iright->GetType()->Compare(ValType("void")));
 		case AST::Nodes::Condition::ConditionType::NotEqual:
-			return std::make_shared<BoolValue>(iright->GetType() != ValueType::Null);
+			return std::make_shared<BoolValue>(!iright->GetType()->Compare(ValType("void")));
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported operator for undefined: " + std::to_string((int)condition), "RuntimeError");
@@ -173,10 +168,8 @@ namespace Runtime
 		return nullptr;
 	}
 
-	std::shared_ptr<Value> Runtime::NullValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
+	std::shared_ptr<Value> Runtime::VoidValue::Operate(std::shared_ptr<Value> right, AST::Nodes::ExpressionNode::OperatorType opType)
 	{
-		std::shared_ptr<IntegerValue> iright = std::dynamic_pointer_cast<IntegerValue>(right);
-
         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
         errorManager.RaiseError("Null values does not support any operations", "RuntimeError");
         return nullptr;
@@ -226,16 +219,32 @@ namespace Runtime
 		int vright = *iright->GetValue();
 
 		switch (opType)
-		{
-		case AST::Nodes::ExpressionNode::OperatorType::DIVIDE:
-			return std::make_shared<IntegerValue>(vleft / vright);
-		case AST::Nodes::ExpressionNode::OperatorType::MULTIPLY:
-			return std::make_shared<IntegerValue>(vleft * vright);
-		case AST::Nodes::ExpressionNode::OperatorType::PLUS:
-			return std::make_shared<IntegerValue>(vleft + vright);
-		case AST::Nodes::ExpressionNode::OperatorType::MINUS:
-			return std::make_shared<IntegerValue>(vleft - vright);
-		}
+        {
+            case AST::Nodes::ExpressionNode::OperatorType::DIVIDE:
+                {
+                    auto nv = std::dynamic_pointer_cast<IntegerValue>(iright->Clone());
+                    nv->SetValue(vleft / vright);
+                    return nv;
+                }
+            case AST::Nodes::ExpressionNode::OperatorType::MULTIPLY:
+                {
+                    auto nv = std::dynamic_pointer_cast<IntegerValue>(iright->Clone());
+                    nv->SetValue(vleft * vright);
+                    return nv;
+                }
+            case AST::Nodes::ExpressionNode::OperatorType::PLUS:
+                {
+                    auto nv = std::dynamic_pointer_cast<IntegerValue>(iright->Clone());
+                    nv->SetValue(vleft + vright);
+                    return nv;
+                }
+            case AST::Nodes::ExpressionNode::OperatorType::MINUS:
+                {
+                    auto nv = std::dynamic_pointer_cast<IntegerValue>(iright->Clone());
+                    nv->SetValue(vleft - vright);
+                    return nv;
+                }
+        }
 
         assert(opType != AST::Nodes::ExpressionNode::OperatorType::NONE &&
                 "Exhausted operate operation handlers for integer");
@@ -289,16 +298,32 @@ namespace Runtime
 		float vright = *iright->GetValue();
 
 		switch (opType)
-		{
-		case AST::Nodes::ExpressionNode::OperatorType::DIVIDE:
-			return std::make_shared<FloatValue>(vleft / vright);
-		case AST::Nodes::ExpressionNode::OperatorType::MULTIPLY:
-			return std::make_shared<FloatValue>(vleft * vright);
-		case AST::Nodes::ExpressionNode::OperatorType::PLUS:
-			return std::make_shared<FloatValue>(vleft + vright);
-		case AST::Nodes::ExpressionNode::OperatorType::MINUS:
-			return std::make_shared<FloatValue>(vleft - vright);
-		}
+        {
+            case AST::Nodes::ExpressionNode::OperatorType::DIVIDE:
+                {
+                    auto nv = std::dynamic_pointer_cast<FloatValue>(iright->Clone());
+                    nv->SetValue(vleft / vright);
+                    return nv;
+                }
+            case AST::Nodes::ExpressionNode::OperatorType::MULTIPLY:
+                {
+                    auto nv = std::dynamic_pointer_cast<FloatValue>(iright->Clone());
+                    nv->SetValue(vleft * vright);
+                    return nv;
+                }
+            case AST::Nodes::ExpressionNode::OperatorType::PLUS:
+                {
+                    auto nv = std::dynamic_pointer_cast<FloatValue>(iright->Clone());
+                    nv->SetValue(vleft + vright);
+                    return nv;
+                }
+            case AST::Nodes::ExpressionNode::OperatorType::MINUS:
+                {
+                    auto nv = std::dynamic_pointer_cast<FloatValue>(iright->Clone());
+                    nv->SetValue(vleft - vright);
+                    return nv;
+                }
+        }
 
         assert(opType != AST::Nodes::ExpressionNode::OperatorType::NONE &&
                 "Exhausted operate operation handlers for float");
@@ -354,13 +379,29 @@ namespace Runtime
 		switch (opType)
 		{
 		case AST::Nodes::ExpressionNode::OperatorType::DIVIDE:
-			return std::make_shared<DoubleValue>(vleft / vright);
+        {
+            auto nv = std::dynamic_pointer_cast<DoubleValue>(iright->Clone());
+            nv->SetValue(vleft / vright);
+            return nv;
+        }
 		case AST::Nodes::ExpressionNode::OperatorType::MULTIPLY:
-			return std::make_shared<DoubleValue>(vleft * vright);
+        {
+            auto nv = std::dynamic_pointer_cast<DoubleValue>(iright->Clone());
+            nv->SetValue(vleft * vright);
+            return nv;
+        }
 		case AST::Nodes::ExpressionNode::OperatorType::PLUS:
-			return std::make_shared<DoubleValue>(vleft + vright);
+        {
+            auto nv = std::dynamic_pointer_cast<DoubleValue>(iright->Clone());
+            nv->SetValue(vleft + vright);
+            return nv;
+        }
 		case AST::Nodes::ExpressionNode::OperatorType::MINUS:
-			return std::make_shared<DoubleValue>(vleft - vright);
+        {
+            auto nv = std::dynamic_pointer_cast<DoubleValue>(iright->Clone());
+            nv->SetValue(vleft - vright);
+            return nv;
+        }
 		}
 
         assert(opType != AST::Nodes::ExpressionNode::OperatorType::NONE &&
@@ -410,7 +451,11 @@ namespace Runtime
 		switch (opType)
 		{
 		case AST::Nodes::ExpressionNode::OperatorType::PLUS:
-			return std::make_shared<StringValue>(vleft + vright);
+        {
+            auto nv = std::dynamic_pointer_cast<StringValue>(iright->Clone());
+            nv->SetValue(vleft + vright);
+            return nv;
+        }
 		default:
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.RaiseError("Unsupported operator for string literals: " + std::to_string((int)opType), "RuntimeError");

@@ -1,58 +1,72 @@
 
 
 #include "../../include/typechecker.h"
+#include "include/interpreter/value.h"
+#include <memory>
 
 namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<Node> typeNode)
+    PValType TypeChecker::GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
     {
-		if (typeNode->GetType() == NodeType::Identifier)
-		{
-			auto id = std::dynamic_pointer_cast<IdentifierNode>(typeNode);
-			if (id->GetName() == "string")
-			{
-				return ValueType::String;
-			}
-			else if (id->GetName() == "double")
-			{
-				return ValueType::Double;
-			}
-			else if (id->GetName() == "float")
-			{
-				return ValueType::Float;
-			}
-			else if (id->GetName() == "int")
-			{
-				return ValueType::Integer;
-			}
-			else if (id->GetName() == "bool")
-            {
-                return ValueType::Bool;
-            }
-			else if (id->GetName() == "void")
-            {
-                return ValueType::Null;
-            }
-			else
-			{
-				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-				errorManager.UndefinedType(filename, id->GetName(), id->GetLocation(), "TypeError");
-                // Try reporting instead of exiting
-                exit(-1);
-			}
-		}
-		else
-		{
-			// TODO: support for complex types, e.g. inline objects, generic types
-			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-			errorManager.RaiseError("Unsupported node type for type: " + std::to_string((int)typeNode->GetType()), "TypeError");
-            // TODO: try reporint instead of exiting
-            exit(-1);
-		}
+        auto typ = target;
 
-		return ValueType::Null;
+        while (typ != nullptr)
+        {
+            if (!typeDfs->HasItem(typ->GetName()))
+            {
+                Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                errManager.TypeDoesNotExist(filename, typ, loc, prefix);
+                return std::make_shared<ValType>("void");
+            }
+
+            auto typDf = typeDfs->LookUp(typ->GetName());
+            assert(typDf != nullptr && "Found typ df should not be nullptr");
+
+            if (typDf->GetBaseType() == nullptr)
+                break;
+            else
+                typ = typDf->GetBaseType();
+        }
+
+        return typ;
+    }
+
+    PValType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode)
+    {
+        return std::make_shared<ValType>(typeNode->GetTypeName()->GetName());
+    }
+
+    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
+    {
+        // 0. check if "from" type exists in typeDfs
+        if (!typeDfs->HasItem(from->GetName()))
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(filename, from, loc, prefix);
+            return std::make_shared<ValType>("void");
+        }
+        // 1. check if "to" type exists in typeDfs
+        if (!typeDfs->HasItem(to->GetName()))
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(filename, to, loc, prefix);
+            return std::make_shared<ValType>("void");
+        }
+        // 2. check if "from" and "to" types are equal
+        if (from->Compare(*to)) return to;
+        // 3. check if "from" type's name is "to" type's basename
+        auto fromDf = typeDfs->LookUp(from->GetName());
+        assert(fromDf != nullptr && "From type's definition should not be null");
+        if (fromDf->GetBaseType()->Compare(*to)) return to;
+        // 4. otherwise check if "from" type contains cast to "to" type in typeDf
+        auto casts = fromDf->GetCastsEnv();
+        if (casts->HasItem(to->GetName())) return to;
+
+        Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+        errManager.TypeCastNotPossible(filename, from, to, loc, prefix);
+        return std::make_shared<ValType>("void");
     }
 }
 

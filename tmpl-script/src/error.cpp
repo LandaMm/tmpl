@@ -75,6 +75,13 @@ namespace Prelude
         std::cerr << "Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
+    void ErrorManager::UnexpectedFnModifier(std::string filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc)
+    {
+        LogFileLocation(filename, loc, "ParseError");
+        std::cerr << "Unexpected token used for fn modifier '"
+            << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
+		std::exit(-1);
+    }
 	void ErrorManager::MissingConstantDefinition(std::string filename, std::shared_ptr<Token> token)
 	{
         LogFileLocation(filename, token->GetLocation(), "ParseError");
@@ -82,19 +89,19 @@ namespace Prelude
 				  << "but got unexpected '" << Token::GetTokenTypeCharacter(token->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
+	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
 	{
         // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name
-            << "'. Expected type '" << Runtime::HumanValueType(expectedType)
-            << "' but got '" << Runtime::HumanValueType(type) << "'" << std::endl;
+            << "'. Expected type '" << *expectedType
+            << "' but got '" << *type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
-	void ErrorManager::OperandMismatchType(std::string filename, Runtime::ValueType leftType, Runtime::ValueType rightType, Location loc, std::string prefix)
+	void ErrorManager::OperandMismatchType(std::string filename, Runtime::PValType leftType, Runtime::PValType rightType, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);
-        std::cerr << "Mismatch type of left and right operands '" << Runtime::HumanValueType(leftType) << "' != '" << Runtime::HumanValueType(rightType) << "'" << std::endl;
+        std::cerr << "Mismatch type of left and right operands '" << *leftType << "' != '" << *rightType << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
 	void ErrorManager::UndefinedType(std::string filename, std::string name, Location loc, std::string prefix)
@@ -110,41 +117,70 @@ namespace Prelude
         std::cerr << "Undeclared variable '" << id->GetName() << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
-    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc, std::string prefix)
+    void ErrorManager::ArgMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
     {
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Argument type '"
-            << Runtime::HumanValueType(type)
+            << *type
             << "' of parameter '" << name << "' doesn't match parameter type '"
-            << Runtime::HumanValueType(expectedType)
+            << *expectedType
             << "'" << std::endl;
         if (prefix != "TypeError") exit(-1);
     }
 
-    void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::ValueType type, Runtime::ValueType expectedType, Location loc)
+    void ErrorManager::ReturnMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
         std::cerr << "Return value type '"
-            << Runtime::HumanValueType(type)
+            << *type
             << "' of the function '" << name << "' doesn't match function's signature type '"
-            << Runtime::HumanValueType(expectedType)
+            << *expectedType
             << "'" << std::endl;
         exit(-1);
     }
 
-    void ErrorManager::UnexpectedReturnType(std::string filename, Runtime::ValueType expected, Runtime::ValueType gotType, Location loc)
+    void ErrorManager::UnexpectedReturnType(std::string filename, Runtime::PValType expected, Runtime::PValType gotType, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
-        std::cerr << "Unexpected return type '" << Runtime::HumanValueType(gotType) << "' when '" << Runtime::HumanValueType(expected) << "' type was expected" << std::endl;
+        std::cerr << "Unexpected return type '" << *gotType << "' when '" << *expected << "' type was expected" << std::endl;
         /*exit(-1);*/
     }
 
-    void ErrorManager::TypeMismatch(std::string filename, Runtime::ValueType left, Runtime::ValueType right, Location loc)
+    void ErrorManager::TypeMismatch(std::string filename, Runtime::PValType left, Runtime::PValType right, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");
-        std::cerr << "Different return types '" << Runtime::HumanValueType(left)
-            << "' and '" << Runtime::HumanValueType(right) << "'" << std::endl;
+        std::cerr << "Different return types '" << *left
+            << "' and '" << *right << "'" << std::endl;
         /*exit(-1);*/
+    }
+
+    void ErrorManager::TypeDoesNotExist(std::string filename, Runtime::PValType typ, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type '" << *typ << "' is not defined" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::TypeDoesNotExist(std::string filename, std::string typName, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type with name '" << typName << "' is not defined" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::TypeConstructorDoesNotExist(std::string filename, Runtime::PValType targetTyp, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "No constructor found for type '" << *targetTyp << "'" << std::endl;
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type '" << *from << "' cannot be casted to type '"
+            << *to << "'" << std::endl;
+        if (prefix != "TypeError") exit(-1);
     }
 
     void ErrorManager::ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, Location loc, std::string prefix)
@@ -165,11 +201,11 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
-    void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::ValueType metType, Location loc)
+    void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::PValType metType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
         std::cerr << "Unary operator '" << op
-            << "' is not allowed with type '" << Runtime::HumanValueType(metType) << "'" << std::endl;
+            << "' is not allowed with type '" << *metType << "'" << std::endl;
         std::exit(-1);
     }
 
@@ -181,13 +217,13 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
-    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::ValueType valType, std::string prefix)
+    void ErrorManager::UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::PValType valType, std::string prefix)
     {
         auto loc = obj->GetLocation();
         LogFileLocation(filename, loc, prefix);
         assert(obj->GetMember()->GetType() == NodeType::Identifier && "Object member for fn call should be an identifier.");
         auto id = std::dynamic_pointer_cast<Nodes::IdentifierNode>(obj->GetMember());
-        std::cerr << "Calling undeclared function '" << id->GetName() << "' for type '" << Runtime::HumanValueType(valType) << "'" << std::endl;
+        std::cerr << "Calling undeclared function '" << id->GetName() << "' for type '" << *valType << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 
@@ -235,15 +271,52 @@ namespace Prelude
         if (prefix != "TypeError") std::exit(-1);
     }
 
-        void ErrorManager::FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix)
-        {
-            LogFileLocation(filename, loc, prefix);
-            std::cerr << "Cannot redeclare already existing function '"
-                << name << "' at ";
-            LogFileLocation(declFilename, declLoc);
-            std::cerr << std::endl;
-            if (prefix != "TypeError") std::exit(-1);
-        }
+
+    void ErrorManager::TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix)
+    {
+        LogFileLocation(filename, typeNode->GetLocation(), prefix);
+        // TODO: show generics as well
+        std::cerr << "Cannot redeclare already existing type '"
+            << typeNode->GetTypeName()->GetName() << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::TypeConstructorRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        // TODO: show generics as well
+        std::cerr << "Cannot redeclare type constructor for '"
+            << typeName << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::TypeCastRedeclaration(std::string filename, std::string typeName, Runtime::PValType castType, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Cast '" << typeName << "' -> '" << *castType
+            << "' already exists" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Cannot redeclare already existing function '"
+            << name << "' at ";
+        LogFileLocation(declFilename, declLoc);
+        std::cerr << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::PrivateTypeError(std::string filename, std::string typName, std::string typModule, AST::Location loc, AST::Location mLoc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Trying to access a private type '" << typName
+            << "' outside of it's module ";
+        LogFileLocation(typModule, mLoc);
+        std::cerr << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 
     void ErrorManager::PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, Location loc, Location mLoc, std::string prefix)
     {

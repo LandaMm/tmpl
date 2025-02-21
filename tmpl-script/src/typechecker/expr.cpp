@@ -5,12 +5,12 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::DiagnoseExpression(std::shared_ptr<ExpressionNode> expr)
+    PValType TypeChecker::DiagnoseExpression(std::shared_ptr<ExpressionNode> expr)
     {
         auto left = DiagnoseNode(expr->GetLeft());
         auto right = DiagnoseNode(expr->GetRight());
 
-        if (left != right)
+        if (!left->Compare(*right))
         {
             Prelude::ErrorManager& manager = Prelude::ErrorManager::getInstance();
             manager.OperandMismatchType(GetFilename(), left, right, expr->GetLocation(), "TypeError");
@@ -24,19 +24,20 @@ namespace Runtime
         return left;
     }
 
-    ValueType TypeChecker::DiagnoseCondition(std::shared_ptr<Condition> condition)
+    PValType TypeChecker::DiagnoseCondition(std::shared_ptr<Condition> condition)
     {
-		ValueType left = DiagnoseNode(condition->GetLeft());
-		ValueType right = DiagnoseNode(condition->GetRight());
+		PValType left = DiagnoseNode(condition->GetLeft());
+		PValType right = DiagnoseNode(condition->GetRight());
 
-		if (left != right && left != ValueType::Null && right != ValueType::Null)
+		if (!left->Compare(*right)/* && left != ValueType::Null && right != ValueType::Null*/)
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.OperandMismatchType(GetFilename(), left, right, condition->GetLocation(), "RuntimeError");
             ReportError();
-			return ValueType::Bool;
+			return std::make_shared<ValType>("bool");
 		}
 
+        /*
 		if (left != right && (left == ValueType::Null || right == ValueType::Null))
 		{
 			if (condition->GetOperator() != Condition::ConditionType::Compare && condition->GetOperator() != Condition::ConditionType::NotEqual)
@@ -48,19 +49,19 @@ namespace Runtime
 			}
             return ValueType::Bool;
 		}
+        */
 
-		return ValueType::Bool;
+		return std::make_shared<ValType>("bool");
     }
 
-    ValueType TypeChecker::DiagnoseTernary(std::shared_ptr<TernaryNode> ternary)
+    PValType TypeChecker::DiagnoseTernary(std::shared_ptr<TernaryNode> ternary)
     {
-		ValueType condition = DiagnoseNode(ternary->GetCondition());
+		PValType condition = DiagnoseNode(ternary->GetCondition());
 
         auto leftType = DiagnoseNode(ternary->GetLeft());
         auto rightType = DiagnoseNode(ternary->GetRight());
 
-        // TODO: boolean support
-		if (condition != ValueType::Bool)
+		if (!condition->Compare(ValType("bool")))
 		{
 			// should be unreachable
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -70,7 +71,7 @@ namespace Runtime
             return leftType;
 		}
 
-        if (leftType != rightType) {
+        if (!leftType->Compare(*rightType)) {
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.TypeMismatch(GetFilename(), leftType, rightType, ternary->GetLocation());
                 ReportError();
@@ -79,7 +80,7 @@ namespace Runtime
 		return leftType;
     }
 
-    ValueType TypeChecker::DiagnoseUnary(std::shared_ptr<UnaryNode> unary)
+    PValType TypeChecker::DiagnoseUnary(std::shared_ptr<UnaryNode> unary)
     {
         auto op = unary->GetOperator();
         if (op == UnaryNode::UnaryOperator::Negative || op == UnaryNode::UnaryOperator::Positive)
@@ -87,7 +88,7 @@ namespace Runtime
             return DiagnoseNode(unary->GetTarget());
         }
 
-        return ValueType::Bool;
+        return std::make_shared<ValType>("bool");
     }
 }
 

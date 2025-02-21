@@ -270,6 +270,14 @@ namespace AST
             m_tokens.push_back(std::make_shared<Token>(TokenType::True, m_line, m_col));
 		else if (*id == "false")
             m_tokens.push_back(std::make_shared<Token>(TokenType::False, m_line, m_col));
+		else if (*id == "typedf")
+            m_tokens.push_back(std::make_shared<Token>(TokenType::TypeDf, m_line, m_col));
+		else if (*id == "construct")
+            m_tokens.push_back(std::make_shared<Token>(TokenType::Construct, m_line, m_col));
+		else if (*id == "new")
+            m_tokens.push_back(std::make_shared<Token>(TokenType::New, m_line, m_col));
+		else if (*id == "cast")
+            m_tokens.push_back(std::make_shared<Token>(TokenType::Cast, m_line, m_col));
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));
@@ -394,6 +402,15 @@ namespace AST
 		}
 		return m_tokens[m_index];
 	}
+
+    void Lexer::RestoreState()
+    {
+        assert(m_state != nullptr && "State is required for restoring.");
+
+        m_index = m_state->index;
+
+        m_state = nullptr;
+    }
 
 	std::shared_ptr<Token> Lexer::SeekToken()
 	{

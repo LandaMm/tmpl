@@ -7,7 +7,7 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    void TypeChecker::AssumeIfElse(std::shared_ptr<Statements::IfElseStatement> ifElse, ValueType expected)
+    void TypeChecker::AssumeIfElse(std::shared_ptr<Statements::IfElseStatement> ifElse, PValType expected)
     {
         AssumeBlock(ifElse->GetBody(), expected);
         std::shared_ptr<Node> elseNode = ifElse->GetElseNode();
@@ -24,7 +24,7 @@ namespace Runtime
     }
 
     // Look for return statement inside block and check the type of returned value
-    void TypeChecker::AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, ValueType expected)
+    void TypeChecker::AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected)
     {
         auto it = std::make_shared<Common::Iterator>(body->GetSize());
 
@@ -35,8 +35,8 @@ namespace Runtime
             if (stmt->GetType() == NodeType::Return)
             {
                 auto ret = std::dynamic_pointer_cast<ReturnNode>(stmt);
-                ValueType retType = DiagnoseNode(ret->GetValue());
-                if (retType != expected)
+                PValType retType = DiagnoseNode(ret->GetValue());
+                if (!retType->Compare(*expected))
                 {
                     Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                     errorManager.UnexpectedReturnType(GetFilename(), expected, retType, ret->GetLocation());

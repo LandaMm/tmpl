@@ -31,6 +31,11 @@ namespace AST
         Require, // 
         Export, // 
         Extern, //
+        Type,
+        TypeTemplate,
+        TypeDf,
+        Instance,
+        Cast,
     };
 
 	class Node

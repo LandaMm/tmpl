@@ -8,11 +8,11 @@ namespace Runtime
 
 	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
 	{
-		ValueType varType = TypeChecker::EvaluateType(GetFilename(), varDecl->GetType());
+		PValType varType = TypeChecker::EvaluateType(GetFilename(), varDecl->GetType());
 		std::string varName = *varDecl->GetName();
 		std::shared_ptr<Value> varValue = Execute(varDecl->GetValue());
 
-		if (varType != varValue->GetType())
+		if (!varType->Compare(*varValue->GetType()))
 		{
 			Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
 			errorManager.VarMismatchType(GetFilename(), varName, varValue->GetType(), varType, varDecl->GetLocation(), "RuntimeError");

@@ -8,7 +8,7 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    ValueType TypeChecker::DiagnoseFnCall(std::shared_ptr<FunctionCall> fnCall)
+    PValType TypeChecker::DiagnoseFnCall(std::shared_ptr<FunctionCall> fnCall)
     {
         // TODO: support for object member calls
         std::shared_ptr<Node> callee = fnCall->GetCallee();
@@ -21,15 +21,16 @@ namespace Runtime
             case AST::NodeType::ObjectMember:
             {
                 auto obj = std::dynamic_pointer_cast<ObjectMember>(callee);
-                ValueType targetType = DiagnoseNode(obj->GetObject());
-                if (!m_type_functions->HasItem(targetType))
+                PValType targetType = DiagnoseNode(obj->GetObject());
+                if (!m_type_functions->HasItem(targetType->GetName()))
                 {
                     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                     errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
-                    return ValueType::Null;
+                    ReportError();
+                    return std::make_shared<ValType>("void");
                 }
 
-                std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType);
+                std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
                 assert(typeEnv != nullptr && "Type env should have been created.");
 
                 std::shared_ptr<Node> fnNameNode = obj->GetMember();
@@ -39,7 +40,8 @@ namespace Runtime
                 {
                     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
                     errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
-                    return ValueType::Null;
+                    ReportError();
+                    return std::make_shared<ValType>("void");
                 }
 
                 fn = typeEnv->LookUp(fnName);
@@ -54,7 +56,8 @@ namespace Runtime
                 {
                     Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                     errorManager.UndeclaredFunction(GetFilename(), idCallee, "TypeError");
-                    return ValueType::Null;
+                    ReportError();
+                    return std::make_shared<ValType>("void");
                 }
 
                 fn = m_functions->LookUp(fnName);
@@ -64,7 +67,8 @@ namespace Runtime
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.RaiseError("Invalid node for function call", "TypeError");
-                return ValueType::Null;
+                ReportError();
+                return std::make_shared<ValType>("void");
             }
         }
 
@@ -73,7 +77,7 @@ namespace Runtime
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.PrivateFunctionError(GetFilename(), fnName, fn->GetModuleName(), callee->GetLocation(), fn->GetLocation(), "TypeError");
             ReportError();
-            return ValueType::Null;
+            return std::make_shared<ValType>("void");
         }
 
         auto args = fnCall->GetArgs();
@@ -97,8 +101,8 @@ namespace Runtime
             auto param = fn->GetItem(it->GetPosition());
             std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
-            ValueType valType = DiagnoseNode(arg);
-            if (valType != param->GetType())
+            PValType valType = DiagnoseNode(arg);
+            if (!valType->Compare(*param->GetType()))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgMismatchType(

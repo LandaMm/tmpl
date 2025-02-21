@@ -1,4 +1,5 @@
 
+#include "include/node/instance.h"
 #include <cassert>
 #include <memory>
 #ifdef _WIN32
@@ -59,6 +60,12 @@ namespace Runtime
                 case NodeType::ProcedureDecl:
                     EvaluateProcedureDeclaration(std::dynamic_pointer_cast<ProcedureDeclaration>(stmt));
                     break;
+                case NodeType::TypeDf:
+                    EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
+                    break;
+                case NodeType::Export:
+                    // Ignore export in the tmpl executable
+                    break;
                 default:
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -93,6 +100,9 @@ namespace Runtime
                 case NodeType::FnDecl:
                     EvaluateFunctionDeclaration(std::dynamic_pointer_cast<FunctionDeclaration>(stmt), true, false);
                     break;
+                case NodeType::TypeDf:
+                    EvaluateTypeDefinition(std::dynamic_pointer_cast<TypeDfNode>(stmt), false);
+                    break;
                 default:
                     {
                         Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -113,7 +123,7 @@ namespace Runtime
 			return EvaluateLiteral(std::dynamic_pointer_cast<LiteralNode>(node));
 		case NodeType::VarDecl:
 			EvaluateVariableDeclaration(std::dynamic_pointer_cast<VarDeclaration>(node));
-			return std::make_shared<NullValue>();
+			return std::make_shared<VoidValue>();
 		case NodeType::Identifier:
 			return EvaluateIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
 		case NodeType::Condition:
@@ -128,12 +138,16 @@ namespace Runtime
             return EvaluateFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
         case NodeType::IfElse:
             return EvaluateIfElseStatement(std::dynamic_pointer_cast<Statements::IfElseStatement>(node));
+        case NodeType::Instance:
+            return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
+        case NodeType::Cast:
+            return EvaluateTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
         case NodeType::Block:
         {
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);
             auto scope = std::make_shared<Environment<Variable>>(m_variables);
             m_variables = scope;
-            std::shared_ptr<Value> value = std::make_shared<NullValue>();
+            std::shared_ptr<Value> value = std::make_shared<VoidValue>();
             auto it = std::make_shared<Common::Iterator>(block->GetSize());
             while (it->HasItems())
             {
@@ -147,7 +161,7 @@ namespace Runtime
                 else
                 {
                     auto localVal = Execute(node);
-                    if (node->IsBlock() && (localVal != nullptr && localVal->GetType() != ValueType::Null))
+                    if (node->IsBlock() && (localVal != nullptr && !localVal->GetType()->Compare(ValType("void"))))
                     {
                         value = localVal;
                         break;
@@ -167,6 +181,6 @@ namespace Runtime
             }
 		}
 
-		return std::make_shared<NullValue>();
+		return std::make_shared<VoidValue>();
 	}
 }

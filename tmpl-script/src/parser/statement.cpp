@@ -8,6 +8,7 @@
 #include "../../include/node/return.h"
 #include "../../include/node/function.h"
 #include "../../include/node/export.h"
+#include "include/token.h"
 
 namespace AST
 {
@@ -31,6 +32,10 @@ namespace AST
                 target = VariableDeclaration();
                 Eat(TokenType::Semicolon);
                 break;
+            case TokenType::TypeDf:
+                target = TypeDfStatement();
+                Eat(TokenType::Semicolon);
+                break;
             default:
                 Prelude::ErrorManager &manager = GetErrorManager();
                 manager.UnexpectedToken(GetFilename(), token);
@@ -48,43 +53,89 @@ namespace AST
         auto fnLoc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Fn);
 
-        std::shared_ptr<Node> fnName = Id();
-        if (m_lexer->GetToken()->GetType() == TokenType::Point)
+        Nodes::FunctionModifier modifier = Nodes::FunctionModifier::None;
+
+        if (m_lexer->GetToken()->GetType() == TokenType::At)
         {
-            fnName = ObjectMember(fnName);
+            auto atToken = m_lexer->GetToken();
+            Eat(TokenType::At);
+
+            switch(m_lexer->GetToken()->GetType())
+            {
+                case TokenType::Construct:
+                    Eat(TokenType::Construct);
+                    modifier = Nodes::FunctionModifier::Construct;
+                    break;
+                case TokenType::Cast:
+                    Eat(TokenType::Cast);
+                    modifier = Nodes::FunctionModifier::Cast;
+                    break;
+                default:
+                {
+                    Prelude::ErrorManager& errManager = GetErrorManager();
+                    errManager.UnexpectedFnModifier(GetFilename(), m_lexer->GetToken(), atToken->GetLocation());
+                    return nullptr;
+                }
+            }
         }
 
-        Eat(TokenType::OpenBracket);
+        std::shared_ptr<Node> fnName;
+
+        if (m_lexer->SeekToken()->GetType() == TokenType::Point && modifier == Nodes::FunctionModifier::None)
+        {
+            fnName = Type();
+            fnName = ObjectMember(fnName);
+        }
+        else if (modifier == Nodes::FunctionModifier::Cast)
+        {
+            // fn @cast(Integer) : int {...}
+            // typdf List<?T> = list<T>;
+            // fn @cast(List<?T>) : list<T> {...}
+            Eat(TokenType::OpenBracket);
+            fnName = TypeTemplate();
+            Eat(TokenType::CloseBracket);
+        }
+        else
+        {
+            fnName = Id();
+        }
+
+        assert(fnName != nullptr && "Fn name shouldn't be left null in signature");
 
         std::shared_ptr<Statements::StatementsBody> body =
             std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
         std::shared_ptr<Nodes::FunctionDeclaration> fn =
-            std::make_shared<Nodes::FunctionDeclaration>(fnName, body, fnLoc);
+            std::make_shared<Nodes::FunctionDeclaration>(fnName, body, modifier, fnLoc);
 
-        auto currToken = m_lexer->GetToken()->GetType();
-
-        while (currToken != TokenType::CloseBracket
-                && currToken != TokenType::_EOF)
+        if (modifier != Nodes::FunctionModifier::Cast)
         {
-            if (currToken == TokenType::Comma)
-            {
-                Eat(TokenType::Comma);
-            }
-            // TODO: support for complex types
-            std::shared_ptr<Node> type = Id();
-            std::shared_ptr<Nodes::IdentifierNode> name = Id();
-            std::shared_ptr<Nodes::FunctionParam> param = std::make_shared<Nodes::FunctionParam>(type, name);
-            fn->AddParam(param);
-            currToken = m_lexer->GetToken()->GetType();
-        }
+            Eat(TokenType::OpenBracket);
 
-        Eat(TokenType::CloseBracket);
+            auto currToken = m_lexer->GetToken()->GetType();
+
+            while (currToken != TokenType::CloseBracket
+                    && currToken != TokenType::_EOF)
+            {
+                if (currToken == TokenType::Comma)
+                {
+                    Eat(TokenType::Comma);
+                }
+                // TODO: support for complex types
+                std::shared_ptr<Nodes::TypeNode> type = Type();
+                std::shared_ptr<Nodes::IdentifierNode> name = Id();
+                std::shared_ptr<Nodes::FunctionParam> param = std::make_shared<Nodes::FunctionParam>(type, name);
+                fn->AddParam(param);
+                currToken = m_lexer->GetToken()->GetType();
+            }
+
+            Eat(TokenType::CloseBracket);
+        }
 
         Eat(TokenType::Colon);
 
         // TODO: support for complex types
-        std::shared_ptr<Node> retType = Id();
+        std::shared_ptr<Nodes::TypeNode> retType = Type();
 
         fn->SetReturnType(retType);
 
@@ -154,8 +205,7 @@ namespace AST
 		else
 			Eat(TokenType::Const);
 
-        // TODO: support for complex types
-		std::shared_ptr<Node> type = Id();
+		std::shared_ptr<Nodes::TypeNode> type = Type();
 
 		std::shared_ptr<Nodes::IdentifierNode> nameNode = Id();
 		std::shared_ptr<std::string> name = std::make_shared<std::string>(nameNode->GetName());

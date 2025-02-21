@@ -17,12 +17,12 @@ namespace Runtime
 	private:
 		// TODO:
 		// `std::string m_typename;` - for complex type names, e.g. Point<int> instead of object {x: int, y: int}
-		ValueType m_type;
+		PValType m_type;
 		std::shared_ptr<Value> m_value;
 		bool m_editable;
 
 	public:
-		Variable(ValueType type, std::shared_ptr<Value> value, bool editable)
+		Variable(PValType type, std::shared_ptr<Value> value, bool editable)
 			: m_type(type), m_value(value), m_editable(editable) {}
 
 	public:
@@ -51,13 +51,13 @@ namespace Runtime
     class FnParam
     {
     private:
-        ValueType m_type;
+        PValType m_type;
         std::string m_name;
     public:
-        FnParam(ValueType type, std::string name) : m_type(type), m_name(name) { }
+        FnParam(PValType type, std::string name) : m_type(type), m_name(name) { }
         ~FnParam() = default;
     public:
-        inline ValueType GetType() const { return m_type; }
+        inline PValType GetType() const { return m_type; }
         inline std::string GetName() const { return m_name; }
     };
 
@@ -66,7 +66,7 @@ namespace Runtime
 	private:
 		std::shared_ptr<Node> m_body;
         std::vector<std::shared_ptr<FnParam>> m_params;
-        ValueType m_ret_type;
+        PValType m_ret_type;
 
         std::string m_module_name;
         bool m_exported;
@@ -76,7 +76,7 @@ namespace Runtime
         size_t m_index;
 
 	public:
-		Fn(std::shared_ptr<Node> body, ValueType retType, std::string module, bool exported, bool externed, Location loc)
+		Fn(std::shared_ptr<Node> body, PValType retType, std::string module, bool exported, bool externed, Location loc)
 			: m_body(body),
             m_ret_type(retType),
             m_params(std::vector<std::shared_ptr<FnParam>>()),
@@ -86,13 +86,14 @@ namespace Runtime
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
+		void SetReturnType(PValType newTyp) { m_ret_type = newTyp; }
     public:
         inline std::shared_ptr<FnParam> GetItem(unsigned int index) { return m_params[index]; }
 
 	public:
 		inline std::shared_ptr<Node> GetBody() const { return m_body; }
         inline size_t GetParamsSize() const { return m_params.size(); }
-        inline ValueType GetReturnType() const { return m_ret_type; }
+        inline PValType GetReturnType() const { return m_ret_type; }
         inline std::string GetModuleName() const { return m_module_name; }
         inline bool IsExported() const { return m_exported; }
         inline bool IsExterned() const { return m_externed; }
