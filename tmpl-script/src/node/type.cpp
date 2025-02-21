@@ -16,5 +16,10 @@ namespace AST::Nodes
     {
         return "TypeDf(" + m_template->Format() + " = " + m_value->Format() + ")";
     }
+
+    std::string GenericNode::Format() const
+    {
+        return "Generic(" + m_name->Format() + ")";
+    }
 }
 
