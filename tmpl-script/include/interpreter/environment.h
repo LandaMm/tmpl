@@ -48,6 +48,19 @@ namespace Runtime
 		}
 	};
 
+    class FnGeneric
+    {
+    private:
+        std::string m_name;
+        // TODO:
+        // base and default type
+    public:
+        FnGeneric(std::string name) : m_name(name) { }
+        ~FnGeneric() = default;
+    public:
+        inline std::string GetName() const { return m_name; }
+    };
+
     class FnParam
     {
     private:
