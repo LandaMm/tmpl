@@ -4,6 +4,7 @@
 #include <memory>
 #include "include/helper.h"
 #include "include/interpreter.h"
+#include "include/node/assign.h"
 #include "include/node/cast.h"
 #include "include/node/instance.h"
 #include "include/node/logical.h"
@@ -117,6 +118,7 @@ namespace Runtime
         void HandleModule(std::shared_ptr<ProgramNode> program); // DONE
         void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt); // DONE
         void HandleTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported);
+        void HandleAssignment(std::shared_ptr<AssignmentNode> assignment);
 
     private:
         void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected); // DONE
