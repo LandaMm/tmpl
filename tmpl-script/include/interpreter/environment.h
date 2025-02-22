@@ -26,7 +26,12 @@ namespace Runtime
 			: m_type(type), m_value(value), m_editable(editable) {}
 
 	public:
-		inline std::shared_ptr<Value> GetValue() { return m_value; }
+		inline std::shared_ptr<Value> GetValue() const { return m_value; }
+        inline PValType GetType() const { return m_type; }
+        inline bool IsEditable() const { return m_editable; }
+
+    public:
+        void SetValue(std::shared_ptr<Value> newValue) { m_value = newValue; }
 	};
 
 	class Procedure
