@@ -108,7 +108,7 @@ namespace AST
             break;
         }
 		default:
-			stmt = Ternary();
+			stmt = Assignment();
 			Eat(TokenType::Semicolon);
 			break;
 		}
