@@ -1,4 +1,5 @@
 
+#include "include/node/assign.h"
 #include "include/node/instance.h"
 #include <cassert>
 #include <memory>
@@ -142,6 +143,11 @@ namespace Runtime
             return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
         case NodeType::Cast:
             return EvaluateTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
+        case NodeType::Assign:
+        {
+            EvaluateAssignment(std::dynamic_pointer_cast<AssignmentNode>(node));
+            break;
+        }
         case NodeType::Block:
         {
             auto block = std::dynamic_pointer_cast<Statements::StatementsNode>(node);

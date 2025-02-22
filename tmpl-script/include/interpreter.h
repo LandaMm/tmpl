@@ -1,6 +1,7 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 #include <memory>
+#include "include/node/assign.h"
 #include "include/node/instance.h"
 #include "include/node/statement.h"
 #include "include/node/type.h"
@@ -95,6 +96,7 @@ namespace Runtime
         void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed); // DONE
         void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt); // DONE
         void EvaluateTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported);
+        void EvaluateAssignment(std::shared_ptr<AssignmentNode> assignment);
 
     private:
         inline std::string GetFilename() const { return m_filename; }

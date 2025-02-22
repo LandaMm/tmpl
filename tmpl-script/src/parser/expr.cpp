@@ -4,11 +4,30 @@
 #include "../../include/node/literal.h"
 #include "../../include/node/logical.h"
 #include "../../include/node/unary.h"
+#include "include/node/assign.h"
 #include "include/node/instance.h"
 #include "include/token.h"
 
 namespace AST
 {
+    std::shared_ptr<Node> Parser::Assignment()
+    {
+        // TODO: support for object member assignment
+        if (m_lexer->GetToken()->GetType() == TokenType::Id)
+        {
+            // TODO: when support object members use m_lexer.SaveState to look for "="
+            if (m_lexer->SeekToken() != nullptr && m_lexer->SeekToken()->GetType() == TokenType::Equal)
+            {
+                auto assignee = Id();
+                Eat(TokenType::Equal);
+                auto expr = Ternary();
+                return std::make_shared<Nodes::AssignmentNode>(assignee, expr, assignee->GetLocation());
+            }
+        }
+
+        return Ternary();
+    }
+
 	std::shared_ptr<Node> Parser::Ternary()
 	{
 		std::shared_ptr<Node> result = Cond();

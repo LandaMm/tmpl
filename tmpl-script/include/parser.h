@@ -46,6 +46,7 @@ namespace AST
 		std::shared_ptr<Node> Expr();
 		std::shared_ptr<Node> Cond();
 		std::shared_ptr<Node> Ternary();
+		std::shared_ptr<Node> Assignment();
 
     private: // Checkers
         bool IsTypeCastAhead();

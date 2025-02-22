@@ -13,6 +13,7 @@
 #include "../include/node/logical.h"
 #include "../include/node/macros.h"
 #include "../include/iterator.h"
+#include "include/node/assign.h"
 #include "include/node/instance.h"
 
 namespace Runtime
@@ -44,6 +45,11 @@ namespace Runtime
                 return DiagnoseInstance(std::dynamic_pointer_cast<InstanceNode>(node));
             case NodeType::Cast:
                 return DiagnoseTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
+            case NodeType::Assign:
+            {
+                HandleAssignment(std::dynamic_pointer_cast<AssignmentNode>(node));
+                return std::make_shared<ValType>("void");
+            }
             case NodeType::Return:
             {
                 auto ret = std::dynamic_pointer_cast<ReturnNode>(node);
