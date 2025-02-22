@@ -6,17 +6,17 @@
     var float f = 3.14151;
     var int i = 5979874;
 
-    println("d: " + d.tostring());
-    println("f: " + f.tostring());
-    println("i: " + i.tostring());
+    println("d: " + (string)d);
+    println("f: " + (string)f);
+    println("i: " + (string)i);
 
-    println("d->f: " + d.tofloat().tostring());
-    println("d->i: " + d.toint().tostring());
+    println("d->f: " + (string)(float)d);
+    println("d->i: " + (string)(int)d);
 
-    println("f->d: " + f.todouble().tostring());
-    println("f->i: " + f.toint().tostring());
+    println("f->d: " + (string)(double)f);
+    println("f->i: " + (string)(int)f);
 
-    println("i->d: " + i.todouble().tostring());
-    println("i->f: " + i.tofloat().tostring());
+    println("i->d: " + (string)(double)i);
+    println("i->f: " + (string)(float)i);
 }
 

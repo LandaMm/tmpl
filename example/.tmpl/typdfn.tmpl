@@ -1,21 +1,26 @@
 @require"std/io"
+@require"std/convert"
 
 typedf Integer = int;
 
-fn @construct Integer(int initialValue) : Integer {
+fn @construct Integer(int initialValue) {
     return initialValue;
 }
 
 typedf Number = Integer;
 
-fn @construct Number(int initialValue) : Number {
+fn @construct Number(int initialValue) {
     var Integer integerVal = new Integer(initialValue);
     return integerVal;
 }
 
+fn @cast(Number) : string {
+    return (string)(int)(Integer)self;
+}
+
 ->main {
     var Number num = new Number(100);
-    println(num);
+    println((string)num);
     println("Hello, World!");
 }
 

@@ -7,6 +7,6 @@ export fn @construct Integer(int value) {
 }
 
 export fn @cast(Integer) : string {
-    return ((int)self).tostring();
+    return (string)(int)self;
 }
 

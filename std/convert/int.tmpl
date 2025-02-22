@@ -2,14 +2,14 @@
 @extern fn i_tos(int value) : string;
 @extern fn i_tof(int value) : float;
 
-export fn int.todouble() : double {
+export fn @cast(int) : double {
     return i_tod(self);
 }
 
-export fn int.tofloat() : float {
+export fn @cast(int) : float {
     return i_tof(self);
 }
 
-export fn int.tostring() : string {
+export fn @cast(int) : string {
     return i_tos(self);
 }

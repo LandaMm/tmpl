@@ -17,13 +17,13 @@ fn factorial(int n) : int {
     } else {
         println("is_good is false!");
     }
-    return PI + factor.tofloat();
+    return PI + (float)factor;
 }
 
 ->fact {
     var int num = 7;
     var int res = factorial(7);
-    println("Factorial of " + itos(num) + " is " + res.tostring());
+    println("Factorial of " + (string)num + " is " + (string)res);
     return res;
 }
 
