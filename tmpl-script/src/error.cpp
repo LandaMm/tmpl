@@ -98,6 +98,21 @@ namespace Prelude
             << "' but got '" << *type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
+	void ErrorManager::AssignMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
+	{
+        // TODO: allow defining double type variable with float value (casting) and opposite direction
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type mismatch for assignment of variable '" << name
+            << "'. Expected type '" << *expectedType
+            << "' but got '" << *type << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+	}
+    void ErrorManager::ConstAssignment(std::string filename, std::string name, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Cannot reassign a constant '" << name << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 	void ErrorManager::OperandMismatchType(std::string filename, Runtime::PValType leftType, Runtime::PValType rightType, Location loc, std::string prefix)
 	{
         LogFileLocation(filename, loc, prefix);

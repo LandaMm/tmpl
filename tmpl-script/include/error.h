@@ -78,6 +78,8 @@ namespace Prelude
 		void UndeclaredVariable(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
 		void UndefinedType(std::string filename, std::string name, AST::Location loc, std::string prefix);
 		void VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
+		void AssignMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
+        void ConstAssignment(std::string filename, std::string name, AST::Location loc, std::string prefix);
         void VarAlreadyExists(std::string filename, std::string name, AST::Location loc, std::string prefix);
         void FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix);
     public: // CliRunner
