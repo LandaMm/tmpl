@@ -15,7 +15,12 @@ namespace Runtime
     void Interpreter::EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed)
     {
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
-        PValType retType = TypeChecker::EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        PValType retType = nullptr;
+
+        if (fnDecl->GetModifier() != AST::Nodes::FunctionModifier::Construct)
+        {
+            retType = TypeChecker::EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        }
 
         std::shared_ptr<Fn> fn = std::make_shared<Fn>(body, retType, GetFilename(), exported, externed, fnDecl->GetLocation());
 

@@ -20,8 +20,13 @@ namespace Runtime
     void TypeChecker::HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
         std::shared_ptr<Statements::StatementsBody> body = fnDecl->GetBody();
-        PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
-        PValType baseType;
+        PValType retType = nullptr;
+        PValType baseType = nullptr;
+
+        if (fnDecl->GetModifier() != AST::Nodes::FunctionModifier::Construct)
+        {
+            retType = EvaluateType(GetFilename(), fnDecl->GetReturnType());
+        }
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
 
