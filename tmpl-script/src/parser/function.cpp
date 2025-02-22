@@ -88,12 +88,14 @@ namespace AST
             Eat(TokenType::CloseBracket);
         }
 
-        Eat(TokenType::Colon);
+        if (modifier != Nodes::FunctionModifier::Construct)
+        {
+            Eat(TokenType::Colon);
 
-        // TODO: support for complex types
-        std::shared_ptr<Nodes::TypeNode> retType = Type();
+            std::shared_ptr<Nodes::TypeNode> retType = Type();
 
-        fn->SetReturnType(retType);
+            fn->SetReturnType(retType);
+        }
 
         return fn;
     }
