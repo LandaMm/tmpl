@@ -15,10 +15,17 @@ namespace Runtime
 
         while (condVal->GetValue() == true)
         {
-            auto val = Execute(whileNode->GetBody());
-            if (!val->GetType()->Compare(ValType("void")))
+            try
             {
-                return val;
+                auto val = Execute(whileNode->GetBody());
+                if (!val->GetType()->Compare(ValType("void")))
+                {
+                    return val;
+                }
+            }
+            catch(const BreakException&)
+            {
+                break;
             }
 
             condition = Execute(whileNode->GetCondition());

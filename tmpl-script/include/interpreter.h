@@ -25,6 +25,14 @@
 
 namespace Runtime
 {
+    class BreakException : public std::exception
+    {
+        public:
+            const char* what() const noexcept override {
+                return "Break statement encountered.";
+            }
+    };
+
 	using namespace AST::Nodes;
 	class Interpreter
 	{

@@ -20,13 +20,20 @@ namespace Runtime
 
         while (condVal->GetValue() == true)
         {
-            auto val = Execute(forLoopNode->GetBody());
-            if (!val->GetType()->Compare(ValType("void")))
+            try
             {
-                assert(scope->GetParent() != nullptr && "Scope parent gone.");
-                m_variables = scope->GetParent();
-                assert(m_variables != scope && "Parent and child are located at the same memory space.");
-                return val;
+                auto val = Execute(forLoopNode->GetBody());
+                if (!val->GetType()->Compare(ValType("void")))
+                {
+                    assert(scope->GetParent() != nullptr && "Scope parent gone.");
+                    m_variables = scope->GetParent();
+                    assert(m_variables != scope && "Parent and child are located at the same memory space.");
+                    return val;
+                }
+            }
+            catch(const BreakException&)
+            {
+                break;
             }
 
             Execute(forLoopNode->GetAssignment());

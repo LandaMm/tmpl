@@ -148,6 +148,8 @@ namespace Runtime
             return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
         case NodeType::Cast:
             return EvaluateTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
+        case NodeType::Break:
+            throw BreakException();
         case NodeType::Assign:
         {
             EvaluateAssignment(std::dynamic_pointer_cast<AssignmentNode>(node));
