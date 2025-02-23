@@ -329,13 +329,53 @@ namespace AST
 		while (m_pos < m_code.size())
 		{
 			char ch = m_code[m_pos];
-			if (ch != '"')
+            if (ch == '\\')
+            {
+                m_pos++;
+                m_col++;
+                if (m_pos >= m_code.size())
+                {
+                    string_closed = false;
+                    break;
+                }
+                ch = m_code[m_pos];
+                switch (ch)
+                {
+                    case '\\':
+                        id->push_back('\\');
+                        break;
+                    case 'n':
+                        id->push_back('\n');
+                        break;
+                    case 'r':
+                        id->push_back('\r');
+                        break;
+                    case 't':
+                        id->push_back('\t');
+                        break;
+                    case 'b':
+                        id->push_back('\b');
+                        break;
+                    case '"':
+                        id->push_back('"');
+                        break;
+                    default:
+                    {
+                        Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                        errManager.UnexpectedEscapeCharacter(GetFilename(), ch, m_line, m_col);
+                        return;
+                    }
+                }
+                m_pos++;
+                m_col++;
+            }
+            else if (ch != '"')
 			{
 				id->push_back(ch);
 				m_pos++;
 				m_col++;
 			}
-			else
+            else
 			{
 				m_pos++;
 				m_col++;
