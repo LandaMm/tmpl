@@ -7,8 +7,12 @@ fn repeat_str(string what, int times) : string {
     println("[debug] repeat_str.times = " + (string)times);
     for (var int i = 0; i < times; i = i + 1)
     {
-        println("adding " + what + " #" + (string)i + " time");
         res = res + what;
+        if (i > 50)
+        {
+            println("[REPEAT_STR_FOR] You've reached the repeat limit of 50");
+            break;
+        }
     }
     return res;
 }
@@ -19,16 +23,20 @@ fn repeat_str_while(string what, int times) : string {
     while (true) {
         res = res + what;
         i = i + 1;
-        if (i >= times) return res;
+        if (i > 50)
+        {
+            println("[REPEAT_STR_WHILE] You've reached the repeat limit of 50");
+            break;
+        }
     }
 
     return res;
 }
 
 ->main {
-    var string repeated = repeat_str("moa", 10);
+    var string repeated = repeat_str("moa", 55);
     println("repeated: " + repeated);
-    var string wrepeated = repeat_str_while("meow", 5);
+    var string wrepeated = repeat_str_while("meow", 55);
     println("wrepeated: " + wrepeated);
 }
 
