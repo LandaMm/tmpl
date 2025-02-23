@@ -50,6 +50,7 @@ namespace Prelude
 		void UnexpectedEofWhileToken(std::string filename, AST::TokenType tokenType, size_t line, size_t col);
 		void UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> locToken);
 		void UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> locToken, std::shared_ptr<AST::Token> gotToken, AST::TokenType expectedTokenType);
+		void UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> gotToken, std::string expected);
 		void MissingConstantDefinition(std::string filename, std::shared_ptr<AST::Token> token);
         void UnexpectedFnModifier(std::string filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc);
 

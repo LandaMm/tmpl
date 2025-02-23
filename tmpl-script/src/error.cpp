@@ -75,6 +75,12 @@ namespace Prelude
         std::cerr << "Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
+    void ErrorManager::UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> gotToken, std::string expected)
+    {
+        LogFileLocation(filename, gotToken->GetLocation(), "ParseError");
+        std::cerr << "Expected " << expected << " but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
+		std::exit(-1);
+    }
     void ErrorManager::UnexpectedFnModifier(std::string filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc)
     {
         LogFileLocation(filename, loc, "ParseError");
