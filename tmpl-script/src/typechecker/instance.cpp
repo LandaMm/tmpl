@@ -42,53 +42,17 @@ namespace Runtime
         auto fnCall = instance->GetFunctionCall();
         auto fnName = targetType->GetName() + "::constructor";
 
-        if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
-        {
-            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-            errorManager.PrivateFunctionError(GetFilename(), fnName, fn->GetModuleName(), fnCall->GetLocation(), fn->GetLocation(), "TypeError");
-            ReportError();
-            return targetType;
-        }
-
-        auto args = fnCall->GetArgs();
-
-        if (fn->GetParamsSize() != args->size())
-        {
-            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-            errorManager.ArgsParamsExhausted(
-                    GetFilename(),
-                    fnName,
-                    args->size(),
-                    fn->GetParamsSize(),
-                    fnCall->GetLocation(), "TypeError");
-            ReportError();
-            return targetType;
-        }
+        auto typFn = std::make_shared<TypeFn>(targetType, fn->GetModuleName(), fn->IsExported(), fn->GetLocation());
 
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while (it->HasItems())
         {
             auto param = fn->GetItem(it->GetPosition());
-            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
-            PValType val = DiagnoseNode(arg);
-            if (!val->Compare(*param->GetType()))
-            {
-                Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
-                errorManager.ArgMismatchType(
-                        GetFilename(),
-                        param->GetName(),
-                        val,
-                        param->GetType(),
-                        arg->GetLocation(),
-                        "TypeError"
-                        );
-                ReportError();
-                return targetType;
-            }
+            typFn->AddParam(param);
         }
 
-        return targetType;
+        return ResolveFn(typFn, fnName, fnCall);
     }
 }
 

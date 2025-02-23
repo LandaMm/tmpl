@@ -128,6 +128,10 @@ namespace Runtime
         void AssumeForLoop(std::shared_ptr<ForLoopNode> forLoopNode, PValType expected);
 
     private:
+        PValType ResolveFn(std::shared_ptr<TypeFn> fn, std::string fnName, std::shared_ptr<FunctionCall> fnCall);
+        bool ResolveTypeFn(std::shared_ptr<ObjectMember> obj, std::shared_ptr<TypeFn>& fn, std::string& fnName);
+
+    private:
         void ReportError() { m_errors++; };
 
     public:
