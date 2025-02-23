@@ -5,9 +5,9 @@ fn repeat_str(string what, int times) : string {
     var string res = "";
     println("[debug] repeat_str.what = " + what);
     println("[debug] repeat_str.times = " + (string)times);
-    for (var int i = 0; i < times; i = i + 1)
+    for (var int i = 0; i < times; i += 1)
     {
-        res = res + what;
+        res += what;
         if (i > 50)
         {
             println("[REPEAT_STR_FOR] You've reached the repeat limit of 50");
@@ -25,8 +25,8 @@ fn repeat_str_while(string what, int times) : string {
     var string res = "";
     var int i = 0;
     while (true) {
-        res = res + what;
-        i = i + 1;
+        res += what;
+        i += 1;
         if (i > 50)
         {
             println("[REPEAT_STR_WHILE] You've reached the repeat limit of 50");
@@ -42,9 +42,9 @@ fn repeat_str_while(string what, int times) : string {
 }
 
 fn mult_table(int size) : void {
-    for (var int i = 1; i <= size; i = i + 1)
+    for (var int i = 1; i <= size; i += 1)
     {
-        for (var int j = 1; j <= size; j = j + 1)
+        for (var int j = 1; j <= size; j += 1)
         {
             print((string)(i * j) + "    ");
         }
