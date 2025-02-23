@@ -139,6 +139,8 @@ namespace Runtime
             return EvaluateFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
         case NodeType::IfElse:
             return EvaluateIfElseStatement(std::dynamic_pointer_cast<Statements::IfElseStatement>(node));
+        case NodeType::While:
+            return EvaluateWhileLoop(std::dynamic_pointer_cast<WhileNode>(node));
         case NodeType::Instance:
             return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
         case NodeType::Cast:
@@ -167,7 +169,7 @@ namespace Runtime
                 else
                 {
                     auto localVal = Execute(node);
-                    if (node->IsBlock() && (localVal != nullptr && !localVal->GetType()->Compare(ValType("void"))))
+                    if (node->IsBlock() && !localVal->GetType()->Compare(ValType("void")))
                     {
                         value = localVal;
                         break;
