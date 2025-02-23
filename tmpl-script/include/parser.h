@@ -69,6 +69,7 @@ namespace AST
         std::shared_ptr<Nodes::FunctionDeclaration> FunctionSignature();
         std::shared_ptr<Node> FunctionDeclaration();
         std::shared_ptr<Node> ExportStmt();
+        std::shared_ptr<Node> WhileLoop();
     private: // Macros
         std::shared_ptr<Node> RequireStatement();
         std::shared_ptr<Node> ExternStatement();

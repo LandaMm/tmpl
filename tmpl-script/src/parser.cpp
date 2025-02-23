@@ -81,6 +81,9 @@ namespace AST
             stmt = TypeDfStatement();
             Eat(TokenType::Semicolon);
             break;
+        case TokenType::While:
+            stmt = WhileLoop();
+            break;
         case TokenType::At:
         {
             auto tokenType = Peek();
