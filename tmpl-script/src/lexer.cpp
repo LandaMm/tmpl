@@ -109,7 +109,14 @@ namespace AST
 				m_tokens.push_back(std::make_shared<Token>(TokenType::CloseSquareBracket, m_line, m_col));
 				break;
 			case '+':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Plus, m_line, m_col));
+				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
+				{
+					m_tokens.push_back(std::make_shared<Token>(TokenType::CompoundAdd, m_line, m_col));
+					m_pos++;
+					m_col++;
+				}
+				else
+                    m_tokens.push_back(std::make_shared<Token>(TokenType::Plus, m_line, m_col));
 				break;
 			case '@':
 				m_tokens.push_back(std::make_shared<Token>(TokenType::At, m_line, m_col));
@@ -121,14 +128,34 @@ namespace AST
 					m_pos++;
 					m_col++;
 				}
+				else if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
+				{
+					m_tokens.push_back(std::make_shared<Token>(TokenType::CompoundMinus, m_line, m_col));
+					m_pos++;
+					m_col++;
+				}
 				else
 					m_tokens.push_back(std::make_shared<Token>(TokenType::Minus, m_line, m_col));
 				break;
 			case '*':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Multiply, m_line, m_col));
+				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
+				{
+					m_tokens.push_back(std::make_shared<Token>(TokenType::CompoundMultiply, m_line, m_col));
+					m_pos++;
+					m_col++;
+				}
+				else
+                    m_tokens.push_back(std::make_shared<Token>(TokenType::Multiply, m_line, m_col));
 				break;
 			case '/':
-				m_tokens.push_back(std::make_shared<Token>(TokenType::Divide, m_line, m_col));
+				if (m_pos < m_code.size() && m_code[m_pos + 1] == '=')
+				{
+					m_tokens.push_back(std::make_shared<Token>(TokenType::CompoundDivide, m_line, m_col));
+					m_pos++;
+					m_col++;
+				}
+				else
+                    m_tokens.push_back(std::make_shared<Token>(TokenType::Divide, m_line, m_col));
 				break;
 			case ';':
 				m_tokens.push_back(std::make_shared<Token>(TokenType::Semicolon, m_line, m_col));
