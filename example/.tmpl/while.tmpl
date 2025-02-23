@@ -13,6 +13,10 @@ fn repeat_str(string what, int times) : string {
             println("[REPEAT_STR_FOR] You've reached the repeat limit of 50");
             break;
         }
+        if (i > 50)
+        {
+            println("[ERROR] Should be unreachable");
+        }
     }
     return res;
 }
@@ -28,9 +32,28 @@ fn repeat_str_while(string what, int times) : string {
             println("[REPEAT_STR_WHILE] You've reached the repeat limit of 50");
             break;
         }
+        if (i > 50)
+        {
+            println("[ERROR] Should be unreachable");
+        }
     }
 
     return res;
+}
+
+fn mult_table(int size) : void {
+    for (var int i = 1; i <= size; i = i + 1)
+    {
+        for (var int j = 1; j <= size; j = j + 1)
+        {
+            print((string)(i * j) + "    ");
+        }
+        println("");
+        if (i == 5)
+        {
+            break;
+        }
+    }
 }
 
 ->main {
@@ -38,5 +61,6 @@ fn repeat_str_while(string what, int times) : string {
     println("repeated: " + repeated);
     var string wrepeated = repeat_str_while("meow", 55);
     println("wrepeated: " + wrepeated);
+    mult_table(10);
 }
 
