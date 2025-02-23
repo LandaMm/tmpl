@@ -8,13 +8,8 @@ fn repeat_str(string what, int times) : string {
     println("[debug] repeat_str.times = " + (string)times);
     for (var int i = 0; i < times; i = i + 1)
     {
-
-    }
-    while (i < times)
-    {
         println("adding " + what + " #" + (string)i + " time");
         res = res + what;
-        i = i + 1;
     }
     return res;
 }
