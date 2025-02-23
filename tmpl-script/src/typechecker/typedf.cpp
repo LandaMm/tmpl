@@ -19,7 +19,7 @@ namespace Runtime
         auto baseType = typeDfn->GetTypeValue();
 
         std::string key = typeName->GetTypeName()->GetName();
-        auto typeDf = std::make_shared<TypeDf>(key, EvaluateType(GetFilename(), baseType), GetFilename(), exported, typeDfn->GetLocation());
+        auto typeDf = std::make_shared<TypeDf>(key, EvaluateType(GetFilename(), baseType, m_type_definitions, "TypeError"), GetFilename(), exported, typeDfn->GetLocation());
 
         m_type_definitions->AddItem(key, typeDf);
     }

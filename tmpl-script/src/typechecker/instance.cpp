@@ -7,7 +7,7 @@ namespace Runtime
 {
     PValType TypeChecker::DiagnoseInstance(std::shared_ptr<InstanceNode> instance)
     {
-        PValType targetType = EvaluateType(GetFilename(), instance->GetTarget());
+        PValType targetType = EvaluateType(GetFilename(), instance->GetTarget(), m_type_definitions, "TypeError");
 
         if (!m_type_definitions->HasItem(targetType->GetName()))
         {
