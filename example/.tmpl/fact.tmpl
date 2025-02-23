@@ -1,0 +1,13 @@
+@require"std/io"
+@require"std/convert"
+
+fn fact(int n) : int {
+    if (n == 0) return 1;
+    if (n == 1) return 1;
+    return n * fact(n - 1);
+}
+
+->main {
+    println((string)fact(33));
+}
+

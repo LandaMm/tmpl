@@ -1,0 +1,26 @@
+@require"std/io"
+@require"std/convert"
+
+fn repeat_str(string what, int times) : string {
+    var int i = 0;
+    var string res = "";
+    println("[debug] repeat_str.what = " + what);
+    println("[debug] repeat_str.times = " + (string)times);
+    for (var int i = 0; i < times; i++)
+    {
+
+    }
+    while (i < times)
+    {
+        println("adding " + what + " #" + (string)i + " time");
+        res = res + what;
+        i = i + 1;
+    }
+    return res;
+}
+
+->main {
+    var string repeated = repeat_str("moa", 10);
+    println("repeated: " + repeated);
+}
+
