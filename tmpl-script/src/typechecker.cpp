@@ -15,6 +15,7 @@
 #include "../include/iterator.h"
 #include "include/node/assign.h"
 #include "include/node/instance.h"
+#include "include/node/loop.h"
 
 namespace Runtime
 {
@@ -61,6 +62,13 @@ namespace Runtime
                 DiagnoseNode(ifElse->GetCondition());
                 DiagnoseNode(ifElse->GetBody());
                 if (ifElse->GetElseNode() != nullptr) DiagnoseNode(ifElse->GetElseNode());
+                return std::make_shared<ValType>("void");
+            }
+            case NodeType::While:
+            {
+                auto whileLoop = std::dynamic_pointer_cast<WhileNode>(node);
+                DiagnoseNode(whileLoop->GetCondition());
+                DiagnoseNode(whileLoop->GetBody());
                 return std::make_shared<ValType>("void");
             }
             case NodeType::Block:
