@@ -44,6 +44,7 @@ namespace Prelude
 
 	public: // Lexer (Tokenizer)
 		void UnexpectedCharacter(std::string filename, char ch, size_t line, size_t col);
+		void UnexpectedEscapeCharacter(std::string filename, char ch, size_t line, size_t col);
 		void UnexpectedEOF(std::string filename, size_t line, size_t col);
 
 	public: // Parser
