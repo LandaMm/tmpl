@@ -25,6 +25,14 @@ namespace Runtime
         inline PFn GetCaster() const { return m_caster; }
     };
 
+    class TypeDfGeneric
+    {
+    private:
+        std::string m_name;
+        // TODO:
+        // base and default type
+    };
+
     class TypeDf
     {
     public:
@@ -34,6 +42,9 @@ namespace Runtime
     private:
         std::string m_typename;
         PValType m_basename;
+
+        std::vector<std::shared_ptr<TypeDfGeneric>> m_generics;
+
         PCasts m_casts;
         PFn m_constructor;
         
@@ -59,6 +70,11 @@ namespace Runtime
 
         inline bool HasConstructor() const { return m_constructor != nullptr; }
         inline PFn GetConstructor() const { return m_constructor; }
+
+    public:
+        void AddGeneric(std::shared_ptr<TypeDfGeneric> typGeneric);
+        inline unsigned int GenericsSize() const { return m_generics.size(); }
+        inline std::shared_ptr<TypeDfGeneric> GetGeneric(unsigned int index) const { return m_generics[index]; }
 
     public:
         void SetConstructor(PFn constructor) { m_constructor = constructor; }
