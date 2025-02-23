@@ -7,5 +7,10 @@ namespace AST::Nodes
     {
         return "WhileLoop(" + m_condition->Format() + ", " + m_body->Format() + ")";
     }
+
+    std::string ForLoopNode::Format() const
+    {
+        return "ForLoop(" + m_decl->Format() + "; " + m_condition->Format() + "; " + m_loop_action->Format() + " => " + m_body->Format() + ")";
+    }
 }
 
