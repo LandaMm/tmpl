@@ -125,6 +125,7 @@ namespace Runtime
         void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected); // DONE
         void AssumeIfElse(std::shared_ptr<Statements::IfElseStatement> ifElse, PValType expected); // DONE
         void AssumeWhile(std::shared_ptr<WhileNode> whileNode, PValType expected);
+        void AssumeForLoop(std::shared_ptr<ForLoopNode> forLoopNode, PValType expected);
 
     private:
         void ReportError() { m_errors++; };

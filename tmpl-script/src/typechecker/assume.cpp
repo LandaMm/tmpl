@@ -29,6 +29,11 @@ namespace Runtime
         AssumeBlock(whileNode->GetBody(), expected);
     }
 
+    void TypeChecker::AssumeForLoop(std::shared_ptr<ForLoopNode> forLoopNode, PValType expected)
+    {
+        AssumeBlock(forLoopNode->GetBody(), expected);
+    }
+
     // Look for return statement inside block and check the type of returned value
     void TypeChecker::AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected)
     {
