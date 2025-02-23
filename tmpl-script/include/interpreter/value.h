@@ -153,7 +153,7 @@ namespace Runtime
     public:
         IntegerValue(const IntegerValue* val) : Value(val->GetType())
         {
-            m_value = val->m_value;
+            m_value = std::make_shared<int>(*val->m_value);
         }
 
 	public:
@@ -194,6 +194,7 @@ namespace Runtime
     public:
         ListValue(const ListValue* val) : Value(val->GetType())
         {
+            // TODO: think if we want deep copy
             m_value = val->m_value;
         }
 
@@ -227,7 +228,7 @@ namespace Runtime
     public:
         FloatValue(const FloatValue* val) : Value(val->GetType())
         {
-            m_value = val->m_value;
+            m_value = std::make_shared<float>(*val->m_value);
         }
 
 	public:
@@ -263,7 +264,7 @@ namespace Runtime
     public:
         DoubleValue(const DoubleValue* val) : Value(val->GetType())
         {
-            m_value = val->m_value;
+            m_value = std::make_shared<double>(*val->m_value);
         }
 
 	public:
@@ -295,7 +296,7 @@ namespace Runtime
     public:
         StringValue(const StringValue* val) : Value(val->GetType())
         {
-            m_value = val->m_value;
+            m_value = std::make_shared<std::string>(*val->m_value);
         }
 
 	public:
