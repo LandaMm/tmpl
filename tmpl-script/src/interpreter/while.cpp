@@ -13,19 +13,18 @@ namespace Runtime
 
         auto condVal = std::dynamic_pointer_cast<BoolValue>(condition);
 
+        m_breakStack.push_back(false);
+
         while (condVal->GetValue() == true)
         {
-            try
-            {
-                auto val = Execute(whileNode->GetBody());
-                if (!val->GetType()->Compare(ValType("void")))
-                {
-                    return val;
-                }
-            }
-            catch(const BreakException&)
+            auto val = Execute(whileNode->GetBody());
+            if (m_breakStack.back())
             {
                 break;
+            }
+            if (!val->GetType()->Compare(ValType("void")))
+            {
+                return val;
             }
 
             condition = Execute(whileNode->GetCondition());
@@ -34,6 +33,8 @@ namespace Runtime
             assert(condType->Compare(ValType("bool")) && "Condition returned non-boolean value. Should be handled by evaluate condition method");
             condVal = std::dynamic_pointer_cast<BoolValue>(condition);
         }
+
+        m_breakStack.pop_back();
 
         return std::make_shared<VoidValue>();
     }

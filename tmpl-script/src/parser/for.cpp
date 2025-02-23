@@ -42,7 +42,7 @@ namespace AST
             Eat(TokenType::CloseCurly);
         }
 
-        m_breaks.erase(m_breaks.begin());
+        m_breaks.pop_back();
 
         return std::make_shared<Nodes::ForLoopNode>(decl, cond, assignment, body, loc);
     }

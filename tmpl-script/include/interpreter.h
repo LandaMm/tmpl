@@ -25,14 +25,6 @@
 
 namespace Runtime
 {
-    class BreakException : public std::exception
-    {
-        public:
-            const char* what() const noexcept override {
-                return "Break statement encountered.";
-            }
-    };
-
 	using namespace AST::Nodes;
 	class Interpreter
 	{
@@ -47,6 +39,8 @@ namespace Runtime
 
         std::shared_ptr<Environment<Environment<Fn>>> m_type_functions;
         PTypeDfs m_type_definitions;
+
+        std::vector<bool> m_breakStack;
 
         std::shared_ptr<Environment<std::string>> m_modules;
 

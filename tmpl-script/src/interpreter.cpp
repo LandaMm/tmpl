@@ -149,7 +149,13 @@ namespace Runtime
         case NodeType::Cast:
             return EvaluateTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
         case NodeType::Break:
-            throw BreakException();
+        {
+            if (!m_breakStack.empty())
+            {
+                m_breakStack.back() = true;
+            }
+            break;
+        }
         case NodeType::Assign:
         {
             EvaluateAssignment(std::dynamic_pointer_cast<AssignmentNode>(node));
@@ -174,6 +180,10 @@ namespace Runtime
                 else
                 {
                     auto localVal = Execute(node);
+                    if (!m_breakStack.empty() && m_breakStack.back())
+                    {
+                        break;
+                    }
                     if (node->IsBlock() && !localVal->GetType()->Compare(ValType("void")))
                     {
                         value = localVal;
