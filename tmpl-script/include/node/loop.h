@@ -38,14 +38,14 @@ namespace AST::Nodes
     private:
         PNode m_decl;
         PNode m_condition;
-        PNode m_loop_action;
+        PNode m_assignment;
         PBody m_body;
 
     public:
-        ForLoopNode(PNode decl, PNode condition, PNode loopAction, PBody body, Location loc)
+        ForLoopNode(PNode decl, PNode condition, PNode assignment, PBody body, Location loc)
             : m_decl(decl),
               m_condition(condition),
-              m_loop_action(loopAction),
+              m_assignment(assignment),
               m_body(body),
               Node(loc) { }
 
@@ -57,7 +57,7 @@ namespace AST::Nodes
     public:
         inline PNode GetDecl() const { return m_decl; }
         inline PNode GetCondition() const { return m_condition; }
-        inline PNode GetLoopAction() const { return m_loop_action; }
+        inline PNode GetAssignment() const { return m_assignment; }
         inline PBody GetBody() const { return m_body; }
     };
 }
