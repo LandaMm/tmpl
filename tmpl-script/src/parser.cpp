@@ -84,6 +84,9 @@ namespace AST
         case TokenType::While:
             stmt = WhileLoop();
             break;
+        case TokenType::For:
+            stmt = ForLoop();
+            break;
         case TokenType::At:
         {
             auto tokenType = Peek();
