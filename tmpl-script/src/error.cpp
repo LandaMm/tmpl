@@ -161,6 +161,13 @@ namespace Prelude
         /*exit(-1);*/
     }
 
+    void ErrorManager::BreakNotAllowed(std::string filename, std::shared_ptr<AST::Nodes::BreakNode> node, std::string prefix)
+    {
+        LogFileLocation(filename, node->GetLocation(), prefix);
+        std::cerr << "Breaks are only allowed inside loops" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
     void ErrorManager::TypeMismatch(std::string filename, Runtime::PValType left, Runtime::PValType right, Location loc)
     {
         LogFileLocation(filename, loc, "TypeError");

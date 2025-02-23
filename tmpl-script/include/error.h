@@ -2,6 +2,7 @@
 #define ERROR_H
 #include <string>
 #include <memory>
+#include "include/node/loop.h"
 #include "include/node/object_member.h"
 #include "location.h"
 #include "token.h"
@@ -82,6 +83,7 @@ namespace Prelude
         void ConstAssignment(std::string filename, std::string name, AST::Location loc, std::string prefix);
         void VarAlreadyExists(std::string filename, std::string name, AST::Location loc, std::string prefix);
         void FunctionRedeclaration(std::string filename, std::string name, AST::Location loc, std::string declFilename, AST::Location declLoc, std::string prefix);
+        void BreakNotAllowed(std::string filename, std::shared_ptr<AST::Nodes::BreakNode> node, std::string prefix);
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);
         void InvalidArgument(std::string arg, std::string message);
