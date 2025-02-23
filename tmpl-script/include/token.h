@@ -60,6 +60,7 @@ namespace AST
         New,
         Cast,
         While,
+        For,
 		_EOF,
 	};
 
@@ -117,6 +118,7 @@ namespace AST
         "new",
         "cast",
         "while",
+        "for",
 		"EOF",
 	};
 
