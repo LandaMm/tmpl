@@ -13,8 +13,22 @@ fn repeat_str(string what, int times) : string {
     return res;
 }
 
+fn repeat_str_while(string what, int times) : string {
+    var string res = "";
+    var int i = 0;
+    while (true) {
+        res = res + what;
+        i = i + 1;
+        if (i >= times) return res;
+    }
+
+    return res;
+}
+
 ->main {
     var string repeated = repeat_str("moa", 10);
     println("repeated: " + repeated);
+    var string wrepeated = repeat_str_while("meow", 5);
+    println("wrepeated: " + wrepeated);
 }
 
