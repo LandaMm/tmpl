@@ -282,6 +282,8 @@ namespace AST
             m_tokens.push_back(std::make_shared<Token>(TokenType::While, m_line, m_col));
 		else if (*id == "for")
             m_tokens.push_back(std::make_shared<Token>(TokenType::For, m_line, m_col));
+		else if (*id == "break")
+            m_tokens.push_back(std::make_shared<Token>(TokenType::Break, m_line, m_col));
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<std::string>> value = std::make_shared<Token::TypedValueHolder<std::string>>(std::make_shared<std::string>(*id));

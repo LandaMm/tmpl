@@ -61,6 +61,7 @@ namespace AST
         Cast,
         While,
         For,
+        Break,
 		_EOF,
 	};
 
@@ -119,6 +120,7 @@ namespace AST
         "cast",
         "while",
         "for",
+        "break",
 		"EOF",
 	};
 
