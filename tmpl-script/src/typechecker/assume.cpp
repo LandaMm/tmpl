@@ -2,6 +2,7 @@
 
 #include "../../include/typechecker.h"
 #include "include/iterator.h"
+#include <memory>
 
 namespace Runtime
 {
@@ -21,6 +22,16 @@ namespace Runtime
                 AssumeBlock(std::dynamic_pointer_cast<Statements::StatementsBody>(elseNode), expected);
             }
         }
+    }
+
+    void TypeChecker::AssumeWhile(std::shared_ptr<WhileNode> whileNode, PValType expected)
+    {
+        AssumeBlock(whileNode->GetBody(), expected);
+    }
+
+    void TypeChecker::AssumeForLoop(std::shared_ptr<ForLoopNode> forLoopNode, PValType expected)
+    {
+        AssumeBlock(forLoopNode->GetBody(), expected);
     }
 
     // Look for return statement inside block and check the type of returned value
@@ -46,6 +57,10 @@ namespace Runtime
             else if (stmt->GetType() == NodeType::IfElse)
             {
                 AssumeIfElse(std::dynamic_pointer_cast<Statements::IfElseStatement>(stmt), expected);
+            }
+            else if (stmt->GetType() == NodeType::While)
+            {
+                AssumeWhile(std::dynamic_pointer_cast<WhileNode>(stmt), expected);
             }
             else
             {

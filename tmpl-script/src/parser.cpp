@@ -1,6 +1,9 @@
 
 #include "../include/parser.h"
 #include "../include/error.h"
+#include "include/node/loop.h"
+#include "include/token.h"
+#include <memory>
 
 namespace AST
 {
@@ -81,6 +84,24 @@ namespace AST
             stmt = TypeDfStatement();
             Eat(TokenType::Semicolon);
             break;
+        case TokenType::While:
+            stmt = WhileLoop();
+            break;
+        case TokenType::For:
+            stmt = ForLoop();
+            break;
+        case TokenType::Break:
+        {
+            stmt = BreakStmt();
+            Eat(TokenType::Semicolon);
+            if (m_breaks.empty())
+            {
+                Prelude::ErrorManager& manager = GetErrorManager();
+                manager.BreakNotAllowed(GetFilename(), std::dynamic_pointer_cast<Nodes::BreakNode>(stmt), "ParseError");
+                return nullptr;
+            }
+            break;
+        }
         case TokenType::At:
         {
             auto tokenType = Peek();

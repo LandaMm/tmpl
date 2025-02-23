@@ -3,6 +3,7 @@
 #include <memory>
 #include "include/node/assign.h"
 #include "include/node/instance.h"
+#include "include/node/loop.h"
 #include "include/node/statement.h"
 #include "include/node/type.h"
 #include "node/return.h"
@@ -38,6 +39,8 @@ namespace Runtime
 
         std::shared_ptr<Environment<Environment<Fn>>> m_type_functions;
         PTypeDfs m_type_definitions;
+
+        std::vector<bool> m_breakStack;
 
         std::shared_ptr<Environment<std::string>> m_modules;
 
@@ -83,6 +86,8 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret); // DONE
         std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret); // DONE
         std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse); // DONE
+        std::shared_ptr<Value> EvaluateWhileLoop(std::shared_ptr<WhileNode> whileNode); // DONE
+        std::shared_ptr<Value> EvaluateForLoop(std::shared_ptr<ForLoopNode> forLoopNode); // DONE
         std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args); // DONE
         std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance); // DONE
         std::shared_ptr<Value> EvaluateTypeCasting(std::shared_ptr<CastNode> cast); // DONE

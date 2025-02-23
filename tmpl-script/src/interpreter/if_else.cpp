@@ -23,7 +23,7 @@ namespace Runtime
             return Execute(ifElse->GetElseNode());
         }
 
-        return nullptr;
+        return std::make_shared<VoidValue>();
     }
 }
 

@@ -19,8 +19,13 @@ namespace AST
 		std::shared_ptr<Nodes::ProgramNode> m_root;
 		std::shared_ptr<Lexer> m_lexer;
 
+    private:
+        std::vector<AST::Location> m_breaks;
+
 	public:
-		Parser(std::shared_ptr<Lexer> lexer) : m_lexer(lexer), m_root(std::make_shared<Nodes::ProgramNode>()) {}
+		Parser(std::shared_ptr<Lexer> lexer)
+            : m_lexer(lexer), m_breaks(std::vector<AST::Location>()),
+              m_root(std::make_shared<Nodes::ProgramNode>()) {}
 		~Parser() {}
 
 	public:
@@ -69,6 +74,9 @@ namespace AST
         std::shared_ptr<Nodes::FunctionDeclaration> FunctionSignature();
         std::shared_ptr<Node> FunctionDeclaration();
         std::shared_ptr<Node> ExportStmt();
+        std::shared_ptr<Node> WhileLoop();
+        std::shared_ptr<Node> ForLoop();
+        std::shared_ptr<Node> BreakStmt();
     private: // Macros
         std::shared_ptr<Node> RequireStatement();
         std::shared_ptr<Node> ExternStatement();
