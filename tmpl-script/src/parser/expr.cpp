@@ -16,12 +16,49 @@ namespace AST
         if (m_lexer->GetToken()->GetType() == TokenType::Id)
         {
             // TODO: when support object members use m_lexer.SaveState to look for "="
-            if (m_lexer->SeekToken() != nullptr && m_lexer->SeekToken()->GetType() == TokenType::Equal)
+            if (m_lexer->SeekToken() != nullptr &&
+                    (
+                     m_lexer->SeekToken()->GetType() == TokenType::Equal ||
+                     m_lexer->SeekToken()->GetType() == TokenType::CompoundAdd ||
+                     m_lexer->SeekToken()->GetType() == TokenType::CompoundMinus ||
+                     m_lexer->SeekToken()->GetType() == TokenType::CompoundMultiply ||
+                     m_lexer->SeekToken()->GetType() == TokenType::CompoundDivide
+                    ))
             {
                 auto assignee = Id();
-                Eat(TokenType::Equal);
+
+                Nodes::AssignOperator assignOp;
+
+                switch (m_lexer->GetToken()->GetType())
+                {
+                    case TokenType::Equal:
+                        assignOp = Nodes::AssignOperator::Reassign;
+                        break;
+                    case TokenType::CompoundAdd:
+                        assignOp = Nodes::AssignOperator::Add;
+                        break;
+                    case TokenType::CompoundMinus:
+                        assignOp = Nodes::AssignOperator::Subtract;
+                        break;
+                    case TokenType::CompoundMultiply:
+                        assignOp = Nodes::AssignOperator::Multiply;
+                        break;
+                    case TokenType::CompoundDivide:
+                        assignOp = Nodes::AssignOperator::Divide;
+                        break;
+                    default:
+                    {
+                        Prelude::ErrorManager& errManager = GetErrorManager();
+                        errManager.UnexpectedToken(GetFilename(), m_lexer->GetToken(), "assign operator (e.g. '=', '+=')");
+                        return nullptr;
+                    }
+                }
+
+                Eat(m_lexer->GetToken()->GetType());
+
                 auto expr = Ternary();
-                return std::make_shared<Nodes::AssignmentNode>(assignee, expr, assignee->GetLocation());
+
+                return std::make_shared<Nodes::AssignmentNode>(assignee, expr, assignOp, assignee->GetLocation());
             }
         }
 
