@@ -10,7 +10,7 @@ namespace AST::Nodes
 
     std::string ForLoopNode::Format() const
     {
-        return "ForLoop(" + m_decl->Format() + "; " + m_condition->Format() + "; " + m_loop_action->Format() + " => " + m_body->Format() + ")";
+        return "ForLoop(" + m_decl->Format() + "; " + m_condition->Format() + "; " + m_assignment->Format() + " => " + m_body->Format() + ")";
     }
 }
 
