@@ -7,6 +7,15 @@
 
 namespace AST::Nodes
 {
+    class BreakNode : public Node
+    {
+    public:
+        BreakNode(Location loc) : Node(loc) { }
+	public:
+		inline NodeType GetType() const override { return NodeType::Break; };
+		std::string Format() const override { return "Break()"; }
+    };
+
     class WhileNode : public Node
     {
     private:
