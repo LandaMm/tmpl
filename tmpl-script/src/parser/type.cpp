@@ -7,7 +7,27 @@ namespace AST
     {
         auto target = Id();
 
-        return std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
+        auto typ = std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            auto currToken = m_lexer->GetToken()->GetType();
+            while (currToken != TokenType::Greater)
+            {
+                if (currToken == TokenType::Comma)
+                {
+                    Eat(TokenType::Comma);
+                }
+
+                typ->AddGenericType(Type());
+
+                currToken = m_lexer->GetToken()->GetType();
+            }
+            Eat(TokenType::Greater);
+        }
+
+        return typ;
     }
 
     std::shared_ptr<Nodes::TypeTemplateNode> Parser::TypeTemplate()
