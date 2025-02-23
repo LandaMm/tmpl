@@ -16,6 +16,8 @@ namespace AST
         std::shared_ptr<Statements::StatementsBody> body =
             std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
+        m_breaks.push_back(loc);
+
         if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
         {
 			body->AddItem(Statement());
@@ -30,6 +32,8 @@ namespace AST
             }
             Eat(TokenType::CloseCurly);
         }
+
+        m_breaks.erase(m_breaks.begin());
 
         return std::make_shared<Nodes::WhileNode>(condition, body, loc);
     }
