@@ -1,6 +1,7 @@
 
 #include "include/node/assign.h"
 #include "include/node/instance.h"
+#include "include/node/loop.h"
 #include <cassert>
 #include <memory>
 #ifdef _WIN32
@@ -141,6 +142,8 @@ namespace Runtime
             return EvaluateIfElseStatement(std::dynamic_pointer_cast<Statements::IfElseStatement>(node));
         case NodeType::While:
             return EvaluateWhileLoop(std::dynamic_pointer_cast<WhileNode>(node));
+        case NodeType::For:
+            return EvaluateForLoop(std::dynamic_pointer_cast<ForLoopNode>(node));
         case NodeType::Instance:
             return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
         case NodeType::Cast:
