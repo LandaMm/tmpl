@@ -36,6 +36,7 @@ namespace Runtime
     {
         Prelude::ErrorManager& errMan = Prelude::ErrorManager::getInstance();
         // example: tmpl <script_name> [procedure]
+        // example: tmpl script_file.tmpl
         if (m_argc < 2)
         {
             std::cout << "ArgumentsError: Not enough additional arguments provided."
@@ -46,14 +47,13 @@ namespace Runtime
         }
 
         std::string filename = m_argv[1];
-
-        if (filename.find('/') > -1)
-        {
-            errMan.InvalidArgument(filename, "Script name cannot contain path special characters lile '/'. Please use script basename.");
-            return "";
-        }
-
         auto cwd = std::filesystem::current_path();
+
+        if (filename.find(".tmpl") != -1)
+        {
+            std::filesystem::path scriptFilename = cwd / filename;
+            return scriptFilename.string();
+        }
 
         std::filesystem::path scriptFilename = cwd / ".tmpl/" / (filename + ".tmpl");
 
