@@ -235,6 +235,16 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
+    void ErrorManager::TypeGenericsExhausted(std::string filename, std::string name, size_t provided, size_t required, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        assert(provided != required && "Generics required and provided count are same. Should be unreachable");
+        
+        std::cerr << "Exhausted generics for type '" << name << "' provided. Needs to provide " << required << " generic types but " << provided << " provided" << std::endl;
+
+        if (prefix != "TypeError") exit(-1);
+    }
+
     void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::PValType metType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
