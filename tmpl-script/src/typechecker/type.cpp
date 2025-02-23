@@ -2,6 +2,7 @@
 
 #include "../../include/typechecker.h"
 #include "include/interpreter/value.h"
+#include <error.h>
 #include <memory>
 
 namespace Runtime
@@ -33,9 +34,37 @@ namespace Runtime
         return typ;
     }
 
-    PValType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode)
+    PValType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix)
     {
-        return std::make_shared<ValType>(typeNode->GetTypeName()->GetName());
+        // check for type existance
+        std::string typName = typeNode->GetTypeName()->GetName();
+        auto typ = std::make_shared<ValType>(typName);
+
+        if (!typeDfs->HasItem(typName))
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(filename, typName, typeNode->GetLocation(), prefix);
+            return std::make_shared<ValType>("void");
+        }
+
+        auto typDf = typeDfs->LookUp(typName);
+        assert(typDf != nullptr && "Found typ df should not be nullptr");
+
+        if (typDf->GetModuleName() != filename && !typDf->IsExported())
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.PrivateTypeError(filename, typName, typDf->GetModuleName(), typeNode->GetLocation(), typDf->GetLocation(), prefix);
+            return std::make_shared<ValType>("void");
+        }
+
+        if (typeNode->GetGenericsSize() != typDf->GenericsSize())
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeGenericsExhausted(filename, typName, typeNode->GetGenericsSize(), typDf->GenericsSize(), typeNode->GetLocation(), prefix);
+            return std::make_shared<ValType>("void");
+        }
+
+        return std::make_shared<ValType>(typName);
     }
 
     PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
