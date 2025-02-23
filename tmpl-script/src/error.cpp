@@ -51,6 +51,12 @@ namespace Prelude
         std::cerr << "Unexpected character '" << ch << "' (code: " << (int)ch << ") met" << std::endl;
 		std::exit(-1);
 	}
+    void ErrorManager::UnexpectedEscapeCharacter(std::string filename, char ch, size_t line, size_t col)
+	{
+        LogFileLocation(filename, Location(line, col), "LexerError");
+        std::cerr << "Unexpected escape character '" << ch << "' (code: " << (int)ch << ") met" << std::endl;
+		std::exit(-1);
+	}
 	void ErrorManager::UnexpectedEOF(std::string filename, size_t line, size_t col)
 	{
         LogFileLocation(filename, Location(line, col), "LexerError");
@@ -75,6 +81,12 @@ namespace Prelude
         std::cerr << "Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
+    void ErrorManager::UnexpectedToken(std::string filename, std::shared_ptr<AST::Token> gotToken, std::string expected)
+    {
+        LogFileLocation(filename, gotToken->GetLocation(), "ParseError");
+        std::cerr << "Expected " << expected << " but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
+		std::exit(-1);
+    }
     void ErrorManager::UnexpectedFnModifier(std::string filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc)
     {
         LogFileLocation(filename, loc, "ParseError");

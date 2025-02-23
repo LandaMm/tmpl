@@ -1,8 +1,18 @@
-
+@require"std/io"
+@require"std/convert"
 
 ->main {
     var int test = 50;
     test = 100;
+    println("test = 100: " + (string)test);
+    test += 100;
+    println("test + 100: " + (string)test);
+    test -= 50;
+    println("test - 50: " + (string)test);
+    test *= 2;
+    println("test * 2: " + (string)test);
+    test /= 5;
+    println("test / 5: " + (string)test);
     return test;
 }
 
