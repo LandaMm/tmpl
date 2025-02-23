@@ -59,6 +59,7 @@ namespace AST
         Construct,
         New,
         Cast,
+        While,
 		_EOF,
 	};
 
@@ -115,6 +116,7 @@ namespace AST
         "construct",
         "new",
         "cast",
+        "while",
 		"EOF",
 	};
 
