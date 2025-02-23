@@ -37,6 +37,7 @@ namespace AST
         Instance,
         Cast,
         Assign,
+        While,
     };
 
 	class Node
