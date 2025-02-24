@@ -36,7 +36,7 @@ namespace AST
 		
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseSquareBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
-			std::shared_ptr<Node> item = Expr();
+			std::shared_ptr<Node> item = Ternary();
 			list->AddItem(item);
 			if (m_lexer->GetToken()->GetType() == TokenType::Comma)
 			{
