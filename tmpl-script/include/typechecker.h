@@ -7,6 +7,7 @@
 #include "include/node/assign.h"
 #include "include/node/cast.h"
 #include "include/node/instance.h"
+#include "include/node/list.h"
 #include "include/node/logical.h"
 #include "include/node/loop.h"
 #include "include/node/type.h"
@@ -111,6 +112,7 @@ namespace Runtime
         PValType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary); // DONE
         PValType DiagnoseInstance(std::shared_ptr<InstanceNode> instance);
         PValType DiagnoseTypeCasting(std::shared_ptr<CastNode> cast);
+        PValType DiagnoseList(std::shared_ptr<ListNode> list);
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE
@@ -138,8 +140,8 @@ namespace Runtime
         int GetErrorReport() { return m_errors; }
 
 	public:
-		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix); // DONE
-        static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix); // DONE
+		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker);
+        static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix);
         static PValType GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix);
 
     private:

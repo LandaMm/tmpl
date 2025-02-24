@@ -25,7 +25,7 @@ namespace Runtime
 
         if (fnDecl->GetModifier() != AST::Nodes::FunctionModifier::Construct)
         {
-            retType = EvaluateType(GetFilename(), fnDecl->GetReturnType(), m_type_definitions, "TypeError");
+            retType = EvaluateType(GetFilename(), fnDecl->GetReturnType(), m_type_definitions, "TypeError", this);
         }
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
@@ -40,7 +40,7 @@ namespace Runtime
         {
             auto param = fnDecl->GetItem(it->GetPosition());
             it->Next();
-            PValType paramType = EvaluateType(GetFilename(), param->GetType(), m_type_definitions, "TypeError");
+            PValType paramType = EvaluateType(GetFilename(), param->GetType(), m_type_definitions, "TypeError", this);
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);
@@ -151,7 +151,7 @@ namespace Runtime
                 // TODO: generics support
                 auto dummTypNode =
                     std::make_shared<TypeNode>(id->GetTypeName(), id->GetTypeName()->GetLocation());
-                PValType targetType = EvaluateType(GetFilename(), dummTypNode, m_type_definitions, "TypeError");
+                PValType targetType = EvaluateType(GetFilename(), dummTypNode, m_type_definitions, "TypeError", this);
 
                 auto typeVar = std::make_shared<TypeVariable>(targetType, false);
                 variables->AddItem("self", typeVar);
@@ -180,7 +180,7 @@ namespace Runtime
 
                 auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
                 assert(obj->GetObject()->GetType() == NodeType::Type && "Object target should be a type for type fn");
-                PValType targetType = EvaluateType(GetFilename(), std::dynamic_pointer_cast<TypeNode>(obj->GetObject()), m_type_definitions, "TypeError");
+                PValType targetType = EvaluateType(GetFilename(), std::dynamic_pointer_cast<TypeNode>(obj->GetObject()), m_type_definitions, "TypeError", this);
                 if (!m_type_functions->HasItem(targetType->GetName()))
                     m_type_functions->AddItem(targetType->GetName(), std::make_shared<Environment<TypeFn>>());
 
@@ -233,7 +233,7 @@ namespace Runtime
 
     void TypeChecker::HandleFnSignature(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
-        PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType(), m_type_definitions, "TypeError");
+        PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType(), m_type_definitions, "TypeError", this);
 
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
         assert(nameNode->GetType() == NodeType::Identifier && "Name should be identifier");
@@ -246,7 +246,7 @@ namespace Runtime
         {
             auto param = fnDecl->GetItem(it->GetPosition());
             it->Next();
-            PValType paramType = EvaluateType(GetFilename(), param->GetType(), m_type_definitions, "TypeError");
+            PValType paramType = EvaluateType(GetFilename(), param->GetType(), m_type_definitions, "TypeError", this);
             std::string paramName = param->GetName()->GetName();
             std::shared_ptr<FnParam> fnParam = std::make_shared<FnParam>(paramType, paramName);
             fn->AddParam(fnParam);

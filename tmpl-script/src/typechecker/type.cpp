@@ -35,7 +35,7 @@ namespace Runtime
         return typ;
     }
 
-    PValType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix)
+    PValType TypeChecker::EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker)
     {
         // check for type existance
         std::string typName = typeNode->GetTypeName()->GetName();
@@ -45,6 +45,7 @@ namespace Runtime
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
             errManager.TypeDoesNotExist(filename, typName, typeNode->GetLocation(), prefix);
+            if (typChecker != nullptr) typChecker->ReportError();
             return std::make_shared<ValType>("void");
         }
 
@@ -55,6 +56,7 @@ namespace Runtime
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
             errManager.PrivateTypeError(filename, typName, typDf->GetModuleName(), typeNode->GetLocation(), typDf->GetLocation(), prefix);
+            if (typChecker != nullptr) typChecker->ReportError();
             return std::make_shared<ValType>("void");
         }
 
@@ -62,6 +64,7 @@ namespace Runtime
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
             errManager.TypeGenericsExhausted(filename, typName, typeNode->GetGenericsSize(), typDf->GenericsSize(), typeNode->GetLocation(), prefix);
+            if (typChecker != nullptr) typChecker->ReportError();
             return std::make_shared<ValType>("void");
         }
 
@@ -72,7 +75,7 @@ namespace Runtime
         {
             auto genNode = typeNode->GetGeneric(it->GetPosition());
             it->Next();
-            pTyp->AddGeneric(EvaluateType(filename, genNode, typeDfs, prefix));
+            pTyp->AddGeneric(EvaluateType(filename, genNode, typeDfs, prefix, typChecker));
         }
 
         return pTyp;

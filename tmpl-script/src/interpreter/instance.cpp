@@ -7,7 +7,7 @@ namespace Runtime
 {
     std::shared_ptr<Value> Interpreter::EvaluateInstance(std::shared_ptr<InstanceNode> instance)
     {
-        PValType targetType = TypeChecker::EvaluateType(GetFilename(), instance->GetTarget(), m_type_definitions, "RuntimeError");
+        PValType targetType = TypeChecker::EvaluateType(GetFilename(), instance->GetTarget(), m_type_definitions, "RuntimeError", nullptr);
 
         if (!m_type_definitions->HasItem(targetType->GetName()))
         {
