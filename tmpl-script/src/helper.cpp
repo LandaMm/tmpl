@@ -16,6 +16,23 @@ namespace Helper
         env->AddItem(name, Type);
     }
 
+    void Helper::DefineBuiltInListType(PTypeDfEnv env)
+    {
+        std::string bName = "#BUILTIN_LIST";
+        std::string tName = "list";
+
+        DefineBuiltInType(bName, tName, env);
+
+        auto bTypDf = env->LookUp(bName);
+        auto tTypDf = env->LookUp(tName);
+        assert(bTypDf != nullptr && tTypDf != nullptr && "List type definitions should exist now.");
+
+        auto typGen = std::make_shared<Runtime::TypeDfGeneric>("T");
+        
+        bTypDf->AddGeneric(typGen);
+        tTypDf->AddGeneric(typGen);
+    }
+
     Helper::PTypeDfEnv Helper::GetTypeDefinitions()
     {
         auto typeDefinitions = std::make_shared<Helper::TypeDfEnv>();
@@ -26,7 +43,8 @@ namespace Helper
         DefineBuiltInType("#BUILTIN_STRING", "string", typeDefinitions);
         DefineBuiltInType("#BUILTIN_BOOL", "bool", typeDefinitions);
         DefineBuiltInType("#BUILTIN_VOID", "void", typeDefinitions);
-        // TODO: list type
+
+        DefineBuiltInListType(typeDefinitions);
 
         return typeDefinitions;
     }
