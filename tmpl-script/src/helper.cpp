@@ -25,6 +25,7 @@ namespace Helper
         DefineBuiltInType("#BUILTIN_DOUBLE", "double", typeDefinitions);
         DefineBuiltInType("#BUILTIN_STRING", "string", typeDefinitions);
         DefineBuiltInType("#BUILTIN_BOOL", "bool", typeDefinitions);
+        DefineBuiltInType("#BUILTIN_VOID", "void", typeDefinitions);
         // TODO: list type
 
         return typeDefinitions;
