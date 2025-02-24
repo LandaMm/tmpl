@@ -22,6 +22,10 @@ namespace AST
 			std::string Format() const override { return "List"; };
 		public:
 			void AddItem(std::shared_ptr<Node> item);
+        public:
+            inline unsigned int Size() const { return m_items.size(); }
+            inline std::shared_ptr<Node> GetItem(unsigned int index) 
+                const { return m_items[index]; }
 		};
 	}
 }
