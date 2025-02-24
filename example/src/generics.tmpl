@@ -7,6 +7,7 @@ fn @construct String(list<int> chars) {
 
 ->main {
     var String msg = new String([]int{103, 56, 35});
-    return msg;
+    var list<String> msgs = []String{msg};
+    return msgs;
 }
 
