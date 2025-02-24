@@ -15,6 +15,7 @@
 #include "../include/iterator.h"
 #include "include/node/assign.h"
 #include "include/node/instance.h"
+#include "include/node/list.h"
 #include "include/node/loop.h"
 
 namespace Runtime
@@ -46,6 +47,8 @@ namespace Runtime
                 return DiagnoseInstance(std::dynamic_pointer_cast<InstanceNode>(node));
             case NodeType::Cast:
                 return DiagnoseTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
+            case NodeType::List:
+                return DiagnoseList(std::dynamic_pointer_cast<ListNode>(node));
             case NodeType::Assign:
             {
                 HandleAssignment(std::dynamic_pointer_cast<AssignmentNode>(node));

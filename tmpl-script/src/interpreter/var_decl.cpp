@@ -8,7 +8,7 @@ namespace Runtime
 
 	void Interpreter::EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl)
 	{
-		PValType varType = TypeChecker::EvaluateType(GetFilename(), varDecl->GetType());
+		PValType varType = TypeChecker::EvaluateType(GetFilename(), varDecl->GetType(), m_type_definitions, "RuntimeError", nullptr);
 		std::string varName = *varDecl->GetName();
 		std::shared_ptr<Value> varValue = Execute(varDecl->GetValue());
 

@@ -3,6 +3,7 @@
 #define TYPE_NODE_H
 
 #include <memory>
+#include <vector>
 #include "../node.h"
 #include "include/node/identifier.h"
 
@@ -16,8 +17,7 @@ namespace AST
             using PId = std::shared_ptr<IdentifierNode>;
         private:
             PId m_typename;
-            // TODO:
-            // std::vector<std::shared_ptr<...>> m_generics;
+            std::vector<std::shared_ptr<TypeNode>> m_generics;
 
         public:
             TypeNode(PId target, Location loc)
@@ -26,6 +26,11 @@ namespace AST
         public:
             inline NodeType GetType() const override { return NodeType::Type; };
             std::string Format() const override;
+
+        public:
+            void AddGenericType(std::shared_ptr<TypeNode> typ) { m_generics.push_back(typ); }
+            inline unsigned int GetGenericsSize() const { return m_generics.size(); }
+            std::shared_ptr<TypeNode> GetGeneric(unsigned int index) const { return m_generics[index]; }
 
         public:
             inline PId GetTypeName() const { return m_typename; }
