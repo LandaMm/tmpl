@@ -103,13 +103,19 @@ namespace Prelude
 	}
 	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
 	{
-        // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name
             << "'. Expected type '" << *expectedType
             << "' but got '" << *type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
+    void ErrorManager::ListItemMismatchType(std::string filename, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type mismatch for list item. Expected type '" << *expectedType
+            << "' but got '" << *type << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 	void ErrorManager::AssignMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
 	{
         // TODO: allow defining double type variable with float value (casting) and opposite direction
