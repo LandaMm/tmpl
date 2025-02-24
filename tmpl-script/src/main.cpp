@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
     std::vector<std::string> args = cliRunner.GetProcedureArgs();
 
-    std::shared_ptr<ListValue> argsList = std::make_shared<ListValue>();
+    std::shared_ptr<ListValue> argsList = std::make_shared<ListValue>(std::make_shared<ValType>("string"));
 
     for (auto arg : args)
     {
