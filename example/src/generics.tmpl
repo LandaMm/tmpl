@@ -1,7 +1,12 @@
 
+typedf String = list<int>;
+
+fn @construct String(list<int> chars) {
+    return chars;
+}
 
 ->main {
-    var list<int> message = []int{1, 2, 3};
-    return message;
+    var String msg = new String([]int{103, 56, 35});
+    return msg;
 }
 
