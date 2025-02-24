@@ -2,6 +2,7 @@
 
 #include "../../include/typechecker.h"
 #include "include/interpreter/value.h"
+#include "include/iterator.h"
 #include <error.h>
 #include <memory>
 
@@ -64,7 +65,17 @@ namespace Runtime
             return std::make_shared<ValType>("void");
         }
 
-        return std::make_shared<ValType>(typName);
+        auto pTyp = std::make_shared<ValType>(typName);
+
+        auto it = std::make_shared<Common::Iterator>(typeNode->GetGenericsSize());
+        while (it->HasItems())
+        {
+            auto genNode = typeNode->GetGeneric(it->GetPosition());
+            it->Next();
+            pTyp->AddGeneric(EvaluateType(filename, genNode, typeDfs, prefix));
+        }
+
+        return pTyp;
     }
 
     PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
