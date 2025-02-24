@@ -31,6 +31,10 @@ namespace Runtime
         std::string m_name;
         // TODO:
         // base and default type
+    public:
+        TypeDfGeneric(std::string name) : m_name(name) { }
+    public:
+        inline std::string GetName() const { return m_name; }
     };
 
     class TypeDf
@@ -72,7 +76,7 @@ namespace Runtime
         inline PFn GetConstructor() const { return m_constructor; }
 
     public:
-        void AddGeneric(std::shared_ptr<TypeDfGeneric> typGeneric);
+        void AddGeneric(std::shared_ptr<TypeDfGeneric> typGeneric) { m_generics.push_back(typGeneric); }
         inline unsigned int GenericsSize() const { return m_generics.size(); }
         inline std::shared_ptr<TypeDfGeneric> GetGeneric(unsigned int index) const { return m_generics[index]; }
 
