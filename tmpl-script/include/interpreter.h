@@ -3,6 +3,7 @@
 #include <memory>
 #include "include/node/assign.h"
 #include "include/node/instance.h"
+#include "include/node/list.h"
 #include "include/node/loop.h"
 #include "include/node/statement.h"
 #include "include/node/type.h"
@@ -71,35 +72,36 @@ namespace Runtime
         void CloseHandle(std::string handleKey);
 
 	public:
-		std::shared_ptr<Value> Execute(std::shared_ptr<Node> node); // DONE
-        void Evaluate(std::shared_ptr<ProgramNode> program); // DONE
-        void ImportModule(std::shared_ptr<RequireMacro> require); // DONE
-        void EvaluateModule(std::shared_ptr<ProgramNode> program); // DONE
+		std::shared_ptr<Value> Execute(std::shared_ptr<Node> node);
+        void Evaluate(std::shared_ptr<ProgramNode> program);
+        void ImportModule(std::shared_ptr<RequireMacro> require);
+        void EvaluateModule(std::shared_ptr<ProgramNode> program);
 
 	private:
-		std::shared_ptr<Value> EvaluateExpression(std::shared_ptr<ExpressionNode> expr); // DONE
-		std::shared_ptr<Value> EvaluateLiteral(std::shared_ptr<LiteralNode> literal); // DONE
+		std::shared_ptr<Value> EvaluateExpression(std::shared_ptr<ExpressionNode> expr);
+		std::shared_ptr<Value> EvaluateLiteral(std::shared_ptr<LiteralNode> literal);
 		std::shared_ptr<Value> EvaluateIdentifier(std::shared_ptr<IdentifierNode> identifier);
-		std::shared_ptr<Value> EvaluateCondition(std::shared_ptr<Condition> condition); // DONE
-		std::shared_ptr<Value> EvaluateTernary(std::shared_ptr<TernaryNode> ternary); // DONE
-        std::shared_ptr<Value> EvaluateUnary(std::shared_ptr<UnaryNode> unary); // DONE
-        std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret); // DONE
-        std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret); // DONE
-        std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse); // DONE
-        std::shared_ptr<Value> EvaluateWhileLoop(std::shared_ptr<WhileNode> whileNode); // DONE
-        std::shared_ptr<Value> EvaluateForLoop(std::shared_ptr<ForLoopNode> forLoopNode); // DONE
-        std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args); // DONE
-        std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance); // DONE
-        std::shared_ptr<Value> EvaluateTypeCasting(std::shared_ptr<CastNode> cast); // DONE
+		std::shared_ptr<Value> EvaluateCondition(std::shared_ptr<Condition> condition);
+		std::shared_ptr<Value> EvaluateTernary(std::shared_ptr<TernaryNode> ternary);
+        std::shared_ptr<Value> EvaluateUnary(std::shared_ptr<UnaryNode> unary);
+        std::shared_ptr<Value> EvaluateReturn(std::shared_ptr<ReturnNode> ret);
+        std::shared_ptr<Value> EvaluateFunctionCall(std::shared_ptr<FunctionCall> ret);
+        std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse);
+        std::shared_ptr<Value> EvaluateWhileLoop(std::shared_ptr<WhileNode> whileNode);
+        std::shared_ptr<Value> EvaluateForLoop(std::shared_ptr<ForLoopNode> forLoopNode);
+        std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args);
+        std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance);
+        std::shared_ptr<Value> EvaluateTypeCasting(std::shared_ptr<CastNode> cast);
+        std::shared_ptr<Value> EvaluateList(std::shared_ptr<ListNode> list);
 
     private:
         std::shared_ptr<Value> CastValue(std::shared_ptr<Value> val, PValType to, Location loc);
 
 	private:
-		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE
-		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl); // DONE
-        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed); // DONE
-        void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt); // DONE
+		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
+		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
+        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
+        void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt);
         void EvaluateTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported);
         void EvaluateAssignment(std::shared_ptr<AssignmentNode> assignment);
 
