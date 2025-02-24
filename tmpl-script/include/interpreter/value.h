@@ -158,13 +158,12 @@ namespace Runtime
 	{
 	private:
 		std::vector<std::shared_ptr<Value>> m_value;
+        PValType m_items_type;
 
 	public:
-		ListValue()
+		ListValue(PValType itemsType)
             : m_value(std::vector<std::shared_ptr<Value>>()),
-              Value(std::make_shared<ValType>("list")) {}
-		ListValue(std::vector<std::shared_ptr<Value>> values)
-            : m_value(values),
+              m_items_type(itemsType),
               Value(std::make_shared<ValType>("list")) {}
 
 	public:
@@ -176,6 +175,7 @@ namespace Runtime
         {
             // TODO: think if we want deep copy
             m_value = val->m_value;
+            m_items_type = val->m_items_type;
         }
 
     public:
