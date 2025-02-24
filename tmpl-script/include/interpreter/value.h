@@ -10,21 +10,11 @@
 
 namespace Runtime
 {
-	enum class ValueType
-	{
-		Integer,
-		Float,
-		Double,
-		String,
-        List,
-        Bool,
-		Null,
-	};
-
     struct CustomValueType
     {
     private:
         std::string m_name;
+        std::vector<std::shared_ptr<CustomValueType>> m_generics;
 
     public:
         CustomValueType(std::string name)
@@ -37,27 +27,17 @@ namespace Runtime
         inline std::string GetName() const { return m_name; }
 
     public:
+        void AddGeneric(std::shared_ptr<CustomValueType> generic) { m_generics.push_back(generic); }
+        inline std::shared_ptr<CustomValueType> GetGeneric(unsigned int index) 
+            const { return m_generics[index]; }
+        inline unsigned int GetGenericsSize() const { return m_generics.size(); }
+
+    public:
         friend std::ostream &operator<<(std::ostream& stream, const CustomValueType &x);
     };
 
     typedef CustomValueType ValType;
     typedef std::shared_ptr<ValType> PValType;
-
-    static std::string HumanValueType(ValueType type)
-    {
-        switch(type)
-        {
-            case ValueType::String: return "string";
-            case ValueType::Float: return "float";
-            case ValueType::Integer: return "int";
-            case ValueType::Double: return "double";
-            case ValueType::Bool: return "bool";
-            case ValueType::List: return "list";
-            case ValueType::Null: return "void";
-        }
-
-        return "UNKNOWN_TYPE";
-    }
 
 	class Value
 	{
