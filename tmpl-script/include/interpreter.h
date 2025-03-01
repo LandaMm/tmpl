@@ -38,7 +38,6 @@ namespace Runtime
 		std::shared_ptr<Environment<Procedure>> m_procedures;
 		std::shared_ptr<Environment<Fn>> m_functions;
 
-        std::shared_ptr<Environment<Environment<Fn>>> m_type_functions;
         PTypeDfs m_type_definitions;
 
         std::vector<bool> m_breakStack;
@@ -61,7 +60,6 @@ namespace Runtime
             m_variables(env_vars),
             m_procedures(env_procedures),
             m_functions(env_functions),
-            m_type_functions(env_type_functions),
             m_type_definitions(env_type_definitions),
             m_modules(env_modules),
             m_handles(std::make_shared<Environment<void*>>()),
@@ -100,10 +98,18 @@ namespace Runtime
 	private:
 		void EvaluateVariableDeclaration(std::shared_ptr<VarDeclaration> varDecl);
 		void EvaluateProcedureDeclaration(std::shared_ptr<ProcedureDeclaration> procDecl);
-        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
         void EvaluateExportStatement(std::shared_ptr<ExportStatement> exportStmt);
         void EvaluateTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported);
         void EvaluateAssignment(std::shared_ptr<AssignmentNode> assignment);
+
+    private: // Function Declaration
+        void EvaluateFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
+        void EvaluateConstructDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
+        void EvaluateCastDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
+        void EvaluateRegularFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
+        void EvaluateTypeFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
+
+        std::shared_ptr<Fn> EvaluateFnDeclarationBasics(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed, PValType retType);
 
     private:
         inline std::string GetFilename() const { return m_filename; }
