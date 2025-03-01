@@ -1,0 +1,11 @@
+@require"std/io"
+@require"std/convert"
+
+fn test<?T>(T msg) : void {
+    return (string)msg;
+}
+
+->main {
+    test<string>("Hi");
+}
+
