@@ -1,21 +1,21 @@
+@require"std/io"
+@require"std/convert"
 
-typedf String = list<int>;
-
-fn @construct String(list<int> chars) {
-    return chars;
+fn @cast(void) : string {
+    return "void";
 }
+
+typedf List<?ID, ?T> = list<T>;
+
+fn @construct List<?ID, ?T>(ID identifier) {
+    println("created list with id: " + (string)identifier);
+    return []T{};
+}
+
+fn List<?ID, ?T>.addItem() : void {}
 
 ->main {
-    var String msg = new String([]int{103, 56, 35});
-    var list<String> msgs = []String{msg};
-    return msgs;
-}
-
-->multi_list {
-    var list<list<int>> tbls = []list<int>{
-        []int{1, 2, 3},
-        []int{4, 5, 6}
-    };
-    return tbls;
+    var List<string, int> l = new List<string, int>("some_id");
+    return l;
 }
 
