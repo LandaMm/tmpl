@@ -60,6 +60,7 @@ namespace AST
             std::vector<std::shared_ptr<FunctionParam>> m_params;
             std::shared_ptr<TypeNode> m_ret_type;
             std::shared_ptr<Statements::StatementsBody> m_body;
+            std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
             FunctionModifier m_modifier;
         private:
             size_t m_index;
@@ -72,6 +73,7 @@ namespace AST
                     )
                 : m_name(name),
                 m_params(std::vector<std::shared_ptr<FunctionParam>>()),
+                m_generics(std::vector<std::shared_ptr<TemplateGeneric>>()),
                 m_ret_type(nullptr),
                 m_body(body),
                 m_modifier(modifier),
@@ -80,6 +82,7 @@ namespace AST
             ~FunctionDeclaration() = default;
         public:
             void AddParam(std::shared_ptr<FunctionParam> param);
+            void AddGeneric(std::shared_ptr<TemplateGeneric> generic) { m_generics.push_back(generic); }
             void SetReturnType(std::shared_ptr<TypeNode> retType) { m_ret_type = retType; }
         public:
             inline std::shared_ptr<Node> GetName() const { return m_name; }
@@ -87,9 +90,13 @@ namespace AST
             inline std::shared_ptr<Statements::StatementsBody> GetBody() const { return m_body; }
             inline FunctionModifier GetModifier() const { return m_modifier; }
         public:
-            inline std::shared_ptr<FunctionParam> GetItem(unsigned int index)
+            inline std::shared_ptr<FunctionParam> GetParam(unsigned int index)
                 { return m_params[index]; }
-            inline unsigned int GetSize() const { return m_params.size(); }
+            inline unsigned int GetParamsSize() const { return m_params.size(); }
+        public:
+            inline std::shared_ptr<TemplateGeneric> GetGeneric(unsigned int index)
+                { return m_generics[index]; }
+            inline unsigned int GetGenericsSize() const { return m_generics.size(); }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
             std::string Format() const override;
