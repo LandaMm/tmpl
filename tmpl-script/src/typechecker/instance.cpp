@@ -36,23 +36,34 @@ namespace Runtime
             return targetType;
         }
 
+        auto typDfs = std::make_shared<TypeDfs>(m_type_definitions);
+        m_type_definitions = typDfs;
+
+        auto gIt = Common::Iterator(typeDf->GenericsSize());
+        while (gIt.HasItems())
+        {
+            auto gen = typeDf->GetGeneric(gIt.GetPosition());
+            auto genType = EvaluateType(GetFilename(), instance->GetTarget()->GetGeneric(gIt.GetPosition()), m_type_definitions, "TypeError", this);
+            // TODO: check for base and default type
+            auto typDf = std::make_shared<TypeDf>(gen->GetName(), genType, GetFilename(), false, instance->GetTarget()->GetGeneric(gIt.GetPosition())->GetLocation());
+            typDf->SetTransparent(true);
+            typDfs->AddItem(gen->GetName(), typDf);
+            gIt.Next();
+        }
+
         auto fn = typeDf->GetConstructor();
         assert(fn != nullptr && "Constructor fn should not be nullptr here.");
 
         auto fnCall = instance->GetFunctionCall();
         auto fnName = targetType->GetName() + "::constructor";
 
-        auto typFn = std::make_shared<TypeFn>(targetType, fn->GetModuleName(), fn->IsExported(), fn->GetLocation());
+        auto retType = ResolveFn(fn, fnName, fnCall);
 
-        auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
-        while (it->HasItems())
-        {
-            auto param = fn->GetItem(it->GetPosition());
-            it->Next();
-            typFn->AddParam(param);
-        }
+        assert(m_type_definitions->GetParent() != nullptr && "Parent gone.");
+        assert(m_type_definitions->GetParent() != m_type_definitions && "Typ df parent clone");
+        m_type_definitions = m_type_definitions->GetParent();
 
-        return ResolveFn(typFn, fnName, fnCall);
+        return retType;
     }
 }
 

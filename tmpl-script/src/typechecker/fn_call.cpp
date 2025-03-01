@@ -10,7 +10,7 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    PValType TypeChecker::ResolveFn(std::shared_ptr<TypeFn> fn, std::string fnName, std::shared_ptr<FunctionCall> fnCall)
+    PValType TypeChecker::ResolveFn(std::shared_ptr<Fn> fn, std::string fnName, std::shared_ptr<FunctionCall> fnCall)
     {
         if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
         {
@@ -42,14 +42,16 @@ namespace Runtime
             std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
             PValType valType = DiagnoseNode(arg);
-            if (!valType->Compare(*param->GetType()))
+            PValType paramType = NormalizeType(GetFilename(), param->GetType(), arg->GetLocation(), m_type_definitions, "TypeError", this);
+            /*PValType paramType = param->GetType();*/
+            if (!valType->Compare(*paramType))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgMismatchType(
                         GetFilename(),
                         param->GetName(),
                         valType,
-                        param->GetType(),
+                        paramType,
                         arg->GetLocation(),
                         "TypeError"
                         );
@@ -61,18 +63,31 @@ namespace Runtime
         return fn->GetReturnType();
     }
 
-    bool TypeChecker::ResolveTypeFn(std::shared_ptr<ObjectMember> obj, std::shared_ptr<TypeFn>& fn, std::string& fnName)
+    bool TypeChecker::ResolveTypeFn(std::shared_ptr<ObjectMember> obj, std::shared_ptr<Fn>& fn, std::string& fnName)
     {
         PValType targetType = DiagnoseNode(obj->GetObject());
-        if (!m_type_functions->HasItem(targetType->GetName()))
+        auto typeName = targetType->GetName();
+
+        if (!m_type_definitions->HasItem(typeName))
         {
-            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.UndeclaredFunction(GetFilename(), obj, targetType, "TypeError");
+            Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(GetFilename(), typeName, obj->GetObject()->GetLocation(), "TypeError");
             ReportError();
             return false;
         }
 
-        std::shared_ptr<Environment<TypeFn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
+        auto typeDf = m_type_definitions->LookUp(typeName);
+        assert(typeDf != nullptr && "Type df shouldn't be null at this point.");
+
+        if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.PrivateTypeError(GetFilename(), typeDf->GetTypeName(), typeDf->GetModuleName(), obj->GetObject()->GetLocation(), typeDf->GetLocation(), "TypeError");
+            ReportError();
+            return false;
+        }
+
+        auto typeEnv = typeDf->GetTypFnsEnv();
         assert(typeEnv != nullptr && "Type env should have been created.");
 
         std::shared_ptr<Node> fnNameNode = obj->GetMember();
@@ -95,7 +110,7 @@ namespace Runtime
         // TODO: support for object member calls
         std::shared_ptr<Node> callee = fnCall->GetCallee();
 
-        std::shared_ptr<TypeFn> fn;
+        std::shared_ptr<Fn> fn;
         std::string fnName;
 
         switch(callee->GetType())
