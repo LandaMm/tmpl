@@ -41,8 +41,10 @@ namespace Runtime
     {
     public:
         using Casts = Environment<TypeDfCast>;
+        using TypFns = Environment<Fn>;
         using PCasts = std::shared_ptr<Casts>;
         using PFn = std::shared_ptr<Fn>;
+        using PTypFns = std::shared_ptr<TypFns>;
     private:
         std::string m_typename;
         PValType m_basename;
@@ -50,7 +52,10 @@ namespace Runtime
         std::vector<std::shared_ptr<TypeDfGeneric>> m_generics;
 
         PCasts m_casts;
+        PTypFns m_type_functions;
         PFn m_constructor;
+
+        bool m_transparent;
         
         std::string m_module;
         bool m_exported;
@@ -60,13 +65,16 @@ namespace Runtime
         TypeDf(std::string tName, PValType basename, std::string module, bool exported, AST::Location loc)
             : m_typename(tName), m_basename(basename),
               m_casts(std::make_shared<Casts>()),
+              m_type_functions(std::make_shared<TypFns>()),
               m_constructor(nullptr),
+              m_transparent(false),
               m_exported(exported), m_module(module), m_loc(loc) { }
     
     public:
         inline std::string GetTypeName() const { return m_typename; }
         inline PValType GetBaseType() const { return m_basename; }
         inline PCasts GetCastsEnv() const { return m_casts; }
+        inline PTypFns GetTypFnsEnv() const { return m_type_functions; }
 
         inline std::string GetModuleName() const { return m_module; }
         inline bool IsExported() const { return m_exported; }
@@ -82,6 +90,11 @@ namespace Runtime
 
     public:
         void SetConstructor(PFn constructor) { m_constructor = constructor; }
+
+    public:
+        void SetTransparent(bool value) { m_transparent = value; }
+        // typdf Holder<?T> = Box<T>;
+        inline bool IsTransparent() const { return m_transparent; }
     };
 }
 
