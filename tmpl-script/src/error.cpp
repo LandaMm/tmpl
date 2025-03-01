@@ -251,6 +251,15 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
+    void ErrorManager::TypeGenericNameMismatch(std::string filename, std::string name, std::string genName, unsigned int pos, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+
+        std::cerr << "Unknown generic '" << genName << "' provided at position " << pos << " for type '" << name << "'";
+
+        if (prefix != "TypeError") exit(-1);
+    }
+
     void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::PValType metType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
