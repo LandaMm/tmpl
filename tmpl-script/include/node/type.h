@@ -36,22 +36,42 @@ namespace AST
             inline PId GetTypeName() const { return m_typename; }
         };
 
+        class TemplateGeneric
+        {
+        private:
+            std::string m_name;
+            Location m_loc;
+            // TODO: base and default type
+        public:
+            TemplateGeneric(std::string name, Location loc)
+                : m_name(name), m_loc(loc) { }
+
+        public:
+            inline std::string GetName() const { return m_name; }
+            inline Location GetLocation() const { return m_loc; }
+        };
+
         class TypeTemplateNode : public Node
         {
         public:
             using PId = std::shared_ptr<IdentifierNode>;
         private:
             PId m_typename;
-            // TODO:
-            // std::vector<std::shared_ptr<...>> m_generics;
+            std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
 
         public:
             TypeTemplateNode(PId target, Location loc)
-                : m_typename(target), Node(loc) { }
+                : m_typename(target), m_generics(std::vector<std::shared_ptr<TemplateGeneric>>()), Node(loc) { }
 
         public:
             inline NodeType GetType() const override { return NodeType::TypeTemplate; };
             std::string Format() const override;
+
+        public:
+            void AddTemplateGeneric(std::shared_ptr<TemplateGeneric> generic) { m_generics.push_back(generic); }
+            inline unsigned int GetGenericsSize() const { return m_generics.size(); }
+            inline std::shared_ptr<TemplateGeneric> GetTemplateGeneric(unsigned int index)
+                const { return m_generics[index]; }
 
         public:
             inline PId GetTypeName() const { return m_typename; }
