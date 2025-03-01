@@ -1,5 +1,6 @@
 
 #include "include/interpreter.h"
+#include "include/interpreter/value.h"
 #include "include/iterator.h"
 #include "include/typechecker.h"
 
@@ -31,6 +32,21 @@ namespace Runtime
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
             errManager.TypeConstructorDoesNotExist(GetFilename(), targetType, instance->GetTarget()->GetLocation(), "RuntimeError");
             return nullptr;
+        }
+
+        auto typDfs = std::make_shared<TypeDfs>(m_type_definitions);
+        m_type_definitions = typDfs;
+
+        auto gIt = Common::Iterator(typeDf->GenericsSize());
+        while (gIt.HasItems())
+        {
+            auto gen = typeDf->GetGeneric(gIt.GetPosition());
+            auto genType = TypeChecker::EvaluateType(GetFilename(), instance->GetTarget()->GetGeneric(gIt.GetPosition()), m_type_definitions, "RuntimeError", nullptr);
+            // TODO: check for base and default type
+            auto typDf = std::make_shared<TypeDf>(gen->GetName(), genType, GetFilename(), false, instance->GetTarget()->GetGeneric(gIt.GetPosition())->GetLocation());
+            typDf->SetTransparent(true);
+            typDfs->AddItem(gen->GetName(), typDf);
+            gIt.Next();
         }
 
         auto fn = typeDf->GetConstructor();
@@ -70,14 +86,15 @@ namespace Runtime
             std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
-            if (!val->GetType()->Compare(*param->GetType()))
+            PValType paramType = TypeChecker::NormalizeType(GetFilename(), param->GetType(), arg->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+            if (!val->GetType()->Compare(*paramType))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgMismatchType(
                         GetFilename(),
                         param->GetName(),
                         val->GetType(),
-                        param->GetType(),
+                        paramType,
                         arg->GetLocation(),
                         "RuntimeError"
                         );
@@ -108,6 +125,10 @@ namespace Runtime
         }
 
         value->SetType(targetType);
+
+        assert(m_type_definitions->GetParent() != nullptr && "Parent gone.");
+        assert(m_type_definitions->GetParent() != m_type_definitions && "Typ df parent clone");
+        m_type_definitions = m_type_definitions->GetParent();
 
         return value;
     }

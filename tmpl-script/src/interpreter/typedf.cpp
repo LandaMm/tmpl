@@ -1,5 +1,6 @@
 
 #include "include/interpreter.h"
+#include "include/iterator.h"
 #include "include/typechecker.h"
 
 namespace Runtime
@@ -16,10 +17,28 @@ namespace Runtime
             return;
         }
 
-        auto baseType = typeDfn->GetTypeValue();
+        auto baseTypeNode = typeDfn->GetTypeValue();
+
+        m_type_definitions = TypeChecker::DefineTemplateTypes(GetFilename(), typeName, m_type_definitions, false,"RuntimeError", nullptr);
+
+        auto baseTyp = TypeChecker::EvaluateType(GetFilename(), baseTypeNode, m_type_definitions, "RuntimeError", nullptr);
+
+        assert(m_type_definitions->GetParent() != nullptr && "Typ dfs parent gone.");
+        assert(m_type_definitions->GetParent() != m_type_definitions && "Parent clone");
+        m_type_definitions = m_type_definitions->GetParent();
 
         std::string key = typeName->GetTypeName()->GetName();
-        auto typeDf = std::make_shared<TypeDf>(key, TypeChecker::EvaluateType(GetFilename(), baseType, m_type_definitions, "RuntimeError", nullptr), GetFilename(), exported, typeDfn->GetLocation());
+        auto typeDf = std::make_shared<TypeDf>(key, baseTyp, GetFilename(), exported, typeDfn->GetLocation());
+
+        auto gIt = Common::Iterator(typeName->GetGenericsSize());
+        while (gIt.HasItems())
+        {
+            auto gen = typeName->GetTemplateGeneric(gIt.GetPosition());
+            gIt.Next();
+
+            auto typDfGen = std::make_shared<TypeDfGeneric>(gen->GetName());
+            typeDf->AddGeneric(typDfGen);
+        }
 
         m_type_definitions->AddItem(key, typeDf);
     }
