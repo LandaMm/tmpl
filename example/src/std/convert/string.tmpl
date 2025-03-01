@@ -1,0 +1,6 @@
+
+@extern fn cstrlen(string value) : int;
+
+export fn string.len() : int {
+    return cstrlen(self);
+}

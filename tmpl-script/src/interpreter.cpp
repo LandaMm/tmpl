@@ -148,6 +148,8 @@ namespace Runtime
             return EvaluateInstance(std::dynamic_pointer_cast<InstanceNode>(node));
         case NodeType::Cast:
             return EvaluateTypeCasting(std::dynamic_pointer_cast<CastNode>(node));
+        case NodeType::List:
+            return EvaluateList(std::dynamic_pointer_cast<ListNode>(node));
         case NodeType::Break:
         {
             if (!m_breakStack.empty())

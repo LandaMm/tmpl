@@ -1,0 +1,21 @@
+@require"std/io"
+@require"std/convert"
+
+fn @cast(void) : string {
+    return "void";
+}
+
+typedf List<?ID, ?T> = list<T>;
+
+fn @construct List<?ID, ?T>(ID identifier) {
+    println("created list with id: " + (string)identifier);
+    return []T{};
+}
+
+fn List<?ID, ?T>.addItem() : void {}
+
+->main {
+    var List<string, int> l = new List<string, int>("some_id");
+    return l;
+}
+

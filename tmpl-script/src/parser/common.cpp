@@ -31,12 +31,18 @@ namespace AST
 
 	std::shared_ptr<Nodes::ListNode> Parser::List()
 	{
-		std::shared_ptr<Nodes::ListNode> list = std::make_shared<Nodes::ListNode>(m_lexer->GetToken()->GetLocation());
 		Eat(TokenType::OpenSquareBracket);
+        Eat(TokenType::CloseSquareBracket);
+
+        auto typ = Type();
+
+		std::shared_ptr<Nodes::ListNode> list = std::make_shared<Nodes::ListNode>(typ, m_lexer->GetToken()->GetLocation());
+
+        Eat(TokenType::OpenCurly);
 		
-		while (m_lexer->GetToken()->GetType() != TokenType::CloseSquareBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+		while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
-			std::shared_ptr<Node> item = Expr();
+			std::shared_ptr<Node> item = Ternary();
 			list->AddItem(item);
 			if (m_lexer->GetToken()->GetType() == TokenType::Comma)
 			{
@@ -44,7 +50,7 @@ namespace AST
 			}
 		}
 
-		Eat(TokenType::CloseSquareBracket);
+		Eat(TokenType::CloseCurly);
 
 		return list;
 	}

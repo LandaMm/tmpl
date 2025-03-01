@@ -1,0 +1,16 @@
+
+@extern fn d_toi(double value) : int;
+@extern fn d_tof(double value) : float;
+@extern fn d_tos(double value) : string;
+
+export fn @cast(double) : int {
+    return d_toi(self);
+}
+
+export fn @cast(double) : float {
+    return d_tof(self);
+}
+
+export fn @cast(double) : string {
+    return d_tos(self);
+}
