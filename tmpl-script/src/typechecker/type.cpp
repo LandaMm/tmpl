@@ -10,6 +10,37 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
+    TypeChecker::PTypeDfs TypeChecker::DefineTemplateTypes(std::string filename, std::shared_ptr<TypeTemplateNode> typTmpl, TypeChecker::PTypeDfs typeDfs, bool transparent, std::string prefix, TypeChecker* typChecker)
+    {
+        auto tmplTypDfs = std::make_shared<TypeDfs>(typeDfs);
+
+        auto it = Common::Iterator(typTmpl->GetGenericsSize());
+        while (it.HasItems())
+        {
+            auto gen = typTmpl->GetTemplateGeneric(it.GetPosition());
+
+            if (tmplTypDfs->Contains(gen->GetName()))
+            {
+                Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                errManager.TypeRedeclaration(filename, typTmpl, prefix);
+                if (typChecker != nullptr)
+                {
+                    typChecker->ReportError();
+                }
+                return nullptr;
+            }
+
+            auto genTypDf = std::make_shared<TypeDf>(gen->GetName(), std::make_shared<ValType>("void"), filename, false, gen->GetLocation());
+            if (transparent)
+                genTypDf->SetTransparent(true);
+            tmplTypDfs->AddItem(gen->GetName(), genTypDf);
+
+            it.Next();
+        }
+
+        return tmplTypDfs;
+    }
+
     PValType TypeChecker::GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
     {
         auto typ = target;
@@ -78,16 +109,58 @@ namespace Runtime
             pTyp->AddGeneric(EvaluateType(filename, genNode, typeDfs, prefix, typChecker));
         }
 
+        if (typDf->IsTransparent())
+        {
+            pTyp->SetName(typDf->GetBaseType()->GetName());
+        }
+
         return pTyp;
     }
 
-    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
+    PValType TypeChecker::NormalizeType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker)
     {
-        // 0. check if "from" type exists in typeDfs
-        if (!typeDfs->HasItem(from->GetName()))
+        // clone
+        auto typ = std::make_shared<ValType>(target);
+        // check for type existance
+        if (!typeDfs->HasItem(typ->GetName()))
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeDoesNotExist(filename, from, loc, prefix);
+            errManager.TypeDoesNotExist(filename, typ->GetName(), loc, prefix);
+            if (typChecker != nullptr) typChecker->ReportError();
+            return std::make_shared<ValType>("void");
+        }
+
+        auto typDf = typeDfs->LookUp(typ->GetName());
+        assert(typDf != nullptr && "Found typ df should not be nullptr");
+
+        if (typDf->GetModuleName() != filename && !typDf->IsExported())
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.PrivateTypeError(filename, typ->GetName(), typDf->GetModuleName(), loc, typDf->GetLocation(), prefix);
+            if (typChecker != nullptr) typChecker->ReportError();
+            return std::make_shared<ValType>("void");
+        }
+
+        if (typDf->IsTransparent())
+        {
+            typ->SetName(typDf->GetBaseType()->GetName());
+        }
+
+        return typ;
+    }
+
+    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker)
+    {
+        auto fromTyp = 
+            NormalizeType(filename, from, loc, typeDfs, prefix, typChecker);
+        std::cout << "[DEBUG] from normalize: (" << *from << ") -> (" << *fromTyp << ")" << std::endl;
+        // 0. check if "from" type exists in typeDfs
+        //
+        // should not be triggered
+        if (!typeDfs->HasItem(fromTyp->GetName()))
+        {
+            Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+            errManager.TypeDoesNotExist(filename, fromTyp, loc, prefix);
             return std::make_shared<ValType>("void");
         }
         // 1. check if "to" type exists in typeDfs
@@ -98,9 +171,9 @@ namespace Runtime
             return std::make_shared<ValType>("void");
         }
         // 2. check if "from" and "to" types are equal
-        if (from->Compare(*to)) return to;
+        if (fromTyp->Compare(*to)) return to;
         // 3. check if "from" type's name is "to" type's basename
-        auto fromDf = typeDfs->LookUp(from->GetName());
+        auto fromDf = typeDfs->LookUp(fromTyp->GetName());
         assert(fromDf != nullptr && "From type's definition should not be null");
         if (fromDf->GetBaseType()->Compare(*to)) return to;
         // 4. otherwise check if "from" type contains cast to "to" type in typeDf
@@ -108,7 +181,7 @@ namespace Runtime
         if (casts->HasItem(to->GetName())) return to;
 
         Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-        errManager.TypeCastNotPossible(filename, from, to, loc, prefix);
+        errManager.TypeCastNotPossible(filename, fromTyp, to, loc, prefix);
         return std::make_shared<ValType>("void");
     }
 }
