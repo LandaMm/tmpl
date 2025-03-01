@@ -19,18 +19,24 @@ namespace Runtime
     public:
         CustomValueType(std::string name)
             : m_name(name) { }
+        CustomValueType(const CustomValueType& typ)
+            : m_name(typ.m_name), m_generics(typ.m_generics) {}
+        CustomValueType(const std::shared_ptr<CustomValueType>& typ)
+            : m_name(typ->m_name), m_generics(typ->m_generics) {}
 
     public:
         bool Compare(const CustomValueType& other) { return m_name == other.m_name; }
 
     public:
         inline std::string GetName() const { return m_name; }
+        void SetName(std::string newName) { m_name = newName; }
 
     public:
         void AddGeneric(std::shared_ptr<CustomValueType> generic) { m_generics.push_back(generic); }
         inline std::shared_ptr<CustomValueType> GetGeneric(unsigned int index) 
             const { return m_generics[index]; }
         inline unsigned int GetGenericsSize() const { return m_generics.size(); }
+
 
     public:
         friend std::ostream &operator<<(std::ostream& stream, const CustomValueType &x);
