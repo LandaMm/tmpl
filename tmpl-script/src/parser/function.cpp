@@ -1,4 +1,7 @@
+#include "include/node/identifier.h"
 #include "include/parser.h"
+#include "include/token.h"
+#include <memory>
 #include "include/node/function.h"
 
 namespace AST
@@ -37,23 +40,50 @@ namespace AST
 
         std::shared_ptr<Node> fnName;
 
-        if (m_lexer->SeekToken()->GetType() == TokenType::Point && modifier == Nodes::FunctionModifier::None)
+        // fn List<?T>.addItem() {...}
+        // fn sayHi<?T>() {...}
+        // fn List<?T>.castItem<?K>() {...}
+        // fn @construct List<?T>() {...} // DONE
+        // fn @cast(List<?T>) : set<T> {...} // DONE
+        
+        if (modifier == Nodes::FunctionModifier::Construct)
         {
-            fnName = Type();
-            fnName = ObjectMember(fnName);
+            fnName = Id();
         }
         else if (modifier == Nodes::FunctionModifier::Cast)
         {
-            // fn @cast(Integer) : int {...}
-            // typdf List<?T> = list<T>;
-            // fn @cast(List<?T>) : list<T> {...}
             Eat(TokenType::OpenBracket);
-            fnName = TypeTemplate();
+            fnName = TypeTemplate(Id());
             Eat(TokenType::CloseBracket);
         }
-        else
+        else // No modifier
         {
             fnName = Id();
+            bool isTypFn = false;
+            if (m_lexer->GetToken()->GetType() == TokenType::Less)
+            {
+                m_lexer->SaveState();
+                while(m_lexer->GetToken()->GetType() != TokenType::Greater && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+                {
+                    Eat(m_lexer->GetToken()->GetType());
+                }
+                Eat(TokenType::Greater);
+
+                if (m_lexer->GetToken()->GetType() == TokenType::Point)
+                {
+                    isTypFn = true;
+                }
+                m_lexer->RestoreState();
+            }
+            else if (m_lexer->GetToken()->GetType() == TokenType::Point)
+            {
+                isTypFn = true;
+            }
+            if (isTypFn)
+            {
+                fnName = TypeTemplate(std::dynamic_pointer_cast<Nodes::IdentifierNode>(fnName));
+                fnName = ObjectMember(fnName);
+            }
         }
 
         assert(fnName != nullptr && "Fn name shouldn't be left null in signature");
@@ -66,6 +96,18 @@ namespace AST
 
         if (modifier != Nodes::FunctionModifier::Cast)
         {
+            // 1. generics
+            if (m_lexer->GetToken()->GetType() == TokenType::Less)
+            {
+                Eat(TokenType::Less);
+                while (m_lexer->GetToken()->GetType() != TokenType::Greater)
+                {
+                    fn->AddGeneric(TmplGeneric());
+                }
+                Eat(TokenType::Greater);
+            }
+        
+            // 2. params
             Eat(TokenType::OpenBracket);
 
             auto currToken = m_lexer->GetToken()->GetType();
@@ -77,7 +119,6 @@ namespace AST
                 {
                     Eat(TokenType::Comma);
                 }
-                // TODO: support for complex types
                 std::shared_ptr<Nodes::TypeNode> type = Type();
                 std::shared_ptr<Nodes::IdentifierNode> name = Id();
                 std::shared_ptr<Nodes::FunctionParam> param = std::make_shared<Nodes::FunctionParam>(type, name);
