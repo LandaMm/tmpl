@@ -1,3 +1,4 @@
+#include "include/node/type.h"
 #include "include/parser.h"
 #include "include/token.h"
 
@@ -30,11 +31,60 @@ namespace AST
         return typ;
     }
 
-    std::shared_ptr<Nodes::TypeTemplateNode> Parser::TypeTemplate()
+    std::shared_ptr<Nodes::TypeNode> Parser::Type(std::shared_ptr<Nodes::IdentifierNode> target)
     {
-        auto target = Id();
+        auto typ = std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
 
-        return std::make_shared<Nodes::TypeTemplateNode>(target, target->GetLocation());
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            auto currToken = m_lexer->GetToken()->GetType();
+            while (currToken != TokenType::Greater)
+            {
+                if (currToken == TokenType::Comma)
+                {
+                    Eat(TokenType::Comma);
+                }
+
+                typ->AddGenericType(Type());
+
+                currToken = m_lexer->GetToken()->GetType();
+            }
+            Eat(TokenType::Greater);
+        }
+
+        return typ;
+    }
+
+    std::shared_ptr<Nodes::TemplateGeneric> Parser::TmplGeneric()
+    {
+        auto currToken = m_lexer->GetToken()->GetType();
+        if (currToken == TokenType::Comma)
+        {
+            Eat(TokenType::Comma);
+        }
+
+        Eat(TokenType::Question);
+        auto genericNode = Id();
+        auto generic = std::make_shared<Nodes::TemplateGeneric>(genericNode->GetName(), genericNode->GetLocation());
+        return generic;
+    }
+
+    std::shared_ptr<Nodes::TypeTemplateNode> Parser::TypeTemplate(std::shared_ptr<Nodes::IdentifierNode> typName)
+    {
+        auto typTmpl = std::make_shared<Nodes::TypeTemplateNode>(typName, typName->GetLocation());
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
+            {
+                typTmpl->AddTemplateGeneric(TmplGeneric());
+            }
+            Eat(TokenType::Greater);
+        }
+
+        return typTmpl;
     }
 
     std::shared_ptr<Nodes::CastNode> Parser::Cast(std::shared_ptr<Nodes::TypeNode> typ)
@@ -74,7 +124,8 @@ namespace AST
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::TypeDf);
 
-        auto tmpl = TypeTemplate();
+        auto typName = Id();
+        auto tmpl = TypeTemplate(typName);
         
         Eat(TokenType::Equal);
 
