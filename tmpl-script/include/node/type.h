@@ -51,51 +51,41 @@ namespace AST
             inline Location GetLocation() const { return m_loc; }
         };
 
-        class TypeTemplateNode : public Node
-        {
-        public:
-            using PId = std::shared_ptr<IdentifierNode>;
-        private:
-            PId m_typename;
-            std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
-
-        public:
-            TypeTemplateNode(PId target, Location loc)
-                : m_typename(target), m_generics(std::vector<std::shared_ptr<TemplateGeneric>>()), Node(loc) { }
-
-        public:
-            inline NodeType GetType() const override { return NodeType::TypeTemplate; };
-            std::string Format() const override;
-
-        public:
-            void AddTemplateGeneric(std::shared_ptr<TemplateGeneric> generic) { m_generics.push_back(generic); }
-            inline unsigned int GetGenericsSize() const { return m_generics.size(); }
-            inline std::shared_ptr<TemplateGeneric> GetTemplateGeneric(unsigned int index)
-                const { return m_generics[index]; }
-
-        public:
-            inline PId GetTypeName() const { return m_typename; }
-        };
-
         class TypeDfNode : public Node
         {
         public:
-            using PTypeTmpl = std::shared_ptr<TypeTemplateNode>;
+            using PId = std::shared_ptr<IdentifierNode>;
             using PType = std::shared_ptr<TypeNode>;
+            using PTG = std::shared_ptr<TemplateGeneric>;
         private:
-            PTypeTmpl m_template;
+            PId m_name;
             PType m_value;
 
+            std::vector<PTG> m_generics;
+
         public:
-            TypeDfNode(PTypeTmpl tmpl, PType value, Location loc)
-                : m_template(tmpl), m_value(value), Node(loc) { }
+            TypeDfNode(PId name, Location loc)
+                : m_name(name),
+                  m_value(nullptr),
+                  m_generics(std::vector<PTG>()),
+                  Node(loc) { }
 
         public:
             inline NodeType GetType() const override { return NodeType::TypeDf; };
             std::string Format() const override;
 
         public:
-            inline PTypeTmpl GetTypeTemplate() const { return m_template; }
+            void SetValue(PType value) { m_value = value; }
+
+        public:
+            void AddGeneric(PTG generic) { m_generics.push_back(generic); } 
+            unsigned int GetGenericsSize() const { return m_generics.size(); }
+            PTG GetGeneric(unsigned int index) const { return m_generics[index]; }
+
+            std::vector<PTG>* GetGenIterator() { return &m_generics; }
+
+        public:
+            inline PId GetTypeName() const { return m_name; }
             inline PType GetTypeValue() const { return m_value; }
         };
     }

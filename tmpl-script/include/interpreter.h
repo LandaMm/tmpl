@@ -87,7 +87,7 @@ namespace Runtime
         std::shared_ptr<Value> EvaluateIfElseStatement(std::shared_ptr<Statements::IfElseStatement> ifElse);
         std::shared_ptr<Value> EvaluateWhileLoop(std::shared_ptr<WhileNode> whileNode);
         std::shared_ptr<Value> EvaluateForLoop(std::shared_ptr<ForLoopNode> forLoopNode);
-        std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args);
+        std::shared_ptr<Value> EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::shared_ptr<Nodes::FunctionCall> fnCall);
         std::shared_ptr<Value> EvaluateInstance(std::shared_ptr<InstanceNode> instance);
         std::shared_ptr<Value> EvaluateTypeCasting(std::shared_ptr<CastNode> cast);
         std::shared_ptr<Value> EvaluateList(std::shared_ptr<ListNode> list);
@@ -109,7 +109,7 @@ namespace Runtime
         void EvaluateRegularFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
         void EvaluateTypeFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
 
-        std::shared_ptr<Fn> EvaluateFnDeclarationBasics(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed, PValType retType);
+        std::shared_ptr<Fn> EvaluateFnDeclarationBasics(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported, bool externed);
 
     private:
         inline std::string GetFilename() const { return m_filename; }

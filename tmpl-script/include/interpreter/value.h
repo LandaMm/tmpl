@@ -26,6 +26,7 @@ namespace Runtime
 
     public:
         bool Compare(const CustomValueType& other) { return m_name == other.m_name; }
+        bool IsMixed() const { return m_name == "#BUILTIN_MIXED"; }
 
     public:
         inline std::string GetName() const { return m_name; }

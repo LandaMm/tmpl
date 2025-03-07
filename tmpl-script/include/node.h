@@ -32,7 +32,6 @@ namespace AST
         Export, // 
         Extern, //
         Type,
-        TypeTemplate,
         TypeDf,
         Instance,
         Cast,

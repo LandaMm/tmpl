@@ -18,7 +18,7 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    std::shared_ptr<Value> Interpreter::EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::vector<std::shared_ptr<Node>>* args)
+    std::shared_ptr<Value> Interpreter::EvaluateExternFunctionCall(std::string fnName, std::shared_ptr<Fn> fn, std::shared_ptr<Nodes::FunctionCall> fnCall)
     {
         Prelude::ErrorManager&errManager = Prelude::ErrorManager::getInstance();
 
@@ -65,8 +65,8 @@ namespace Runtime
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while(it->HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
-            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            auto param = fn->GetParam(it->GetPosition());
+            std::shared_ptr<Node> arg = fnCall->GetArgument(it->GetPosition());
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
             auto valType = val->GetType();

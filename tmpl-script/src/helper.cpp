@@ -27,7 +27,7 @@ namespace Helper
         auto tTypDf = env->LookUp(tName);
         assert(bTypDf != nullptr && tTypDf != nullptr && "List type definitions should exist now.");
 
-        auto typGen = std::make_shared<Runtime::TypeDfGeneric>("T");
+        auto typGen = std::make_shared<Runtime::TypeDfGeneric>("T", AST::Location(-1, -1));
         
         bTypDf->AddGeneric(typGen);
         tTypDf->AddGeneric(typGen);
@@ -43,6 +43,9 @@ namespace Helper
         DefineBuiltInType("#BUILTIN_STRING", "string", typeDefinitions);
         DefineBuiltInType("#BUILTIN_BOOL", "bool", typeDefinitions);
         DefineBuiltInType("#BUILTIN_VOID", "void", typeDefinitions);
+
+        auto mixedTypDf = std::make_shared<Runtime::TypeDf>("#BUILTIN_MIXED", nullptr, "#GLOBAL", true, AST::Location(-1, -1));
+        typeDefinitions->AddItem("#BUILTIN_MIXED", mixedTypDf);
 
         DefineBuiltInListType(typeDefinitions);
 

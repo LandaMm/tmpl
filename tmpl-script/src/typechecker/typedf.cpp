@@ -8,9 +8,9 @@ namespace Runtime
     void TypeChecker::HandleTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported)
     {
         // check if type already exists
-        auto typeName = typeDfn->GetTypeTemplate();
+        TypeDfNode::PId typeName = typeDfn->GetTypeName();
 
-        if (m_type_definitions->HasItem(typeName->GetTypeName()->GetName()))
+        if (m_type_definitions->HasItem(typeName->GetName()))
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
             errManager.TypeRedeclaration(GetFilename(), typeName, "TypeError");
@@ -20,24 +20,23 @@ namespace Runtime
 
         auto baseTypeNode = typeDfn->GetTypeValue();
 
-        m_type_definitions = DefineTemplateTypes(GetFilename(), typeName, m_type_definitions, false, "TypeError", this);
+        auto genHandler = GenHandler(GetFilename(), m_type_definitions, "TypeError", this);
+        genHandler.DefineGenerics(typeDfn->GetGenIterator(), false);
 
         auto baseTyp = EvaluateType(GetFilename(), baseTypeNode, m_type_definitions, "TypeError", this);
 
-        assert(m_type_definitions->GetParent() != nullptr && "Typ dfs parent gone.");
-        assert(m_type_definitions->GetParent() != m_type_definitions && "Parent clone");
-        m_type_definitions = m_type_definitions->GetParent();
+        m_type_definitions = genHandler.Unload();
 
-        std::string key = typeName->GetTypeName()->GetName();
+        std::string key = typeName->GetName();
         auto typeDf = std::make_shared<TypeDf>(key, baseTyp, GetFilename(), exported, typeDfn->GetLocation());
 
-        auto gIt = Common::Iterator(typeName->GetGenericsSize());
+        auto gIt = Common::Iterator(typeDfn->GetGenericsSize());
         while (gIt.HasItems())
         {
-            auto gen = typeName->GetTemplateGeneric(gIt.GetPosition());
+            auto gen = typeDfn->GetGeneric(gIt.GetPosition());
             gIt.Next();
 
-            auto typDfGen = std::make_shared<TypeDfGeneric>(gen->GetName());
+            auto typDfGen = std::make_shared<TypeDfGeneric>(gen->GetName(), gen->GetLocation());
             typeDf->AddGeneric(typDfGen);
         }
 

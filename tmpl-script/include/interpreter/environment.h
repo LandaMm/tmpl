@@ -66,12 +66,29 @@ namespace Runtime
         inline std::string GetName() const { return m_name; }
     };
 
+    class FnGeneric
+    {
+    private:
+        std::string m_name;
+        AST::Location m_loc;
+        // TODO: base and default type
+    public:
+        FnGeneric(std::string name, AST::Location loc) : m_name(name), m_loc(loc) { }
+        ~FnGeneric() = default;
+    public:
+        inline std::string GetName() const { return m_name; }
+        inline AST::Location GetLocation() const { return m_loc; }
+    };
+
 	class Fn
 	{
 	private:
 		std::shared_ptr<Node> m_body;
+
         std::vector<std::shared_ptr<FnParam>> m_params;
         PValType m_ret_type;
+
+        std::vector<std::shared_ptr<FnGeneric>> m_generics;
 
         std::string m_module_name;
         bool m_exported;
@@ -91,13 +108,20 @@ namespace Runtime
 
     public:
         void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
+        void AddGeneric(std::shared_ptr<FnGeneric> generic) { m_generics.push_back(generic); }
+
 		void SetReturnType(PValType newTyp) { m_ret_type = newTyp; }
     public:
-        inline std::shared_ptr<FnParam> GetItem(unsigned int index) { return m_params[index]; }
+        inline std::shared_ptr<FnParam> GetParam(unsigned int index) const { return m_params[index]; }
+        inline size_t GetParamsSize() const { return m_params.size(); }
+        
+        inline std::shared_ptr<FnGeneric> GetGeneric(unsigned int index) const { return m_generics[index]; }
+        inline unsigned int GetGenericsSize() const { return m_generics.size(); }
+
+        inline std::vector<std::shared_ptr<FnGeneric>>* GetGenIterator() { return &m_generics; }
 
 	public:
 		inline std::shared_ptr<Node> GetBody() const { return m_body; }
-        inline size_t GetParamsSize() const { return m_params.size(); }
         inline PValType GetReturnType() const { return m_ret_type; }
         inline std::string GetModuleName() const { return m_module_name; }
         inline bool IsExported() const { return m_exported; }

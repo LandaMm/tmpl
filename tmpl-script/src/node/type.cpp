@@ -7,14 +7,9 @@ namespace AST::Nodes
         return "TypeNode(" + m_typename->Format() + ")";
     }
 
-    std::string TypeTemplateNode::Format() const
-    {
-        return "TypeTemplateNode(" + m_typename->Format() + ")";
-    }
-
     std::string TypeDfNode::Format() const
     {
-        return "TypeDf(" + m_template->Format() + " = " + m_value->Format() + ")";
+        return "TypeDf(" + m_name->Format() + " = " + m_value->Format() + ")";
     }
 }
 

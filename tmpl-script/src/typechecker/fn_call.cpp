@@ -20,27 +20,46 @@ namespace Runtime
             return std::make_shared<ValType>("void");
         }
 
-        auto args = fnCall->GetArgs();
-
-        if (fn->GetParamsSize() != args->size())
+        if (fn->GetParamsSize() != fnCall->GetArgumentsSize())
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.ArgsParamsExhausted(
                     GetFilename(),
                     fnName,
-                    args->size(),
+                    fnCall->GetArgumentsSize(),
                     fn->GetParamsSize(),
                     fnCall->GetLocation(), "TypeError");
             ReportError();
             return fn->GetReturnType();
         }
 
+        if (fn->GetGenericsSize() != fnCall->GetGenericsSize())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.TypeGenericsExhausted(GetFilename(), fnName, fnCall->GetGenericsSize(), fn->GetGenericsSize(), fnCall->GetLocation(), "TypeError");
+            return fn->GetReturnType();
+        }
+
+        auto genHandler = GenHandler(GetFilename(), m_type_definitions, "TypeError", this);
+
+        auto gIt = Common::Iterator(fn->GetGenericsSize());
+        while (gIt.HasItems())
+        {
+            auto gen = fn->GetGeneric(gIt.GetPosition());
+            auto genTypeNode = fnCall->GetGeneric(gIt.GetPosition());
+
+            auto genType = EvaluateType(GetFilename(), genTypeNode, m_type_definitions, "TypeError", this);
+
+            genHandler.DefineGeneric(gen, genType);
+
+            gIt.Next();
+        }
+
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while (it->HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
-            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
-            it->Next();
+            auto param = fn->GetParam(it->GetPosition());
+            std::shared_ptr<Node> arg = fnCall->GetArgument(it->GetPosition());
             PValType valType = DiagnoseNode(arg);
             PValType paramType = NormalizeType(GetFilename(), param->GetType(), arg->GetLocation(), m_type_definitions, "TypeError", this);
             /*PValType paramType = param->GetType();*/
@@ -58,9 +77,15 @@ namespace Runtime
                 ReportError();
                 break; // will get to return of the fn's return type (+4 lines)
             }
+
+            it->Next();
         }
 
-        return fn->GetReturnType();
+        auto retType = NormalizeType(GetFilename(), fn->GetReturnType(), fnCall->GetLocation(), m_type_definitions, "TypeError", this);
+
+        m_type_definitions = genHandler.Unload();
+
+        return retType;
     }
 
     bool TypeChecker::ResolveTypeFn(std::shared_ptr<ObjectMember> obj, std::shared_ptr<Fn>& fn, std::string& fnName)

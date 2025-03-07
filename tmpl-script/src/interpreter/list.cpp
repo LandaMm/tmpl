@@ -22,7 +22,7 @@ namespace Runtime
             if (!itemType->Compare(*iVal->GetType()))
             {
                 Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-                errManager.ListItemMismatchType(GetFilename(), iVal->GetType(), itemType, item->GetLocation(), "TypeError");
+                errManager.ListItemMismatchType(GetFilename(), iVal->GetType(), itemType, item->GetLocation(), "RuntimeError");
                 return std::make_shared<VoidValue>();
             }
             listValue->AddItem(iVal);

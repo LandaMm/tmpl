@@ -29,12 +29,14 @@ namespace Runtime
     {
     private:
         std::string m_name;
+        AST::Location m_loc;
         // TODO:
         // base and default type
     public:
-        TypeDfGeneric(std::string name) : m_name(name) { }
+        TypeDfGeneric(std::string name, AST::Location loc) : m_name(name), m_loc(loc) { }
     public:
         inline std::string GetName() const { return m_name; }
+        inline AST::Location GetLocation() const { return m_loc; }
     };
 
     class TypeDf

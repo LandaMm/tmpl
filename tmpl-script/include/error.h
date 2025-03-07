@@ -8,7 +8,6 @@
 #include "token.h"
 #include "interpreter/value.h"
 #include "node/identifier.h"
-#include "node/type.h"
 
 namespace Prelude
 {
@@ -67,7 +66,9 @@ namespace Prelude
         void TypeDoesNotExist(std::string filename, std::string typName, AST::Location loc, std::string prefix);
         void TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix);
         // TODO: show where type declared
-        void TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix);
+        // TODO: refactor 
+        void TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> typeNode, std::string prefix);
+        void TypeRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix);
         void TypeConstructorRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix);
         void TypeCastRedeclaration(std::string filename, std::string typeName, Runtime::PValType castType, AST::Location loc, std::string prefix);
         void TypeConstructorDoesNotExist(std::string filename, Runtime::PValType targetTyp, AST::Location loc, std::string prefix);

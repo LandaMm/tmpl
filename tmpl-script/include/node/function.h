@@ -17,19 +17,32 @@ namespace AST
 		private:
 			std::shared_ptr<Node> m_callee;
 			std::vector<std::shared_ptr<Node>> m_args;
+            std::vector<std::shared_ptr<TypeNode>> m_generics;
 
 		public:
 			std::string Format() const override;
 			inline NodeType GetType() const override { return NodeType::FunctionCall; }
 
 		public:
-			FunctionCall(std::shared_ptr<Node> callee, std::vector<std::shared_ptr<Node>> args, Location loc)
-                : m_callee(callee), m_args(args), Node(loc) {}
+			FunctionCall(std::shared_ptr<Node> callee, Location loc)
+                : m_callee(callee),
+                  m_args(std::vector<std::shared_ptr<Node>>()),
+                  m_generics(std::vector<std::shared_ptr<TypeNode>>()),
+                  Node(loc) {}
 			~FunctionCall() {}
+
+        public:
+            void AddGeneric(std::shared_ptr<TypeNode> generic) { m_generics.push_back(generic); }
+            std::shared_ptr<TypeNode> GetGeneric(unsigned int index) const { return m_generics[index]; }
+            unsigned int GetGenericsSize() const { return m_generics.size(); }
 
 		public:
 			inline std::shared_ptr<Node> GetCallee() const { return m_callee; }
-			inline std::vector<std::shared_ptr<Node>> *GetArgs() { return &m_args; }
+
+        public:
+            void AddArgument(std::shared_ptr<Node> arg) { m_args.push_back(arg); }
+            unsigned int GetArgumentsSize() const { return m_args.size(); }
+            std::shared_ptr<Node> GetArgument(unsigned int index) const { return m_args[index]; }
 		};
 
         class FunctionParam

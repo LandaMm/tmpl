@@ -53,7 +53,7 @@ namespace AST
         else if (modifier == Nodes::FunctionModifier::Cast)
         {
             Eat(TokenType::OpenBracket);
-            fnName = TypeTemplate(Id());
+            fnName = Id();
             Eat(TokenType::CloseBracket);
         }
         else // No modifier
@@ -81,7 +81,6 @@ namespace AST
             }
             if (isTypFn)
             {
-                fnName = TypeTemplate(std::dynamic_pointer_cast<Nodes::IdentifierNode>(fnName));
                 fnName = ObjectMember(fnName);
             }
         }

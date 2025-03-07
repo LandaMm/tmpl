@@ -89,25 +89,45 @@ namespace Runtime
             return nullptr;
         }
 
-        auto args = fnCall->GetArgs();
-
-        if (fn->GetParamsSize() != args->size())
+        if (fn->GetParamsSize() != fnCall->GetArgumentsSize())
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.ArgsParamsExhausted(
                     GetFilename(),
                     fnName,
-                    args->size(),
+                    fnCall->GetArgumentsSize(),
                     fn->GetParamsSize(),
                     fnCall->GetLocation(), "RuntimeError");
             return nullptr;
         }
 
+        if (fn->GetGenericsSize() != fnCall->GetGenericsSize())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.TypeGenericsExhausted(GetFilename(), fnName, fnCall->GetGenericsSize(), fn->GetGenericsSize(), fnCall->GetLocation(), "RuntimeError");
+            return nullptr;
+        }
+
+        auto genHandler = GenHandler(GetFilename(), m_type_definitions, "TypeError", nullptr);
+
+        auto gIt = Common::Iterator(fn->GetGenericsSize());
+        while (gIt.HasItems())
+        {
+            auto gen = fn->GetGeneric(gIt.GetPosition());
+            auto genTypeNode = fnCall->GetGeneric(gIt.GetPosition());
+
+            auto genType = TypeChecker::EvaluateType(GetFilename(), genTypeNode, m_type_definitions, "RuntimeError", nullptr);
+
+            genHandler.DefineGeneric(gen, genType);
+
+            gIt.Next();
+        }
+
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while (it->HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
-            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            auto param = fn->GetParam(it->GetPosition());
+            std::shared_ptr<Node> arg = fnCall->GetArgument(it->GetPosition());
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
             PValType paramType = TypeChecker::NormalizeType(GetFilename(), param->GetType(), arg->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
@@ -133,7 +153,11 @@ namespace Runtime
         }
 
         if (fn->IsExterned()) {
-            return EvaluateExternFunctionCall(fnName, fn, args);
+            auto retVal = EvaluateExternFunctionCall(fnName, fn, fnCall);
+
+            m_type_definitions = m_type_definitions->GetParent();
+            
+            return retVal;
         } else {
             auto currentModule = GetFilename();
             SetFilename(fn->GetModuleName());
@@ -144,7 +168,11 @@ namespace Runtime
             m_variables = currentScope;
             SetFilename(currentModule);
 
-            if (!value->GetType()->Compare(*fn->GetReturnType()))
+            auto retType = TypeChecker::NormalizeType(GetFilename(), fn->GetReturnType(), fnCall->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+
+            m_type_definitions = genHandler.Unload();
+
+            if (!value->GetType()->Compare(*retType))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ReturnMismatchType(GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());

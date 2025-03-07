@@ -4,6 +4,8 @@
 #include <memory>
 #include "../include/error.h"
 #include "include/interpreter/value.h"
+#include "include/location.h"
+#include "include/node/identifier.h"
 
 using namespace AST;
 namespace fs = std::filesystem;
@@ -331,12 +333,21 @@ namespace Prelude
     }
 
 
-    void ErrorManager::TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix)
+    void ErrorManager::TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> typeNode, std::string prefix)
     {
         LogFileLocation(filename, typeNode->GetLocation(), prefix);
         // TODO: show generics as well
         std::cerr << "Cannot redeclare already existing type '"
-            << typeNode->GetTypeName()->GetName() << "'" << std::endl;
+            << typeNode->GetName() << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::TypeRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        // TODO: show generics as well
+        std::cerr << "Cannot redeclare already existing type '"
+            << typeName << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 

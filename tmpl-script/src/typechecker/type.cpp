@@ -10,37 +10,6 @@ namespace Runtime
 {
     using namespace AST::Nodes;
 
-    TypeChecker::PTypeDfs TypeChecker::DefineTemplateTypes(std::string filename, std::shared_ptr<TypeTemplateNode> typTmpl, TypeChecker::PTypeDfs typeDfs, bool transparent, std::string prefix, TypeChecker* typChecker)
-    {
-        auto tmplTypDfs = std::make_shared<TypeDfs>(typeDfs);
-
-        auto it = Common::Iterator(typTmpl->GetGenericsSize());
-        while (it.HasItems())
-        {
-            auto gen = typTmpl->GetTemplateGeneric(it.GetPosition());
-
-            if (tmplTypDfs->Contains(gen->GetName()))
-            {
-                Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-                errManager.TypeRedeclaration(filename, typTmpl, prefix);
-                if (typChecker != nullptr)
-                {
-                    typChecker->ReportError();
-                }
-                return nullptr;
-            }
-
-            auto genTypDf = std::make_shared<TypeDf>(gen->GetName(), std::make_shared<ValType>("void"), filename, false, gen->GetLocation());
-            if (transparent)
-                genTypDf->SetTransparent(true);
-            tmplTypDfs->AddItem(gen->GetName(), genTypDf);
-
-            it.Next();
-        }
-
-        return tmplTypDfs;
-    }
-
     PValType TypeChecker::GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix)
     {
         auto typ = target;
@@ -71,6 +40,7 @@ namespace Runtime
         // check for type existance
         std::string typName = typeNode->GetTypeName()->GetName();
         auto typ = std::make_shared<ValType>(typName);
+        typ = NormalizeType(filename, typ, typeNode->GetLocation(), typeDfs, prefix, typChecker);
 
         if (!typeDfs->HasItem(typName))
         {
@@ -153,6 +123,10 @@ namespace Runtime
     {
         auto fromTyp = 
             NormalizeType(filename, from, loc, typeDfs, prefix, typChecker);
+
+        if (fromTyp->IsMixed()) return to;
+        if (to->IsMixed()) return to;
+
         std::cout << "[DEBUG] from normalize: (" << *from << ") -> (" << *fromTyp << ")" << std::endl;
         // 0. check if "from" type exists in typeDfs
         //

@@ -70,23 +70,6 @@ namespace AST
         return generic;
     }
 
-    std::shared_ptr<Nodes::TypeTemplateNode> Parser::TypeTemplate(std::shared_ptr<Nodes::IdentifierNode> typName)
-    {
-        auto typTmpl = std::make_shared<Nodes::TypeTemplateNode>(typName, typName->GetLocation());
-
-        if (m_lexer->GetToken()->GetType() == TokenType::Less)
-        {
-            Eat(TokenType::Less);
-            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
-            {
-                typTmpl->AddTemplateGeneric(TmplGeneric());
-            }
-            Eat(TokenType::Greater);
-        }
-
-        return typTmpl;
-    }
-
     std::shared_ptr<Nodes::CastNode> Parser::Cast(std::shared_ptr<Nodes::TypeNode> typ)
     {
         Eat(TokenType::CloseBracket);
@@ -125,13 +108,26 @@ namespace AST
         Eat(TokenType::TypeDf);
 
         auto typName = Id();
-        auto tmpl = TypeTemplate(typName);
+
+        auto typDf = std::make_shared<Nodes::TypeDfNode>(typName, loc);
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
+            {
+                typDf->AddGeneric(TmplGeneric());
+            }
+            Eat(TokenType::Greater);
+        }
         
         Eat(TokenType::Equal);
 
         auto value = Type();
 
-        return std::make_shared<Nodes::TypeDfNode>(tmpl, value, loc);
+        typDf->SetValue(value);
+
+        return typDf;
     }
 }
 
