@@ -23,7 +23,6 @@ namespace Runtime
         std::shared_ptr<Node> nameNode = fnDecl->GetName();
 
         auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
-        std::cout << "[INFO] type function object target: " << obj->GetObject()->Format() << std::endl; 
         assert(obj->GetObject()->GetType() == NodeType::Identifier && "Object target should be a type for type fn");
 
         auto typTmpl = std::dynamic_pointer_cast<IdentifierNode>(obj->GetObject());

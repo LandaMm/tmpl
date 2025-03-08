@@ -90,17 +90,6 @@ namespace Runtime
 
         PValType baseType = typeDf->GetBaseType();
 
-        /*auto constructorFn =*/
-        /*    std::make_shared<Fn>(nullptr, baseType, GetFilename(), exported, false, fnDecl->GetLocation());*/
-
-        /*auto pIt = std::make_shared<Common::Iterator>(fn->GetParamsSize());*/
-        /*while (pIt->HasItems())*/
-        /*{*/
-        /*    auto param = fn->GetParam(pIt->GetPosition());*/
-        /*    pIt->Next();*/
-        /*    constructorFn->AddParam(param);*/
-        /*}*/
-
         fn->SetReturnType(baseType);
 
         typeDf->SetConstructor(fn);

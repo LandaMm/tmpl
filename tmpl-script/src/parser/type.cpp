@@ -85,12 +85,25 @@ namespace AST
 
         if (m_lexer->GetToken()->GetType() != TokenType::Id)
         {
+            m_lexer->RestoreState();
             return false;
         }
 
-        while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+        Eat(TokenType::Id);
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
         {
-            Eat(m_lexer->GetToken()->GetType());
+            if (!ParseGenericType())
+            {
+                m_lexer->RestoreState();
+                return false;
+            }
+        }
+
+        if (m_lexer->GetToken()->GetType() != TokenType::CloseBracket)
+        {
+            m_lexer->RestoreState();
+            return false;
         }
 
         Eat(m_lexer->GetToken()->GetType());
@@ -99,7 +112,14 @@ namespace AST
 
         m_lexer->RestoreState();
 
-        return curr == TokenType::Id || curr == TokenType::OpenBracket;
+        return m_lexer->OneOf({
+            TokenType::Integer,
+            TokenType::Double,
+            TokenType::Float,
+            TokenType::String,
+            TokenType::OpenBracket,
+            TokenType::Id
+        }, curr);
     }
 
     std::shared_ptr<Nodes::TypeDfNode> Parser::TypeDfStatement()

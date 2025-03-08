@@ -5,12 +5,12 @@ namespace AST
 {
 	std::shared_ptr<Node> Parser::IfElseStatement()
 	{
-		// if (5 == 5 ? true : false) {} else {}
+		// if 5 == 5 ? true : false {} else {}
         auto loc = m_lexer->GetToken()->GetLocation();
 		Eat(TokenType::If);
-		// Eat(TokenType::OpenBracket)
+		// Eat(TokenType::OpenBracket);
 		std::shared_ptr<Node> condition = Ternary();
-		// Eat(TokenType::CloseBracket)
+		// Eat(TokenType::CloseBracket);
 
 		auto ifElse = std::make_shared<Statements::IfElseStatement>(condition, loc);
         std::shared_ptr<Statements::StatementsBody> body =

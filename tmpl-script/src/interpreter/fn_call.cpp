@@ -5,6 +5,7 @@
 #include <error.h>
 #include <memory>
 #include "../../include/interpreter.h"
+#include "include/interpreter/environment.h"
 #include "include/interpreter/value.h"
 #include "include/iterator.h"
 #include "include/node.h"
@@ -101,7 +102,13 @@ namespace Runtime
             return nullptr;
         }
 
-        if (fn->GetGenericsSize() != fnCall->GetGenericsSize())
+        if (fn->GetModifier() != FnModifier::Type && fn->GetGenericsSize() != fnCall->GetGenericsSize())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.TypeGenericsExhausted(GetFilename(), fnName, fnCall->GetGenericsSize(), fn->GetGenericsSize(), fnCall->GetLocation(), "RuntimeError");
+            return nullptr;
+        }
+        else if (fn->GetModifier() == FnModifier::Type && fnCall->GetGenericsSize() > 0)
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.TypeGenericsExhausted(GetFilename(), fnName, fnCall->GetGenericsSize(), fn->GetGenericsSize(), fnCall->GetLocation(), "RuntimeError");
@@ -111,14 +118,40 @@ namespace Runtime
         auto genHandler = GenHandler(GetFilename(), m_type_definitions, "TypeError", nullptr);
 
         auto gIt = Common::Iterator(fn->GetGenericsSize());
+
+        PValType targetTyp = nullptr;
+
+        if (fn->GetModifier() == FnModifier::Type)
+        {
+            assert(fnCall->GetCallee()->GetType() == NodeType::ObjectMember && "Type fn callee should be an object");
+            auto obj = std::dynamic_pointer_cast<ObjectMember>(fnCall->GetCallee());
+            targetTyp = Execute(obj->GetObject())->GetType();
+            if (targetTyp->GetGenericsSize() != fn->GetGenericsSize())
+            {
+                Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                errorManager.TypeGenericsExhausted(GetFilename(), fnName, targetTyp->GetGenericsSize(), fn->GetGenericsSize(), obj->GetObject()->GetLocation(), "RuntimeError");
+                return nullptr;
+            }
+        }
+
         while (gIt.HasItems())
         {
             auto gen = fn->GetGeneric(gIt.GetPosition());
-            auto genTypeNode = fnCall->GetGeneric(gIt.GetPosition());
 
-            auto genType = TypeChecker::EvaluateType(GetFilename(), genTypeNode, m_type_definitions, "RuntimeError", nullptr);
+            if (fn->GetModifier() == FnModifier::Type)
+            {
+                assert(targetTyp != nullptr && "Target type should have been set in case of type functions");
+                auto genType = targetTyp->GetGeneric(gIt.GetPosition());
 
-            genHandler.DefineGeneric(gen, genType);
+                genHandler.DefineGeneric(gen, genType);
+            }
+            else
+            {
+                auto genTypeNode = fnCall->GetGeneric(gIt.GetPosition());
+                auto genType = TypeChecker::EvaluateType(GetFilename(), genTypeNode, m_type_definitions, "RuntimeError", nullptr);
+
+                genHandler.DefineGeneric(gen, genType);
+            }
 
             gIt.Next();
         }

@@ -1,5 +1,6 @@
 
 #include "include/interpreter/value.h"
+#include "include/iterator.h"
 #include "include/typechecker.h"
 
 namespace Runtime
@@ -41,7 +42,18 @@ namespace Runtime
 
         auto retType = ResolveFn(fn, fnName, fnCall);
 
-        return std::make_shared<ValType>(instance->GetTarget()->GetName());
+        auto valType = std::make_shared<ValType>(instance->GetTarget()->GetName());
+
+        auto gIt = Common::Iterator(fnCall->GetGenericsSize());
+        while (gIt.HasItems())
+        {
+            auto genNode = fnCall->GetGeneric(gIt.GetPosition());
+            PValType genType = EvaluateType(GetFilename(), genNode, m_type_definitions, "TypeError", this);
+            valType->AddGeneric(genType);
+            gIt.Next();
+        }
+
+        return valType;
     }
 }
 

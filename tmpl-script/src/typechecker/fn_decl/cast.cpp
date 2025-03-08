@@ -1,4 +1,5 @@
 
+#include "include/interpreter/environment.h"
 #include "include/iterator.h"
 #include "include/node/identifier.h"
 #include "include/typechecker.h"
@@ -69,7 +70,7 @@ namespace Runtime
         }
 
         auto castFn =
-            std::make_shared<Fn>(nullptr, retType, GetFilename(), exported, false, fnDecl->GetLocation());
+            std::make_shared<Fn>(nullptr, retType, FnModifier::Cast, GetFilename(), exported, false, fnDecl->GetLocation());
 
         auto typDfCast =
             std::make_shared<TypeDfCast>(typeName, retType->GetName(), castFn);

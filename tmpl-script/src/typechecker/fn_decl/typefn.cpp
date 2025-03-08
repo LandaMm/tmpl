@@ -20,6 +20,7 @@ namespace Runtime
         genHandler.DefineGenerics(fn->GetGenIterator(), false);
 
         PValType retType = EvaluateType(GetFilename(), fnDecl->GetReturnType(), m_type_definitions, "TypeError", this);
+        fn->SetReturnType(retType);
 
         m_type_definitions = genHandler.Unload();
 
@@ -43,7 +44,6 @@ namespace Runtime
         }
 
         auto obj = std::dynamic_pointer_cast<ObjectMember>(nameNode);
-        std::cout << "[INFO] type function object target: " << obj->GetObject()->Format() << std::endl; 
         assert(obj->GetObject()->GetType() == NodeType::Identifier && "Object target should be a type for type fn");
 
         auto typTmpl = std::dynamic_pointer_cast<IdentifierNode>(obj->GetObject());
@@ -110,7 +110,17 @@ namespace Runtime
         typeEnv->AddItem(fnName, fn);
 
         // TODO: valtype with generics
-        auto typeVar = std::make_shared<TypeVariable>(std::make_shared<ValType>(typeName), false);
+        auto valType = std::make_shared<ValType>(typeName);
+
+        auto vIt = Common::Iterator(fn->GetGenericsSize());
+        while (vIt.HasItems())
+        {
+            auto gen = fn->GetGeneric(vIt.GetPosition());
+            valType->AddGeneric(std::make_shared<ValType>(gen->GetName()));
+            vIt.Next();
+        }
+
+        auto typeVar = std::make_shared<TypeVariable>(valType, false);
         variables->AddItem("self", typeVar);
 
         m_variables = variables;

@@ -1,6 +1,7 @@
 
 #include"../../include/parser.h"
 #include"../../include/node/identifier.h"
+#include "include/token.h"
 
 namespace AST
 {
@@ -22,6 +23,10 @@ namespace AST
             while (m_lexer->GetToken()->GetType() != TokenType::Greater)
             {
                 fnCall->AddGeneric(Type());
+                if (m_lexer->GetToken()->GetType() == TokenType::Comma && m_lexer->SeekToken()->GetType() != TokenType::Greater)
+                {
+                    Eat(TokenType::Comma);
+                }
             }
             Eat(TokenType::Greater);
         }

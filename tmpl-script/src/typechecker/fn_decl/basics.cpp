@@ -6,7 +6,26 @@ namespace Runtime
 {
     std::shared_ptr<Fn> TypeChecker::HandleFnBasics(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported)
     {
-        std::shared_ptr<Fn> fn = std::make_shared<Fn>(fnDecl->GetBody(), nullptr, GetFilename(), exported, false, fnDecl->GetLocation());
+        FnModifier modifier;
+        switch(fnDecl->GetModifier())
+        {
+            case AST::Nodes::FunctionModifier::Cast:
+                modifier = FnModifier::Cast;
+                break;
+            case AST::Nodes::FunctionModifier::Construct:
+                modifier = FnModifier::Construct;
+                break;
+            case AST::Nodes::FunctionModifier::None:
+                if (fnDecl->GetName()->GetType() == NodeType::ObjectMember)
+                    modifier = FnModifier::Type;
+                else
+                    modifier = FnModifier::Regular;
+                break;
+            default:
+                assert(false && "Not all fn modifiers are being handled");
+        }
+
+        std::shared_ptr<Fn> fn = std::make_shared<Fn>(fnDecl->GetBody(), nullptr, modifier, GetFilename(), exported, false, fnDecl->GetLocation());
 
         // Generics
         auto gIt = Common::Iterator(fnDecl->GetGenericsSize());

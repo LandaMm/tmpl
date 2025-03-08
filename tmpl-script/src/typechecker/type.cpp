@@ -116,6 +116,16 @@ namespace Runtime
             typ->SetName(typDf->GetBaseType()->GetName());
         }
 
+        auto it = Common::Iterator(typ->GetGenericsSize());
+        while (it.HasItems())
+        {
+            auto gen = typ->GetGeneric(it.GetPosition());
+
+            typ->SetGeneric(it.GetPosition(), NormalizeType(filename, gen, loc, typeDfs, prefix, typChecker));
+
+            it.Next();
+        }
+
         return typ;
     }
 
@@ -127,7 +137,6 @@ namespace Runtime
         if (fromTyp->IsMixed()) return to;
         if (to->IsMixed()) return to;
 
-        std::cout << "[DEBUG] from normalize: (" << *from << ") -> (" << *fromTyp << ")" << std::endl;
         // 0. check if "from" type exists in typeDfs
         //
         // should not be triggered

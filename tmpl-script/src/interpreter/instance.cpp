@@ -114,17 +114,29 @@ namespace Runtime
         m_variables = currentScope;
         SetFilename(currentModule);
 
-        if (!value->GetType()->Compare(*fn->GetReturnType()))
+        auto fnRetType = TypeChecker::NormalizeType(GetFilename(), fn->GetReturnType(), fn->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+
+        if (!value->GetType()->Compare(*fnRetType))
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.ReturnMismatchType(GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());
             return nullptr;
         }
 
-        // TODO: copy generics
-        value->SetType(std::make_shared<ValType>(instance->GetTarget()->GetName()));
-
         m_type_definitions = genHandler.Unload();
+
+        auto valType = std::make_shared<ValType>(instance->GetTarget()->GetName());
+
+        auto genIt = Common::Iterator(fnCall->GetGenericsSize());
+        while (genIt.HasItems())
+        {
+            auto genNode = fnCall->GetGeneric(genIt.GetPosition());
+            PValType genType = TypeChecker::EvaluateType(GetFilename(), genNode, m_type_definitions, "RuntimeError", nullptr);
+            valType->AddGeneric(genType);
+            genIt.Next();
+        }
+
+        value->SetType(valType);
 
         return value;
     }

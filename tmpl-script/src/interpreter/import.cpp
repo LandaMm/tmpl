@@ -41,8 +41,6 @@ namespace Runtime
         if (m_modules->HasItem(modulePath.string()))
             return;
 
-        std::cout << "[DEBUG] Import module from '" << modulePath << "'" << std::endl;
-
         std::ifstream moduleFile(modulePath);
         if (!moduleFile.good())
         {
