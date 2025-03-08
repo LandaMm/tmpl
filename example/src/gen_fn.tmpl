@@ -25,9 +25,8 @@ fn encode<?T>(T data) : string {
 }
 
 ->main {
-    var double t = 3.3873467843;
-    var List<double> ds = new List<double>(t);
-    var list<double> ds_native = simpleList<double>(ds);
+    var List<string> ds = new List<string>((string)("hello, " + "world!"));
+    var list<string> ds_native = ds.downcast();
     return ds_native;
 }
 

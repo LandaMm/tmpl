@@ -1,10 +1,6 @@
 @require"std/io"
 @require"std/convert"
 
-fn @cast(void) : string {
-    return "void";
-}
-
 typedf List<?ID, ?T> = list<T>;
 
 fn @construct List<?ID, ?T>(ID identifier) {
@@ -12,10 +8,13 @@ fn @construct List<?ID, ?T>(ID identifier) {
     return []T{};
 }
 
-fn List<?ID, ?T>.addItem() : void {}
+fn List.addItem<?ID, ?T>(T item) : void {
+    println("adding item: " + (string)item);
+}
 
 ->main {
-    var List<string, int> l = new List<string, int>("some_id");
+    var List<string, float> l = new List<string, float>("some_id");
+    l.addItem(5.14);
     return l;
 }
 
