@@ -1,5 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <memory>
@@ -46,6 +47,12 @@ namespace AST
 
 	public:
 		std::vector<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
+
+    public:
+        bool OneOf(const std::vector<TokenType>& types, TokenType needle)
+        {
+            return std::find(types.begin(), types.end(), needle) != types.end();
+        }
 
     public:
         void SaveState() { m_state = std::make_shared<LexerState>(m_index); }
