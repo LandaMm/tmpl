@@ -80,6 +80,14 @@ namespace Runtime
         inline AST::Location GetLocation() const { return m_loc; }
     };
 
+    enum class FnModifier
+    {
+        Regular,
+        Type,
+        Construct,
+        Cast
+    };
+
 	class Fn
 	{
 	private:
@@ -87,6 +95,8 @@ namespace Runtime
 
         std::vector<std::shared_ptr<FnParam>> m_params;
         PValType m_ret_type;
+
+        FnModifier m_modifier;
 
         std::vector<std::shared_ptr<FnGeneric>> m_generics;
 
@@ -98,11 +108,12 @@ namespace Runtime
         size_t m_index;
 
 	public:
-		Fn(std::shared_ptr<Node> body, PValType retType, std::string module, bool exported, bool externed, Location loc)
+		Fn(std::shared_ptr<Node> body, PValType retType, FnModifier modifier, std::string module, bool exported, bool externed, Location loc)
 			: m_body(body),
             m_ret_type(retType),
             m_params(std::vector<std::shared_ptr<FnParam>>()),
             m_index(0),
+            m_modifier(modifier),
             m_module_name(module), m_exported(exported), m_externed(externed),
             m_loc(loc) {}
 
@@ -114,6 +125,8 @@ namespace Runtime
     public:
         inline std::shared_ptr<FnParam> GetParam(unsigned int index) const { return m_params[index]; }
         inline size_t GetParamsSize() const { return m_params.size(); }
+
+        inline FnModifier GetModifier() const { return m_modifier; }
         
         inline std::shared_ptr<FnGeneric> GetGeneric(unsigned int index) const { return m_generics[index]; }
         inline unsigned int GetGenericsSize() const { return m_generics.size(); }
