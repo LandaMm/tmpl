@@ -7,6 +7,7 @@
 #include <vector>
 #include "../node/logical.h"
 #include "../node/expression.h"
+#include "include/iterator.h"
 
 namespace Runtime
 {
@@ -22,10 +23,18 @@ namespace Runtime
         CustomValueType(const CustomValueType& typ)
             : m_name(typ.m_name), m_generics(typ.m_generics) {}
         CustomValueType(const std::shared_ptr<CustomValueType>& typ)
-            : m_name(typ->m_name), m_generics(typ->m_generics) {}
+            : m_name(typ->m_name)
+        {
+            auto it = Common::Iterator(typ->GetGenericsSize());
+            while (it.HasItems())
+            {
+                AddGeneric(typ->GetGeneric(it.GetPosition()));
+                it.Next();
+            }
+        }
 
     public:
-        bool Compare(const CustomValueType& other) { return m_name == other.m_name; }
+        bool Compare(const CustomValueType& other);
         bool IsMixed() const { return m_name == "#BUILTIN_MIXED"; }
 
     public:
@@ -34,6 +43,7 @@ namespace Runtime
 
     public:
         void AddGeneric(std::shared_ptr<CustomValueType> generic) { m_generics.push_back(generic); }
+        void SetGeneric(unsigned int index, std::shared_ptr<CustomValueType> generic) { m_generics[index] = generic; }
         inline std::shared_ptr<CustomValueType> GetGeneric(unsigned int index) 
             const { return m_generics[index]; }
         inline unsigned int GetGenericsSize() const { return m_generics.size(); }
@@ -171,7 +181,12 @@ namespace Runtime
 		ListValue(PValType itemsType)
             : m_value(std::vector<std::shared_ptr<Value>>()),
               m_items_type(itemsType),
-              Value(std::make_shared<ValType>("list")) {}
+              Value(std::make_shared<ValType>("list"))
+        {
+            auto finalType = std::make_shared<ValType>("list");
+            finalType->AddGeneric(itemsType);
+            SetType(finalType);
+        }
 
 	public:
 		std::shared_ptr<Value> Compare(std::shared_ptr<Value> right, AST::Nodes::Condition::ConditionType condition) override;
