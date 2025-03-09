@@ -129,7 +129,7 @@ namespace Runtime
         return typ;
     }
 
-    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker)
+    PValType TypeChecker::CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs& typeDfs, std::string prefix, TypeChecker* typChecker)
     {
         auto fromTyp = 
             NormalizeType(filename, from, loc, typeDfs, prefix, typChecker);
@@ -159,6 +159,24 @@ namespace Runtime
         auto fromDf = typeDfs->LookUp(fromTyp->GetName());
         assert(fromDf != nullptr && "From type's definition should not be null");
         if (fromDf->GetBaseType()->Compare(*to)) return to;
+        if (fromDf->GetBaseType()->GetName() == to->GetName() && fromDf->GenericsSize() > 0)
+        {
+            auto genHandler = GenHandler(filename, typeDfs, prefix, typChecker);
+            
+            auto it = Common::Iterator(fromDf->GenericsSize());
+            while (it.HasItems()) {
+                genHandler.DefineGeneric(fromDf->GetGeneric(it.GetPosition()), fromTyp->GetGeneric(it.GetPosition()));
+                it.Next();
+            }
+
+            if ((NormalizeType(filename, fromDf->GetBaseType(), loc, typeDfs, prefix, typChecker))->Compare(*to))
+            {
+                typeDfs = genHandler.Unload();
+                return to;
+            }
+
+            typeDfs = genHandler.Unload();
+        }
         // 4. otherwise check if "from" type contains cast to "to" type in typeDf
         auto casts = fromDf->GetCastsEnv();
         if (casts->HasItem(to->GetName())) return to;
