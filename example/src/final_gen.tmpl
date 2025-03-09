@@ -1,0 +1,12 @@
+
+typedf List<?T> = list<T>;
+
+fn @construct List<?T>() {
+    return []T{};
+}
+
+->main {
+    var List<string> test = new List<int>();
+    return test;
+}
+
