@@ -52,13 +52,14 @@ namespace Runtime
 
     bool CustomValueType::Compare(const CustomValueType& other)
     {
+        if (IsMixed() || other.IsMixed()) return true;
         if (m_name != other.m_name) return false;
         if (m_generics.size() != other.m_generics.size()) return false;
         auto it = Common::Iterator(m_generics.size());
         while (it.HasItems())
         {
             auto gen = m_generics[it.GetPosition()];
-            auto otherGen = m_generics[it.GetPosition()];
+            auto otherGen = other.m_generics[it.GetPosition()];
             if (!gen->Compare(otherGen)) return false;
             it.Next();
         }
