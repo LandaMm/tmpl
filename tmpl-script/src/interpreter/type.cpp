@@ -1,12 +1,13 @@
 
 #include "include/interpreter.h"
+#include "include/typechecker.h"
 
 namespace Runtime
 {
     std::shared_ptr<Value> Interpreter::CastValue(std::shared_ptr<Value> val, PValType to, Location loc)
     {
         auto typeDfs = m_type_definitions;
-        auto from = val->GetType();
+        auto from = TypeChecker::NormalizeType(GetFilename(), val->GetType(), loc, m_type_definitions, "RuntimeError", nullptr);
         // 0. check if "from" type exists in typeDfs
         if (!typeDfs->HasItem(from->GetName()))
         {
@@ -34,6 +35,25 @@ namespace Runtime
         {
             val->SetType(to);
             return val;
+        }
+        if (fromDf->GetBaseType()->GetName() == to->GetName() && fromDf->GenericsSize() > 0)
+        {
+            auto genHandler = GenHandler(GetFilename(), m_type_definitions, "RuntimeError", nullptr);
+            
+            auto it = Common::Iterator(fromDf->GenericsSize());
+            while (it.HasItems()) {
+                genHandler.DefineGeneric(fromDf->GetGeneric(it.GetPosition()), from->GetGeneric(it.GetPosition()));
+                it.Next();
+            }
+
+            if ((TypeChecker::NormalizeType(GetFilename(), fromDf->GetBaseType(), loc, m_type_definitions, "RuntimeError", nullptr))->Compare(*to))
+            {
+                typeDfs = genHandler.Unload();
+                val->SetType(to);
+                return val;
+            }
+
+            typeDfs = genHandler.Unload();
         }
         // 4. otherwise check if "from" type contains cast to "to" type in typeDf
         auto casts = fromDf->GetCastsEnv();
