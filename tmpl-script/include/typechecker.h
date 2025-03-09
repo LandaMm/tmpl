@@ -118,7 +118,7 @@ namespace Runtime
 
 	public:
 		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker);
-        static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker);
+        static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs& typeDfs, std::string prefix, TypeChecker* typChecker);
         static PValType GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix);
 
         static PValType NormalizeType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker);
