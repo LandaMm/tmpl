@@ -283,10 +283,32 @@ namespace AST
 		{
 			std::shared_ptr<Node> res = Id();
 			TokenType current_type = m_lexer->GetToken()->GetType();
-			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
+			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
 			{
-				if (current_type == TokenType::OpenBracket)
+                if (current_type == TokenType::OpenBracket)
+                {
+                    // normal function (without generics)
+					std::shared_ptr<Node> fcall = FunctionCall(res);
+					res = fcall;
+                }
+				if (current_type == TokenType::Less)
 				{
+                    // f<box<int>, int>(...)
+                    m_lexer->SaveState();
+                    Eat(TokenType::Less);
+                    if (m_lexer->GetToken()->GetType() != TokenType::Id)
+                    {
+                        m_lexer->RestoreState();
+                        return res;
+                    }
+                    Eat(TokenType::Id);
+                    if (!m_lexer->OneOf({TokenType::Less, TokenType::Comma, TokenType::Greater}, m_lexer->GetToken()->GetType()))
+                    {
+                        m_lexer->RestoreState();
+                        return res;
+                    }
+                    m_lexer->RestoreState();
+
 					std::shared_ptr<Node> fcall = FunctionCall(res);
 					res = fcall;
 				}
@@ -338,9 +360,9 @@ namespace AST
             Eat(TokenType::CloseBracket);
 
 			TokenType current_type = m_lexer->GetToken()->GetType();
-			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
+			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
 			{
-				if (current_type == TokenType::OpenBracket)
+				if (current_type == TokenType::OpenBracket || current_type == TokenType::Less)
 				{
 					std::shared_ptr<Node> fcall = FunctionCall(res);
 					res = fcall;
@@ -359,7 +381,7 @@ namespace AST
         {
             auto loc = m_lexer->GetToken()->GetLocation();
             Eat(TokenType::New);
-            auto fnName = Type();
+            auto fnName = Id();
             auto fCall = FunctionCall(fnName);
             return std::make_shared<Nodes::InstanceNode>(fnName, fCall, loc);
         }

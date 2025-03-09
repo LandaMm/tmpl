@@ -9,7 +9,7 @@ namespace Runtime
 
     void TypeChecker::HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl)
     {
-		PValType varType = EvaluateType(GetFilename(), varDecl->GetType());
+		PValType varType = EvaluateType(GetFilename(), varDecl->GetType(), m_type_definitions, "TypeError", this);
 		std::string varName = *varDecl->GetName();
 		PValType varValueType = DiagnoseNode(varDecl->GetValue());
 

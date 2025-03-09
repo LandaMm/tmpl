@@ -15,6 +15,7 @@ namespace Helper
     public:
         static PTypeDfEnv GetTypeDefinitions();
         static void DefineBuiltInType(std::string builtinName, std::string name, PTypeDfEnv env);
+        static void DefineBuiltInListType(PTypeDfEnv env);
     };
 }
 

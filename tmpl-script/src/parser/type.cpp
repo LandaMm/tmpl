@@ -1,3 +1,4 @@
+#include "include/node/type.h"
 #include "include/parser.h"
 #include "include/token.h"
 
@@ -7,14 +8,66 @@ namespace AST
     {
         auto target = Id();
 
-        return std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
+        auto typ = std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            auto currToken = m_lexer->GetToken()->GetType();
+            while (currToken != TokenType::Greater)
+            {
+                if (currToken == TokenType::Comma)
+                {
+                    Eat(TokenType::Comma);
+                }
+
+                typ->AddGenericType(Type());
+
+                currToken = m_lexer->GetToken()->GetType();
+            }
+            Eat(TokenType::Greater);
+        }
+
+        return typ;
     }
 
-    std::shared_ptr<Nodes::TypeTemplateNode> Parser::TypeTemplate()
+    std::shared_ptr<Nodes::TypeNode> Parser::Type(std::shared_ptr<Nodes::IdentifierNode> target)
     {
-        auto target = Id();
+        auto typ = std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
 
-        return std::make_shared<Nodes::TypeTemplateNode>(target, target->GetLocation());
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            auto currToken = m_lexer->GetToken()->GetType();
+            while (currToken != TokenType::Greater)
+            {
+                if (currToken == TokenType::Comma)
+                {
+                    Eat(TokenType::Comma);
+                }
+
+                typ->AddGenericType(Type());
+
+                currToken = m_lexer->GetToken()->GetType();
+            }
+            Eat(TokenType::Greater);
+        }
+
+        return typ;
+    }
+
+    std::shared_ptr<Nodes::TemplateGeneric> Parser::TmplGeneric()
+    {
+        auto currToken = m_lexer->GetToken()->GetType();
+        if (currToken == TokenType::Comma)
+        {
+            Eat(TokenType::Comma);
+        }
+
+        Eat(TokenType::Question);
+        auto genericNode = Id();
+        auto generic = std::make_shared<Nodes::TemplateGeneric>(genericNode->GetName(), genericNode->GetLocation());
+        return generic;
     }
 
     std::shared_ptr<Nodes::CastNode> Parser::Cast(std::shared_ptr<Nodes::TypeNode> typ)
@@ -32,12 +85,25 @@ namespace AST
 
         if (m_lexer->GetToken()->GetType() != TokenType::Id)
         {
+            m_lexer->RestoreState();
             return false;
         }
 
-        while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+        Eat(TokenType::Id);
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
         {
-            Eat(m_lexer->GetToken()->GetType());
+            if (!ParseGenericType())
+            {
+                m_lexer->RestoreState();
+                return false;
+            }
+        }
+
+        if (m_lexer->GetToken()->GetType() != TokenType::CloseBracket)
+        {
+            m_lexer->RestoreState();
+            return false;
         }
 
         Eat(m_lexer->GetToken()->GetType());
@@ -46,7 +112,14 @@ namespace AST
 
         m_lexer->RestoreState();
 
-        return curr == TokenType::Id || curr == TokenType::OpenBracket;
+        return m_lexer->OneOf({
+            TokenType::Integer,
+            TokenType::Double,
+            TokenType::Float,
+            TokenType::String,
+            TokenType::OpenBracket,
+            TokenType::Id
+        }, curr);
     }
 
     std::shared_ptr<Nodes::TypeDfNode> Parser::TypeDfStatement()
@@ -54,13 +127,27 @@ namespace AST
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::TypeDf);
 
-        auto tmpl = TypeTemplate();
+        auto typName = Id();
+
+        auto typDf = std::make_shared<Nodes::TypeDfNode>(typName, loc);
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
+            {
+                typDf->AddGeneric(TmplGeneric());
+            }
+            Eat(TokenType::Greater);
+        }
         
         Eat(TokenType::Equal);
 
         auto value = Type();
 
-        return std::make_shared<Nodes::TypeDfNode>(tmpl, value, loc);
+        typDf->SetValue(value);
+
+        return typDf;
     }
 }
 

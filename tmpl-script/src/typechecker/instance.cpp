@@ -7,17 +7,15 @@ namespace Runtime
 {
     PValType TypeChecker::DiagnoseInstance(std::shared_ptr<InstanceNode> instance)
     {
-        PValType targetType = EvaluateType(GetFilename(), instance->GetTarget());
-
-        if (!m_type_definitions->HasItem(targetType->GetName()))
+        if (!m_type_definitions->HasItem(instance->GetTarget()->GetName()))
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeDoesNotExist(GetFilename(), targetType, instance->GetTarget()->GetLocation(), "TypeError");
+            errManager.TypeDoesNotExist(GetFilename(), instance->GetTarget()->GetName(), instance->GetTarget()->GetLocation(), "TypeError");
             ReportError();
-            return targetType;
+            return std::make_shared<ValType>(instance->GetTarget()->GetName());
         }
 
-        auto typeDf = m_type_definitions->LookUp(targetType->GetName());
+        auto typeDf = m_type_definitions->LookUp(instance->GetTarget()->GetName());
         assert(typeDf != nullptr && "Type definition should not be not found at this point.");
 
         if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
@@ -31,28 +29,31 @@ namespace Runtime
         if (!typeDf->HasConstructor())
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeConstructorDoesNotExist(GetFilename(), targetType, instance->GetTarget()->GetLocation(), "TypeError");
+            errManager.TypeConstructorDoesNotExist(GetFilename(), std::make_shared<ValType>(instance->GetTarget()->GetName()), instance->GetTarget()->GetLocation(), "TypeError");
             ReportError();
-            return targetType;
+            return std::make_shared<ValType>(instance->GetTarget()->GetName());
         }
 
         auto fn = typeDf->GetConstructor();
         assert(fn != nullptr && "Constructor fn should not be nullptr here.");
 
         auto fnCall = instance->GetFunctionCall();
-        auto fnName = targetType->GetName() + "::constructor";
+        auto fnName = instance->GetTarget()->GetName() + "::constructor";
 
-        auto typFn = std::make_shared<TypeFn>(targetType, fn->GetModuleName(), fn->IsExported(), fn->GetLocation());
+        auto retType = ResolveFn(fn, fnName, fnCall);
 
-        auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
-        while (it->HasItems())
+        auto valType = std::make_shared<ValType>(instance->GetTarget()->GetName());
+
+        auto gIt = Common::Iterator(fnCall->GetGenericsSize());
+        while (gIt.HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
-            it->Next();
-            typFn->AddParam(param);
+            auto genNode = fnCall->GetGeneric(gIt.GetPosition());
+            PValType genType = EvaluateType(GetFilename(), genNode, m_type_definitions, "TypeError", this);
+            valType->AddGeneric(genType);
+            gIt.Next();
         }
 
-        return ResolveFn(typFn, fnName, fnCall);
+        return valType;
     }
 }
 

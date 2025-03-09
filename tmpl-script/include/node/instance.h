@@ -3,7 +3,7 @@
 
 #include "../node.h"
 #include "function.h"
-#include "type.h"
+#include "include/node/identifier.h"
 
 namespace AST
 {
@@ -12,11 +12,11 @@ namespace AST
         class InstanceNode : public Node
         {
         private:
-            std::shared_ptr<TypeNode> m_target;
+            std::shared_ptr<IdentifierNode> m_target;
             std::shared_ptr<FunctionCall> m_fcall;
 
         public:
-            InstanceNode(std::shared_ptr<TypeNode> target, std::shared_ptr<FunctionCall> fcall, Location loc)
+            InstanceNode(std::shared_ptr<IdentifierNode> target, std::shared_ptr<FunctionCall> fcall, Location loc)
                 : m_target(target), m_fcall(fcall), Node(loc) { }
             ~InstanceNode() = default;
         public:
@@ -24,7 +24,7 @@ namespace AST
             std::string Format() const override;
 
         public:
-            inline std::shared_ptr<TypeNode> GetTarget() const { return m_target; }
+            inline std::shared_ptr<IdentifierNode> GetTarget() const { return m_target; }
             inline std::shared_ptr<FunctionCall> GetFunctionCall() const { return m_fcall; }
         };
     }

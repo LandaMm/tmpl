@@ -1,0 +1,38 @@
+@require"std/io"
+@require"std/convert"
+
+typedf List<?T> = list<T>;
+
+fn @construct List<?T>(T firstVal) {
+    return []T{firstVal};
+}
+
+fn List.downcast<?T>() : list<T> {
+    return (list<T>)self;
+}
+
+fn simpleList<?T>(List<T> target) : list<T> {
+    return (list<T>)target;
+}
+
+fn encode<?T>(T data) : string {
+    return "encoded data: " + (string)data;
+}
+
+->encode {
+    var string resp = encode<float>(3.14151);
+    return resp;
+}
+
+->main {
+    var List<string> ds = new List<string>((string)("hello, " + "world!"));
+    var list<string> ds_native = ds.downcast();
+    return ds_native;
+}
+
+->loop {
+    var int size = 5;
+    var list<string> msgs = []string{"Hi", "Hello!", "bye!", "I'm tired", "I wanna sleep"};
+    return msgs;
+}
+

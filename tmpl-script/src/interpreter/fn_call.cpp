@@ -5,11 +5,13 @@
 #include <error.h>
 #include <memory>
 #include "../../include/interpreter.h"
+#include "include/interpreter/environment.h"
 #include "include/interpreter/value.h"
 #include "include/iterator.h"
 #include "include/node.h"
 #include "include/node/identifier.h"
 #include "include/node/object_member.h"
+#include "include/typechecker.h"
 
 namespace Runtime
 {
@@ -32,14 +34,11 @@ namespace Runtime
                 auto obj = std::dynamic_pointer_cast<ObjectMember>(callee);
                 std::shared_ptr<Value> targetVal = Execute(obj->GetObject());
                 PValType targetType = targetVal->GetType();
-                if (!m_type_functions->HasItem(targetType->GetName()))
-                {
-                    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-                    errManager.UndeclaredFunction(GetFilename(), obj, targetType, "RuntimeError");
-                    return nullptr;
-                }
 
-                std::shared_ptr<Environment<Fn>> typeEnv = m_type_functions->LookUp(targetType->GetName());
+                auto typDf = m_type_definitions->LookUp(targetType->GetName());
+                assert(typDf != nullptr && "Found typ df should not be nullptr");
+
+                std::shared_ptr<Environment<Fn>> typeEnv = typDf->GetTypFnsEnv();
                 assert(typeEnv != nullptr && "Type env should have been created.");
 
                 std::shared_ptr<Node> fnNameNode = obj->GetMember();
@@ -91,35 +90,88 @@ namespace Runtime
             return nullptr;
         }
 
-        auto args = fnCall->GetArgs();
-
-        if (fn->GetParamsSize() != args->size())
+        if (fn->GetParamsSize() != fnCall->GetArgumentsSize())
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.ArgsParamsExhausted(
                     GetFilename(),
                     fnName,
-                    args->size(),
+                    fnCall->GetArgumentsSize(),
                     fn->GetParamsSize(),
                     fnCall->GetLocation(), "RuntimeError");
             return nullptr;
         }
 
+        if (fn->GetModifier() != FnModifier::Type && fn->GetGenericsSize() != fnCall->GetGenericsSize())
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.TypeGenericsExhausted(GetFilename(), fnName, fnCall->GetGenericsSize(), fn->GetGenericsSize(), fnCall->GetLocation(), "RuntimeError");
+            return nullptr;
+        }
+        else if (fn->GetModifier() == FnModifier::Type && fnCall->GetGenericsSize() > 0)
+        {
+            Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+            errorManager.TypeGenericsExhausted(GetFilename(), fnName, fnCall->GetGenericsSize(), fn->GetGenericsSize(), fnCall->GetLocation(), "RuntimeError");
+            return nullptr;
+        }
+
+        auto genHandler = GenHandler(GetFilename(), m_type_definitions, "TypeError", nullptr);
+
+        auto gIt = Common::Iterator(fn->GetGenericsSize());
+
+        PValType targetTyp = nullptr;
+
+        if (fn->GetModifier() == FnModifier::Type)
+        {
+            assert(fnCall->GetCallee()->GetType() == NodeType::ObjectMember && "Type fn callee should be an object");
+            auto obj = std::dynamic_pointer_cast<ObjectMember>(fnCall->GetCallee());
+            targetTyp = Execute(obj->GetObject())->GetType();
+            if (targetTyp->GetGenericsSize() != fn->GetGenericsSize())
+            {
+                Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
+                errorManager.TypeGenericsExhausted(GetFilename(), fnName, targetTyp->GetGenericsSize(), fn->GetGenericsSize(), obj->GetObject()->GetLocation(), "RuntimeError");
+                return nullptr;
+            }
+        }
+
+        while (gIt.HasItems())
+        {
+            auto gen = fn->GetGeneric(gIt.GetPosition());
+
+            if (fn->GetModifier() == FnModifier::Type)
+            {
+                assert(targetTyp != nullptr && "Target type should have been set in case of type functions");
+                auto genType = targetTyp->GetGeneric(gIt.GetPosition());
+
+                genHandler.DefineGeneric(gen, genType);
+            }
+            else
+            {
+                auto genTypeNode = fnCall->GetGeneric(gIt.GetPosition());
+                auto genType = TypeChecker::EvaluateType(GetFilename(), genTypeNode, m_type_definitions, "RuntimeError", nullptr);
+
+                genHandler.DefineGeneric(gen, genType);
+            }
+
+            gIt.Next();
+        }
+
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while (it->HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
-            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            auto param = fn->GetParam(it->GetPosition());
+            std::shared_ptr<Node> arg = fnCall->GetArgument(it->GetPosition());
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
-            if (!val->GetType()->Compare(*param->GetType()))
+            PValType paramType = TypeChecker::NormalizeType(GetFilename(), param->GetType(), arg->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+            if (!val->GetType()->Compare(*paramType))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgMismatchType(
                         GetFilename(),
                         param->GetName(),
                         val->GetType(),
-                        param->GetType(),
+                        paramType,
                         arg->GetLocation(),
                         "RuntimeError"
                         );
@@ -134,7 +186,11 @@ namespace Runtime
         }
 
         if (fn->IsExterned()) {
-            return EvaluateExternFunctionCall(fnName, fn, args);
+            auto retVal = EvaluateExternFunctionCall(fnName, fn, fnCall);
+
+            m_type_definitions = m_type_definitions->GetParent();
+            
+            return retVal;
         } else {
             auto currentModule = GetFilename();
             SetFilename(fn->GetModuleName());
@@ -145,7 +201,11 @@ namespace Runtime
             m_variables = currentScope;
             SetFilename(currentModule);
 
-            if (!value->GetType()->Compare(*fn->GetReturnType()))
+            auto retType = TypeChecker::NormalizeType(GetFilename(), fn->GetReturnType(), fnCall->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+
+            m_type_definitions = genHandler.Unload();
+
+            if (!value->GetType()->Compare(*retType))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ReturnMismatchType(GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());

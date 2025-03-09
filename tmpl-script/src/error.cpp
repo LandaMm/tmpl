@@ -4,6 +4,8 @@
 #include <memory>
 #include "../include/error.h"
 #include "include/interpreter/value.h"
+#include "include/location.h"
+#include "include/node/identifier.h"
 
 using namespace AST;
 namespace fs = std::filesystem;
@@ -103,13 +105,19 @@ namespace Prelude
 	}
 	void ErrorManager::VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
 	{
-        // TODO: allow defining double type variable with float value (casting) and opposite direction
         LogFileLocation(filename, loc, prefix);
         std::cerr << "Type mismatch for variable '" << name
             << "'. Expected type '" << *expectedType
             << "' but got '" << *type << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
 	}
+    void ErrorManager::ListItemMismatchType(std::string filename, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        std::cerr << "Type mismatch for list item. Expected type '" << *expectedType
+            << "' but got '" << *type << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
 	void ErrorManager::AssignMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, Location loc, std::string prefix)
 	{
         // TODO: allow defining double type variable with float value (casting) and opposite direction
@@ -235,6 +243,25 @@ namespace Prelude
         if (prefix != "TypeError") exit(-1);
     }
 
+    void ErrorManager::TypeGenericsExhausted(std::string filename, std::string name, size_t provided, size_t required, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        assert(provided != required && "Generics required and provided count are same. Should be unreachable");
+        
+        std::cerr << "Exhausted generics for type '" << name << "' provided. Needs to provide " << required << " generic types but " << provided << " provided" << std::endl;
+
+        if (prefix != "TypeError") exit(-1);
+    }
+
+    void ErrorManager::TypeGenericNameMismatch(std::string filename, std::string name, std::string genName, unsigned int pos, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+
+        std::cerr << "Unknown generic '" << genName << "' provided at position " << pos << " for type '" << name << "'";
+
+        if (prefix != "TypeError") exit(-1);
+    }
+
     void ErrorManager::UnaryOperatorNotSupported(std::string filename, std::string op, Runtime::PValType metType, Location loc)
     {
         LogFileLocation(filename, loc, "RuntimeError");
@@ -306,12 +333,21 @@ namespace Prelude
     }
 
 
-    void ErrorManager::TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix)
+    void ErrorManager::TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> typeNode, std::string prefix)
     {
         LogFileLocation(filename, typeNode->GetLocation(), prefix);
         // TODO: show generics as well
         std::cerr << "Cannot redeclare already existing type '"
-            << typeNode->GetTypeName()->GetName() << "'" << std::endl;
+            << typeNode->GetName() << "'" << std::endl;
+        if (prefix != "TypeError") std::exit(-1);
+    }
+
+    void ErrorManager::TypeRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix)
+    {
+        LogFileLocation(filename, loc, prefix);
+        // TODO: show generics as well
+        std::cerr << "Cannot redeclare already existing type '"
+            << typeName << "'" << std::endl;
         if (prefix != "TypeError") std::exit(-1);
     }
 

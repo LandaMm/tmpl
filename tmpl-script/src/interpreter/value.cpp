@@ -2,6 +2,7 @@
 #include <memory>
 #include "../../include/interpreter/value.h"
 #include "../../include/error.h"
+#include "include/iterator.h"
 
 namespace Runtime
 {
@@ -10,6 +11,22 @@ namespace Runtime
     std::ostream &operator<<(std::ostream& stream, const CustomValueType &x)
     {
         stream << x.m_name;
+
+        if (x.GetGenericsSize() > 0)
+        {
+            stream << "<";
+            auto it = Common::Iterator(x.GetGenericsSize());
+            while (it.HasItems())
+            {
+                stream << *x.GetGeneric(it.GetPosition());
+                it.Next();
+                if (it.HasItems())
+                {
+                    stream << ", ";
+                }
+            }
+            stream << ">";
+        }
 
         return stream;
     }
@@ -32,6 +49,22 @@ namespace Runtime
 		}
 		return stream;
 	}
+
+    bool CustomValueType::Compare(const CustomValueType& other)
+    {
+        if (IsMixed() || other.IsMixed()) return true;
+        if (m_name != other.m_name) return false;
+        if (m_generics.size() != other.m_generics.size()) return false;
+        auto it = Common::Iterator(m_generics.size());
+        while (it.HasItems())
+        {
+            auto gen = m_generics[it.GetPosition()];
+            auto otherGen = other.m_generics[it.GetPosition()];
+            if (!gen->Compare(otherGen)) return false;
+            it.Next();
+        }
+        return true;
+    }
 
     // List Value
 

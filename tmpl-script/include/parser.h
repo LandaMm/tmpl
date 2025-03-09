@@ -59,9 +59,13 @@ namespace AST
 	private: // Object Member
 		std::shared_ptr<Node> ObjectMember(std::shared_ptr<Node> obj);
 
+    private: // Helpers
+        bool ParseGenericType();
+
     private: // Types
         std::shared_ptr<Nodes::TypeNode> Type();
-        std::shared_ptr<Nodes::TypeTemplateNode> TypeTemplate();
+        std::shared_ptr<Nodes::TypeNode> Type(std::shared_ptr<Nodes::IdentifierNode> target);
+        std::shared_ptr<Nodes::TemplateGeneric> TmplGeneric();
         std::shared_ptr<Nodes::TypeDfNode> TypeDfStatement();
         std::shared_ptr<Nodes::CastNode> Cast(std::shared_ptr<Nodes::TypeNode> typ);
 

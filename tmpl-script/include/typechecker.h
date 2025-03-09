@@ -4,9 +4,11 @@
 #include <memory>
 #include "include/helper.h"
 #include "include/interpreter.h"
+#include "include/iterator.h"
 #include "include/node/assign.h"
 #include "include/node/cast.h"
 #include "include/node/instance.h"
+#include "include/node/list.h"
 #include "include/node/logical.h"
 #include "include/node/loop.h"
 #include "include/node/type.h"
@@ -41,37 +43,6 @@ namespace Runtime
         inline bool IsEditable() const { return m_editable; }
     };
 
-	class TypeFn
-	{
-	private:
-        std::vector<std::shared_ptr<FnParam>> m_params;
-        PValType m_ret_type;
-        std::string m_module_name;
-        bool m_exported;
-        Location m_loc;
-
-	public:
-		TypeFn(PValType retType, std::string module, bool exported, Location loc)
-			: m_ret_type(retType),
-            m_params(std::vector<std::shared_ptr<FnParam>>()),
-            m_module_name(module),
-            m_exported(exported),
-            m_loc(loc) {}
-
-    public:
-        void AddParam(std::shared_ptr<FnParam> param) { m_params.push_back(param); }
-
-	public:
-        inline std::shared_ptr<FnParam> GetItem(unsigned int index) const
-            { return m_params[index]; }
-        inline size_t GetParamsSize() const { return m_params.size(); }
-    public:
-        inline PValType GetReturnType() const { return m_ret_type; }
-        inline std::string GetModuleName() const { return m_module_name; }
-        inline bool IsExported() const { return m_exported; }
-        inline Location GetLocation() const { return m_loc; }
-	};
-
     class TypeChecker
     {
     public:
@@ -81,20 +52,19 @@ namespace Runtime
         std::shared_ptr<Parser> m_parser;
         std::string m_filename;
         std::shared_ptr<Environment<TypeVariable>> m_variables;
-        std::shared_ptr<Environment<TypeFn>> m_functions;
+        std::shared_ptr<Environment<Fn>> m_functions;
         std::shared_ptr<Environment<std::string>> m_modules;
-        // TODO: move inside type_definition
-        std::shared_ptr<Environment<Environment<TypeFn>>> m_type_functions;
+
         PTypeDfs m_type_definitions;
+
         int m_errors;
         
     public:
         TypeChecker(std::shared_ptr<Parser> parser)
             : m_parser(parser), m_filename(parser->GetFilename()),
               m_variables(std::make_shared<Environment<TypeVariable>>()),
-              m_functions(std::make_shared<Environment<TypeFn>>()),
+              m_functions(std::make_shared<Environment<Fn>>()),
               m_modules(std::make_shared<Environment<std::string>>()),
-              m_type_functions(std::make_shared<Environment<Environment<TypeFn>>>()),
               m_type_definitions(Helper::Helper::GetTypeDefinitions()),
               m_errors(0) { }
     public:
@@ -111,15 +81,24 @@ namespace Runtime
         PValType DiagnoseTernary(std::shared_ptr<TernaryNode> ternary); // DONE
         PValType DiagnoseInstance(std::shared_ptr<InstanceNode> instance);
         PValType DiagnoseTypeCasting(std::shared_ptr<CastNode> cast);
+        PValType DiagnoseList(std::shared_ptr<ListNode> list);
 
     private:
         void HandleVarDeclaration(std::shared_ptr<VarDeclaration> varDecl); // DONE
-        void HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported); // DONE
         void HandleFnSignature(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported); // DONE
         void HandleModule(std::shared_ptr<ProgramNode> program); // DONE
         void HandleExportStatement(std::shared_ptr<ExportStatement> exportStmt); // DONE
         void HandleTypeDefinition(std::shared_ptr<TypeDfNode> typeDfn, bool exported);
         void HandleAssignment(std::shared_ptr<AssignmentNode> assignment);
+
+    private: // Function Declarations
+        void HandleFnDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported); // DONE
+        void HandleRegularDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported); // DONE
+        void HandleConstructDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
+        void HandleCastDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
+        void HandleTypeFunctionDeclaration(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
+
+        std::shared_ptr<Fn> HandleFnBasics(std::shared_ptr<FunctionDeclaration> fnDecl, bool exported);
 
     private:
         void AssumeBlock(std::shared_ptr<Statements::StatementsBody> body, PValType expected); // DONE
@@ -128,23 +107,95 @@ namespace Runtime
         void AssumeForLoop(std::shared_ptr<ForLoopNode> forLoopNode, PValType expected);
 
     private:
-        PValType ResolveFn(std::shared_ptr<TypeFn> fn, std::string fnName, std::shared_ptr<FunctionCall> fnCall);
-        bool ResolveTypeFn(std::shared_ptr<ObjectMember> obj, std::shared_ptr<TypeFn>& fn, std::string& fnName);
+        PValType ResolveFn(std::shared_ptr<Fn> fn, std::string fnName, std::shared_ptr<FunctionCall> fnCall);
+        bool ResolveTypeFn(std::shared_ptr<ObjectMember> obj, std::shared_ptr<Fn>& fn, std::string& fnName);
 
-    private:
+    public:
         void ReportError() { m_errors++; };
 
     public:
         int GetErrorReport() { return m_errors; }
 
 	public:
-		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode); // DONE
-        static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix); // DONE
+		static PValType EvaluateType(std::string filename, std::shared_ptr<TypeNode> typeNode, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker);
+        static PValType CastType(std::string filename, PValType from, PValType to, Location loc, TypeChecker::PTypeDfs& typeDfs, std::string prefix, TypeChecker* typChecker);
         static PValType GetRootType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix);
+
+        static PValType NormalizeType(std::string filename, PValType target, Location loc, TypeChecker::PTypeDfs typeDfs, std::string prefix, TypeChecker* typChecker);
 
     private:
         std::string GetFilename() const { return m_filename; }
         void SetFilename(std::string filename) { m_filename = filename; }
+    };
+
+    class GenHandler
+    {
+    private:
+        TypeChecker::PTypeDfs m_generic_dfs;
+        TypeChecker::PTypeDfs m_parent_dfs;
+
+        std::string m_filename;
+        std::string m_prefix;
+
+        TypeChecker* m_typchecker;
+
+    public:
+        GenHandler(std::string filename, TypeChecker::PTypeDfs& typDfs, std::string prefix, TypeChecker* typChecker);
+
+    public:
+        inline TypeChecker::PTypeDfs GetEnv() const { return m_generic_dfs; }
+
+    public:
+        TypeChecker::PTypeDfs Unload();
+        // Create class
+        template<typename T>
+        void DefineGenerics(std::vector<std::shared_ptr<T>>* genIt, bool transparent)
+        {
+            Common::Iterator it = Common::Iterator(genIt->size());
+            while (it.HasItems())
+            {
+                auto gen = genIt->at(it.GetPosition());
+
+                // check for generics with same name
+                if (m_generic_dfs->Contains(gen->GetName()))
+                {
+                    Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                    // TODO: raise duplicate generic error
+                    errManager.TypeRedeclaration(m_filename, gen->GetName(), gen->GetLocation(), m_prefix);
+                    if (m_typchecker != nullptr)
+                    {
+                        m_typchecker->ReportError();
+                    }
+                    return;
+                }
+
+                std::shared_ptr<TypeDf> genTypDf = std::make_shared<TypeDf>(gen->GetName(), std::make_shared<ValType>("#BUILTIN_MIXED"), m_filename, false, gen->GetLocation());
+                genTypDf->SetTransparent(transparent);
+                m_generic_dfs->AddItem(gen->GetName(), genTypDf);
+
+                it.Next();
+            }
+        }
+        template<typename T>
+        void DefineGeneric(std::shared_ptr<T> gen, PValType base)
+        {
+            // check for generics with same name
+            if (m_generic_dfs->Contains(gen->GetName()))
+            {
+                Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
+                // TODO: raise duplicate generic error
+                errManager.TypeRedeclaration(m_filename, gen->GetName(), gen->GetLocation(), m_prefix);
+                if (m_typchecker != nullptr)
+                {
+                    m_typchecker->ReportError();
+                }
+                return;
+            }
+
+            std::shared_ptr<TypeDf> genTypDf = std::make_shared<TypeDf>(gen->GetName(), base, m_filename, false, gen->GetLocation());
+            genTypDf->SetTransparent(true);
+            m_generic_dfs->AddItem(gen->GetName(), genTypDf);
+        }
     };
 }
 

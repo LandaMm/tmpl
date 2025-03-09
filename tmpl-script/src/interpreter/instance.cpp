@@ -1,5 +1,6 @@
 
 #include "include/interpreter.h"
+#include "include/interpreter/value.h"
 #include "include/iterator.h"
 #include "include/typechecker.h"
 
@@ -7,16 +8,14 @@ namespace Runtime
 {
     std::shared_ptr<Value> Interpreter::EvaluateInstance(std::shared_ptr<InstanceNode> instance)
     {
-        PValType targetType = TypeChecker::EvaluateType(GetFilename(), instance->GetTarget());
-
-        if (!m_type_definitions->HasItem(targetType->GetName()))
+        if (!m_type_definitions->HasItem(instance->GetTarget()->GetName()))
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeDoesNotExist(GetFilename(), targetType, instance->GetTarget()->GetLocation(), "RuntimeError");
+            errManager.TypeDoesNotExist(GetFilename(), instance->GetTarget()->GetName(), instance->GetTarget()->GetLocation(), "RuntimeError");
             return nullptr;
         }
 
-        auto typeDf = m_type_definitions->LookUp(targetType->GetName());
+        auto typeDf = m_type_definitions->LookUp(instance->GetTarget()->GetName());
         assert(typeDf != nullptr && "Type definition should not be not found at this point.");
 
         if (GetFilename() != typeDf->GetModuleName() && !typeDf->IsExported())
@@ -29,8 +28,24 @@ namespace Runtime
         if (!typeDf->HasConstructor())
         {
             Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
-            errManager.TypeConstructorDoesNotExist(GetFilename(), targetType, instance->GetTarget()->GetLocation(), "RuntimeError");
+            errManager.TypeConstructorDoesNotExist(GetFilename(), std::make_shared<ValType>(instance->GetTarget()->GetName()), instance->GetTarget()->GetLocation(), "RuntimeError");
             return nullptr;
+        }
+
+        auto genHandler = GenHandler(GetFilename(), m_type_definitions, "RuntimeError", nullptr);
+
+        auto typDfs = std::make_shared<TypeDfs>(m_type_definitions);
+        m_type_definitions = typDfs;
+
+        auto gIt = Common::Iterator(typeDf->GenericsSize());
+        while (gIt.HasItems())
+        {
+            auto gen = typeDf->GetGeneric(gIt.GetPosition());
+            auto genType = TypeChecker::EvaluateType(GetFilename(), instance->GetFunctionCall()->GetGeneric(gIt.GetPosition()), m_type_definitions, "RuntimeError", nullptr);
+
+            genHandler.DefineGeneric(gen, genType);
+
+            gIt.Next();
         }
 
         auto fn = typeDf->GetConstructor();
@@ -40,7 +55,7 @@ namespace Runtime
         std::shared_ptr<Environment<Variable>> variables = std::make_shared<Environment<Variable>>(m_variables);
 
         auto fnCall = instance->GetFunctionCall();
-        auto fnName = targetType->GetName() + "::constructor";
+        auto fnName = instance->GetTarget()->GetName() + "::constructor";
 
         if (GetFilename() != fn->GetModuleName() && !fn->IsExported())
         {
@@ -49,15 +64,13 @@ namespace Runtime
             return nullptr;
         }
 
-        auto args = fnCall->GetArgs();
-
-        if (fn->GetParamsSize() != args->size())
+        if (fn->GetParamsSize() != fnCall->GetArgumentsSize())
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.ArgsParamsExhausted(
                     GetFilename(),
                     fnName,
-                    args->size(),
+                    fnCall->GetArgumentsSize(),
                     fn->GetParamsSize(),
                     fnCall->GetLocation(), "RuntimeError");
             return nullptr;
@@ -66,18 +79,19 @@ namespace Runtime
         auto it = std::make_shared<Common::Iterator>(fn->GetParamsSize());
         while (it->HasItems())
         {
-            auto param = fn->GetItem(it->GetPosition());
-            std::shared_ptr<Node> arg = (*args)[it->GetPosition()];
+            auto param = fn->GetParam(it->GetPosition());
+            std::shared_ptr<Node> arg = fnCall->GetArgument(it->GetPosition());
             it->Next();
             std::shared_ptr<Value> val = Execute(arg);
-            if (!val->GetType()->Compare(*param->GetType()))
+            PValType paramType = TypeChecker::NormalizeType(GetFilename(), param->GetType(), arg->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+            if (!val->GetType()->Compare(*paramType))
             {
                 Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
                 errorManager.ArgMismatchType(
                         GetFilename(),
                         param->GetName(),
                         val->GetType(),
-                        param->GetType(),
+                        paramType,
                         arg->GetLocation(),
                         "RuntimeError"
                         );
@@ -100,14 +114,29 @@ namespace Runtime
         m_variables = currentScope;
         SetFilename(currentModule);
 
-        if (!value->GetType()->Compare(*fn->GetReturnType()))
+        auto fnRetType = TypeChecker::NormalizeType(GetFilename(), fn->GetReturnType(), fn->GetLocation(), m_type_definitions, "RuntimeError", nullptr);
+
+        if (!value->GetType()->Compare(*fnRetType))
         {
             Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
             errorManager.ReturnMismatchType(GetFilename(), fnName, value->GetType(), fn->GetReturnType(), fnCall->GetLocation());
             return nullptr;
         }
 
-        value->SetType(targetType);
+        m_type_definitions = genHandler.Unload();
+
+        auto valType = std::make_shared<ValType>(instance->GetTarget()->GetName());
+
+        auto genIt = Common::Iterator(fnCall->GetGenericsSize());
+        while (genIt.HasItems())
+        {
+            auto genNode = fnCall->GetGeneric(genIt.GetPosition());
+            PValType genType = TypeChecker::EvaluateType(GetFilename(), genNode, m_type_definitions, "RuntimeError", nullptr);
+            valType->AddGeneric(genType);
+            genIt.Next();
+        }
+
+        value->SetType(valType);
 
         return value;
     }

@@ -12,10 +12,12 @@ namespace Common
     public:
         Iterator(unsigned int size) : m_index(0), m_size(size) { }
     public:
+        void UpdateSize(unsigned int size) { m_size = size; }
+    public:
         void Next() { m_index++; }
         inline unsigned int GetSize() const { return m_size; }
         inline unsigned int GetPosition() const { return m_index; }
-        inline bool HasItems() { return m_index < m_size; }
+        inline bool HasItems() const { return m_index < m_size; }
     };
 }
 

@@ -8,7 +8,6 @@
 #include "token.h"
 #include "interpreter/value.h"
 #include "node/identifier.h"
-#include "node/type.h"
 
 namespace Prelude
 {
@@ -66,7 +65,10 @@ namespace Prelude
         void TypeDoesNotExist(std::string filename, Runtime::PValType typ, AST::Location loc, std::string prefix);
         void TypeDoesNotExist(std::string filename, std::string typName, AST::Location loc, std::string prefix);
         void TypeCastNotPossible(std::string filename, Runtime::PValType from, Runtime::PValType to, AST::Location loc, std::string prefix);
-        void TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::TypeTemplateNode> typeNode, std::string prefix);
+        // TODO: show where type declared
+        // TODO: refactor 
+        void TypeRedeclaration(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> typeNode, std::string prefix);
+        void TypeRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix);
         void TypeConstructorRedeclaration(std::string filename, std::string typeName, AST::Location loc, std::string prefix);
         void TypeCastRedeclaration(std::string filename, std::string typeName, Runtime::PValType castType, AST::Location loc, std::string prefix);
         void TypeConstructorDoesNotExist(std::string filename, Runtime::PValType targetTyp, AST::Location loc, std::string prefix);
@@ -74,6 +76,8 @@ namespace Prelude
     public: // TypeChecker + Interpreter
         void PrivateFunctionError(std::string filename, std::string fnName, std::string fnModule, AST::Location loc, AST::Location mLoc, std::string prefix);
         void ArgsParamsExhausted(std::string filename, std::string name, size_t argsSize, size_t paramsSize, AST::Location loc, std::string prefix);
+        void TypeGenericsExhausted(std::string filename, std::string name, size_t provided, size_t required, AST::Location loc, std::string prefix);
+        void TypeGenericNameMismatch(std::string filename, std::string name, std::string genName, unsigned int pos, AST::Location loc, std::string prefix);
 		void ArgMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
 		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
 		void UndeclaredFunction(std::string filename, std::shared_ptr<AST::Nodes::ObjectMember> obj, Runtime::PValType valType, std::string prefix);
@@ -81,6 +85,7 @@ namespace Prelude
 		void UndeclaredVariable(std::string filename, std::shared_ptr<AST::Nodes::IdentifierNode> id, std::string prefix);
 		void UndefinedType(std::string filename, std::string name, AST::Location loc, std::string prefix);
 		void VarMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
+		void ListItemMismatchType(std::string filename, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
 		void AssignMismatchType(std::string filename, std::string name, Runtime::PValType type, Runtime::PValType expectedType, AST::Location loc, std::string prefix);
         void ConstAssignment(std::string filename, std::string name, AST::Location loc, std::string prefix);
         void VarAlreadyExists(std::string filename, std::string name, AST::Location loc, std::string prefix);

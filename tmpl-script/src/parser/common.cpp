@@ -1,6 +1,7 @@
 
 #include"../../include/parser.h"
 #include"../../include/node/identifier.h"
+#include "include/token.h"
 
 namespace AST
 {
@@ -14,29 +15,51 @@ namespace AST
 
 	std::shared_ptr<Nodes::FunctionCall> Parser::FunctionCall(std::shared_ptr<Node> callee)
 	{
+        auto fnCall = std::make_shared<Nodes::FunctionCall>(callee, callee->GetLocation());
+
+        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        {
+            Eat(TokenType::Less);
+            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
+            {
+                fnCall->AddGeneric(Type());
+                if (m_lexer->GetToken()->GetType() == TokenType::Comma && m_lexer->SeekToken()->GetType() != TokenType::Greater)
+                {
+                    Eat(TokenType::Comma);
+                }
+            }
+            Eat(TokenType::Greater);
+        }
+
 		Eat(TokenType::OpenBracket);
-		std::vector<std::shared_ptr<Node>> args = std::vector<std::shared_ptr<Node>>();
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
 			std::shared_ptr<Node> arg = Expr();
-			args.push_back(arg);
+            fnCall->AddArgument(arg);
 			if (m_lexer->GetToken()->GetType() == TokenType::Comma)
 			{
 				Eat(TokenType::Comma);
 			}
 		}
 		Eat(TokenType::CloseBracket);
-		return std::make_shared<Nodes::FunctionCall>(callee, args, callee->GetLocation());
+
+		return fnCall;
 	}
 
 	std::shared_ptr<Nodes::ListNode> Parser::List()
 	{
-		std::shared_ptr<Nodes::ListNode> list = std::make_shared<Nodes::ListNode>(m_lexer->GetToken()->GetLocation());
 		Eat(TokenType::OpenSquareBracket);
+        Eat(TokenType::CloseSquareBracket);
+
+        auto typ = Type();
+
+		std::shared_ptr<Nodes::ListNode> list = std::make_shared<Nodes::ListNode>(typ, m_lexer->GetToken()->GetLocation());
+
+        Eat(TokenType::OpenCurly);
 		
-		while (m_lexer->GetToken()->GetType() != TokenType::CloseSquareBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+		while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
-			std::shared_ptr<Node> item = Expr();
+			std::shared_ptr<Node> item = Ternary();
 			list->AddItem(item);
 			if (m_lexer->GetToken()->GetType() == TokenType::Comma)
 			{
@@ -44,7 +67,7 @@ namespace AST
 			}
 		}
 
-		Eat(TokenType::CloseSquareBracket);
+		Eat(TokenType::CloseCurly);
 
 		return list;
 	}

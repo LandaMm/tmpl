@@ -1,0 +1,17 @@
+
+typedf List<?T> = list<T>;
+
+fn @construct List<?T>() {
+    return []T{};
+}
+
+fn List.toIntList<?T>() : list<int> {
+    return []int{1, 2, 3};
+}
+
+->main {
+    var List<string> test = new List<string>();
+    var list<int> t = test.toIntList();
+    return t;
+}
+

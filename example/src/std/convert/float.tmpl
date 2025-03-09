@@ -1,0 +1,15 @@
+@extern fn f_tod(float value) : double;
+@extern fn f_toi(float value) : int;
+@extern fn f_tos(float value) : string;
+
+export fn @cast(float) : double {
+    return f_tod(self);
+}
+
+export fn @cast(float) : int {
+    return f_toi(self);
+}
+
+export fn @cast(float) : string {
+    return f_tos(self);
+}
