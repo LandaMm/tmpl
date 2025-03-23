@@ -13,9 +13,9 @@ namespace AST
 	enum class NodeType
 	{
 		Program, //
-		Expression, //
+		Expression, // DONE
 		FunctionCall, //
-		Literal, // 
+		Literal, // DONE
 		Identifier, //
 		ObjectMember,
 		List,
