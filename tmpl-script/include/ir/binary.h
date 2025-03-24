@@ -20,7 +20,8 @@ namespace IR
         shared_ptr<IRTemp> m_right;
     public:
         BinaryInst(tid id, shared_ptr<IRTemp> left, BinaryOp op, shared_ptr<IRTemp> right)
-            : IRInst(InstType::Binary), IRTemp(id),
+            // TODO: Provide combined type in IRTemp
+            : IRInst(InstType::Binary), IRTemp(id, left->GetDataType()),
               m_left(left), m_op(op), m_right(right) { }
     public:
         inline BinaryOp GetOp() const { return m_op; }
