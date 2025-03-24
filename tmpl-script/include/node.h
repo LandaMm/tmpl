@@ -12,14 +12,14 @@ namespace AST
 
 	enum class NodeType
 	{
-		Program, //
+		Program, // DONE
 		Expression, // DONE
-		FunctionCall, //
+		FunctionCall, // DONE
 		Literal, // DONE
-		Identifier, //
+		Identifier, // DONE
 		ObjectMember,
 		List,
-		Condition, // 
+		Condition, // DONE
 		Ternary, // 
 		Unary, // 
 		IfElse, //
