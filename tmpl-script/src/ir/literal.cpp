@@ -10,55 +10,35 @@ namespace IR
     {
         std::string formatted = IRTemp::Format() + " = ";
 
+        formatted += FormatDataType(GetType());
+
         switch(GetType())
         {
+            case DataType::Void:
+            {
+                formatted += " -";
+            }
             // TODO: Handle int type correctly
-            case ConstType::I8:
+            case DataType::I1:
+            case DataType::I8:
+            case DataType::I16:
+            case DataType::I32:
+            case DataType::I64:
+            case DataType::I128:
             {
-                formatted += "i8";
                 auto val = std::static_pointer_cast<int>(GetValue());
                 formatted += " " + std::to_string(*val);
                 break;
             }
-            case ConstType::I16:
+            case DataType::F32:
             {
-                formatted += "i16";
-                auto val = std::static_pointer_cast<int>(GetValue());
-                formatted += " " + std::to_string(*val);
-                break;
-            }
-            case ConstType::I32:
-            {
-                formatted += "i32";
-                auto val = std::static_pointer_cast<int>(GetValue());
-                formatted += " " + std::to_string(*val);
-                break;
-            }
-            case ConstType::I64:
-            {
-                formatted += "i64";
-                auto val = std::static_pointer_cast<int>(GetValue());
-                formatted += " " + std::to_string(*val);
-                break;
-            }
-            case ConstType::I128:
-            {
-                formatted += "i128";
-                auto val = std::static_pointer_cast<int>(GetValue());
-                formatted += " " + std::to_string(*val);
-                break;
-            }
-            case ConstType::F32:
-            {
-                formatted += "f32";
                 auto val = std::static_pointer_cast<float>(GetValue());
                 formatted += " " + std::to_string(*val);
                 break;
             }
-            case ConstType::F64:
+            case DataType::F64:
             {
-                formatted += "f64";
-                auto val = std::static_pointer_cast<float>(GetValue());
+                auto val = std::static_pointer_cast<double>(GetValue());
                 formatted += " " + std::to_string(*val);
                 break;
             }
@@ -73,9 +53,9 @@ namespace IR
         {
             case LiteralType::INT:
             {
-                // TODO: add support for int32/int64 selection
                 int val = *lit->GetValue<int>();
-                auto inst = std::make_shared<LoadConst>(GetTID(), ConstType::I64, std::make_shared<int>(val));
+                // TODO: add support for int32/int64 selection
+                auto inst = std::make_shared<LoadConst>(GetTID(), DataType::I32, std::make_shared<int>(val));
                 AddInst(inst);
                 return inst;
             }
@@ -83,7 +63,7 @@ namespace IR
             {
                 // TODO: add support for float32/float64 selection
                 float val = *lit->GetValue<float>();
-                auto inst = std::make_shared<LoadConst>(GetTID(), ConstType::F32, std::make_shared<float>(val));
+                auto inst = std::make_shared<LoadConst>(GetTID(), DataType::F32, std::make_shared<float>(val));
                 AddInst(inst);
                 return inst;
             }
