@@ -3,12 +3,45 @@
 #include "include/iterator.h"
 #include "include/node.h"
 #include "include/node/expression.h"
+#include "include/node/function.h"
+#include "include/node/identifier.h"
 #include "include/node/literal.h"
 #include "include/node/procedure.h"
 #include <memory>
+#include <utility>
 
 namespace IR
 {
+    void IRParser::RegisterFnReturnType(std::string fnName, DataType dataTyp)
+    {
+        m_fn_dataType.insert(std::make_pair(fnName, dataTyp));
+    }
+
+    DataType* IRParser::GetFnReturnType(std::string fnName)
+    {
+        auto item = m_fn_dataType.find(fnName);
+        if (item == m_fn_dataType.end())
+        {
+            return nullptr;
+        }
+        return &item->second;
+    }
+
+    void IRParser::RegisterVarType(std::string varName, DataType dataTyp)
+    {
+        m_var_dataType.insert(std::make_pair(varName, dataTyp));
+    }
+
+    DataType* IRParser::GetVarReturnType(std::string varName)
+    {
+        auto item = m_var_dataType.find(varName);
+        if (item == m_var_dataType.end())
+        {
+            return nullptr;
+        }
+        return &item->second;
+    }
+
     void IRParser::Parse()
     {
         for (auto it = Common::Iterator(m_program->Size()); it.HasItems(); it.Next())
@@ -46,6 +79,9 @@ namespace IR
         {
             case AST::NodeType::Literal:
             case AST::NodeType::Expression:
+            case AST::NodeType::Condition:
+            case AST::NodeType::Identifier:
+            case AST::NodeType::FunctionCall:
                 ParseNodeWithValue(node);
                 break;
             default:
@@ -63,6 +99,12 @@ namespace IR
                 return ParseLiteral(std::dynamic_pointer_cast<LiteralNode>(node));
             case AST::NodeType::Expression:
                 return ParseExpression(std::dynamic_pointer_cast<ExpressionNode>(node));
+            case AST::NodeType::Condition:
+                return ParseCondition(std::dynamic_pointer_cast<Condition>(node));
+            case AST::NodeType::FunctionCall:
+                return ParseFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
+            case AST::NodeType::Identifier:
+                return ParseIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
             default:
                 std::cerr << "[ParseNodeWithValue] Unsupported node: "
                     << node->Format() << std::endl;
