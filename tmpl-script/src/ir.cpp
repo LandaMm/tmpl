@@ -1,11 +1,13 @@
 
 #include "include/ir.h"
+#include "include/ir/block.h"
 #include "include/iterator.h"
 #include "include/node.h"
 #include "include/node/expression.h"
 #include "include/node/function.h"
 #include "include/node/identifier.h"
 #include "include/node/literal.h"
+#include "include/node/logical.h"
 #include "include/node/procedure.h"
 #include <memory>
 #include <utility>
@@ -44,6 +46,8 @@ namespace IR
 
     void IRParser::Parse()
     {
+        auto entry = std::make_shared<BlockInst>(GetBID());
+        SetWriter(entry);
         for (auto it = Common::Iterator(m_program->Size()); it.HasItems(); it.Next())
         {
             auto stmt = m_program->GetItem(it.GetPosition());
@@ -62,6 +66,7 @@ namespace IR
                     std::exit(1);
             }
         }
+        WriteInst(entry);
     }
 
     void IRParser::ParseBlock(shared_ptr<AST::Statements::StatementsBody> body)
@@ -82,6 +87,7 @@ namespace IR
             case AST::NodeType::Condition:
             case AST::NodeType::Identifier:
             case AST::NodeType::FunctionCall:
+            case AST::NodeType::Ternary:
                 ParseNodeWithValue(node);
                 break;
             default:
@@ -105,6 +111,8 @@ namespace IR
                 return ParseFunctionCall(std::dynamic_pointer_cast<FunctionCall>(node));
             case AST::NodeType::Identifier:
                 return ParseIdentifier(std::dynamic_pointer_cast<IdentifierNode>(node));
+            case AST::NodeType::Ternary:
+                return ParseTernary(std::dynamic_pointer_cast<TernaryNode>(node));
             default:
                 std::cerr << "[ParseNodeWithValue] Unsupported node: "
                     << node->Format() << std::endl;
