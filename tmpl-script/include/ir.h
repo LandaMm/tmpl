@@ -88,7 +88,8 @@ namespace IR
         return "";
     }
 
-    typedef unsigned long tid;
+    typedef unsigned long tid; // temp id
+    typedef unsigned long bid; // block id
 
     class IRTemp
     {
@@ -105,6 +106,18 @@ namespace IR
         inline std::string Format() const { return "%" + std::to_string(GetId()); }
     };
 
+    class IRLabel
+    {
+    private:
+        bid m_id;
+    public:
+        IRLabel(bid id) : m_id(id) { }
+    public:
+        inline bid GetId() const { return m_id; }
+    public:
+        inline std::string Format() const { return "%L" + std::to_string(GetId()); }
+    };
+
     class IRInst
     {
     private:
@@ -118,7 +131,15 @@ namespace IR
             { return "IRInst (" + std::to_string((int)m_type) + ")"; }
     };
 
-    class IRParser
+    class IRWriter
+    {
+    public:
+        IRWriter() { }
+    public:
+        virtual void WriteInst(shared_ptr<IRInst> inst) = 0;
+    };
+
+    class IRParser : public IRWriter
     {
     private:
         shared_ptr<ProgramNode> m_program;
@@ -127,11 +148,16 @@ namespace IR
         std::unordered_map<std::string, DataType> m_var_dataType;
     private:
         std::vector<shared_ptr<IRInst>> m_parsed;
+
+        shared_ptr<IRWriter> m_current_writer;
+
         tid m_temp_id = 0;
+        bid m_block_id = 0;
     public:
         IRParser(shared_ptr<AST::Parser> parser)
             : m_program(std::dynamic_pointer_cast<ProgramNode>(parser->GetRoot())),
-              m_filename(parser->GetFilename()) { }
+              m_filename(parser->GetFilename()),
+              m_current_writer(nullptr) { }
     public:
         void Parse();
     private:
@@ -145,9 +171,24 @@ namespace IR
         shared_ptr<IRTemp> ParseIdentifier(shared_ptr<IdentifierNode> id);
         shared_ptr<IRTemp> ParseFunctionCall(shared_ptr<FunctionCall> fnCall);
         shared_ptr<IRTemp> ParseCondition(shared_ptr<Condition> cond);
+        shared_ptr<IRTemp> ParseTernary(shared_ptr<TernaryNode> tern);
     private:
-        void AddInst(shared_ptr<IRInst> inst) { m_parsed.push_back(inst); }
+        shared_ptr<IRWriter> ReplaceWriter(shared_ptr<IRWriter> writer)
+        {
+            auto saved = m_current_writer;
+            m_current_writer = writer;
+            return saved;
+        }
+        void SetWriter(shared_ptr<IRWriter> writer)
+        {
+            m_current_writer = writer;
+        }
+
+        virtual void WriteInst(shared_ptr<IRInst> inst) override { m_parsed.push_back(inst); }
+        void AddInst(shared_ptr<IRInst> inst) { m_current_writer->WriteInst(inst); }
+
         tid GetTID() { return m_temp_id++; }
+        shared_ptr<IRLabel> GetBID() { return std::make_shared<IRLabel>(m_block_id++); }
     public:
         inline unsigned int GetSize() const { return m_parsed.size(); }
         inline shared_ptr<IRInst> GetInst(unsigned int index) const { return m_parsed[index]; }
