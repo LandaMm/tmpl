@@ -20,7 +20,7 @@ namespace AST
 		ObjectMember,
 		List,
 		Condition, // DONE
-		Ternary, // 
+		Ternary, // DONE
 		Unary, // 
 		IfElse, //
 		Block, //
