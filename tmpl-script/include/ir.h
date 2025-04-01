@@ -10,6 +10,7 @@
 #include "include/node/logical.h"
 #include "include/node/program.h"
 #include "include/node/statement.h"
+#include "include/node/unary.h"
 #include "include/parser.h"
 #include<memory>
 #include <string>
@@ -22,6 +23,8 @@ namespace IR
 
     enum class InstType {
         Binary, // Math & Logic
+        Neg,
+        Not,
 
         Cmp,
         Br,
@@ -172,6 +175,7 @@ namespace IR
         shared_ptr<IRTemp> ParseFunctionCall(shared_ptr<FunctionCall> fnCall);
         shared_ptr<IRTemp> ParseCondition(shared_ptr<Condition> cond);
         shared_ptr<IRTemp> ParseTernary(shared_ptr<TernaryNode> tern);
+        shared_ptr<IRTemp> ParseUnary(shared_ptr<UnaryNode> unary);
     private:
         shared_ptr<IRWriter> ReplaceWriter(shared_ptr<IRWriter> writer)
         {
