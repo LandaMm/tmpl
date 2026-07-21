@@ -4,7 +4,7 @@
 
 ---
 
-## 🧭 What is Cheetah?
+## What is Cheetah?
 
 - Built for **desktop automation**: generating projects from templates, cleaning files, configuring apps, syncing to cloud, and more.
 - Written entirely in **C++**, with the ability to **load dynamic C++ modules** for performance-critical tasks.
@@ -12,7 +12,7 @@
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 - **Speed-first design** — easily accelerated via native C++ modules.
 - Flexible and safe: if a feature is slow or unstable, rewrite that module in C++.
@@ -21,7 +21,7 @@
 
 ---
 
-## 💡 How It Works
+## How It Works
 
 1. **Script-first**: write your automation logic in the Cheetah DSL.
 2. **Accelerate as needed**: compile performance-critical bits as C++ modules.
@@ -30,7 +30,7 @@
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ```bash
 git clone https://github.com/LandaMm/cheetah.git
@@ -45,7 +45,7 @@ Use the `examples/` folder to explore starter scripts and automation workflows.
 
 ---
 
-## 🌐 Why C++ Modules?
+## Why C++ Modules?
 
 - **Modular extension**: plugins written in C++ can be loaded dynamically.
 - **Zero compromise on performance**: rewrite parts that matter most for efficiency.
@@ -53,13 +53,9 @@ Use the `examples/` folder to explore starter scripts and automation workflows.
 
 ---
 
-## 📚 Inspiration from `tmpl`
-
-Cheetah draws inspiration from my `tmpl` project — a C++ project templating tool — combining practical automation with type-safe templating.
-
 ---
 
-## ✅ Goals & Roadmap
+## Goals & Roadmap
 
 | Milestone      | Progress |
 |----------------|----------|
@@ -71,18 +67,6 @@ Cheetah draws inspiration from my `tmpl` project — a C++ project templating to
 
 ---
 
-## 🤝 Contribute
-
-Cheetah is under active development — issues, feedback, and PRs welcome.  
-Want to write a C++ module, add script features, or help polish docs? Let's collaborate!
-
----
-
-## 📄 License
-
-To be determined — but aiming for a permissive license that ensures credit while allowing flexibility.
-
----
 
 Happy automating!
 
