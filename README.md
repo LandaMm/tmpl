@@ -33,7 +33,7 @@
 ## Getting Started
 
 ```bash
-git clone https://github.com/LandaMm/cheetah.git
+git clone https://github.com/adalspace/cheetah.git
 cd cheetah
 mkdir build && cd build
 cmake ..
@@ -70,4 +70,4 @@ Use the `examples/` folder to explore starter scripts and automation workflows.
 
 Happy automating!
 
-*— [LandaMm](https://github.com/LandaMm)*
+*— [adalspace](https://github.com/adalspace)*
