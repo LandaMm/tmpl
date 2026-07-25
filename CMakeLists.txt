@@ -1,14 +1,12 @@
-cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20)
+project(cheetah)
 
-set(CMAKE_SYSTEM_VERSION 10.0 CACHE STRING "" FORCE)
+file(GLOB_RECURSE SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/node/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/parser/*.cpp"
+)
 
-set(CMAKE_CXX_STANDARD 17)
+add_executable(cheetah ${SOURCES})
 
-project(tmpl CXX)
-
-################################################################################
-# Sub-projects
-################################################################################
-add_subdirectory(tmpl)
-add_subdirectory(tmpl-script)
-
+target_include_directories(cheetah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
