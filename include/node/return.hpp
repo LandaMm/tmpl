@@ -1,7 +1,5 @@
+#pragma once
 
-
-#ifndef RETURN_H
-#define RETURN_H
 #include <memory>
 #include "../node.h"
 
@@ -20,12 +18,8 @@ namespace AST
         public:
             inline NodeType GetType() const override { return NodeType::Return; }
         public:
-            std::string Format() const override { return "Return"; }
-        public:
             inline std::shared_ptr<Node> GetValue() const { return m_value; }
         };
     }
 }
-
-#endif // RETURN_H
 

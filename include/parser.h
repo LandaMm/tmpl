@@ -1,13 +1,13 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include "include/node/cast.h"
+#include "include/node/cast.hpp"
 #include "lexer.h"
 #include "node.h"
-#include "node/program.h"
-#include "node/identifier.h"
-#include "node/function.h"
-#include "node/list.h"
-#include "node/type.h"
+#include "node/program.hpp"
+#include "node/identifier.hpp"
+#include "node/function.hpp"
+#include "node/list.hpp"
+#include "node/type.hpp"
 #include "error.h"
 #include <memory>
 
@@ -73,7 +73,6 @@ namespace AST
 		std::shared_ptr<Node> Statement();
 		std::shared_ptr<Node> IfElseStatement();
 		std::shared_ptr<Node> VariableDeclaration();
-		std::shared_ptr<Node> ProcedureDeclaration();
         std::shared_ptr<Node> ReturnStatement();
         std::shared_ptr<Nodes::FunctionDeclaration> FunctionSignature();
         std::shared_ptr<Node> FunctionDeclaration();

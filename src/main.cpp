@@ -3,6 +3,7 @@
 #include <memory>
 #include "../include/lexer.h"
 #include "../include/parser.h"
+#include "../include/node/program.hpp"
 #include "../include/cli.h"
 #include "../include/error.h"
 
@@ -30,6 +31,9 @@ int main(int argc, char **argv)
 
 	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
 	parser->Parse();
+
+    auto root = reinterpret_pointer_cast<AST::Nodes::ProgramNode>(parser->GetRoot());
+    (void)root;
 
     // std::string procName = cliRunner.GetProcedureName();
     // std::vector<std::string> args = cliRunner.GetProcedureArgs();

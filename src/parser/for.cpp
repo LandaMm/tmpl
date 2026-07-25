@@ -1,6 +1,6 @@
 
 #include "include/parser.h"
-#include "include/node/loop.h"
+#include "include/node/loop.hpp"
 
 namespace AST
 {

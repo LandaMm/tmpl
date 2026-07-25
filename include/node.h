@@ -25,7 +25,6 @@ namespace AST
 		IfElse, //
 		Block, //
 		VarDecl, // 
-		ProcedureDecl, //
         Return, //
         FnDecl, // 
         Require, // 
@@ -43,37 +42,21 @@ namespace AST
 
 	class Node
 	{
-    private:
-        Location m_loc;
 	public:
-		virtual inline NodeType GetType() const = 0;
-
-	public:
-		virtual std::string Format() const = 0;
-
+        Node(Location loc) : m_loc(loc) { }
 	public:
 		template <typename T>
 		inline T *Get() const { return static_cast<T *>(this); };
-
-	public:
-		friend std::ostream &operator<<(std::ostream &stream, const Node &node);
-
     public:
         inline Location GetLocation() const { return m_loc; }
-
     public:
         void SetLocation(Location loc) { m_loc = loc; }
-
     public:
+		virtual inline NodeType GetType() const = 0;
         virtual inline bool IsBlock() { return false; }
-
-    public:
-        // Node() : m_loc(Location(-1, -1)) { }
-        Node(Location loc) : m_loc(loc) { }
+    private:
+        Location m_loc;
 	};
-
-	// 2 + var - ((10 * 5) / 2) * 4.4
-	// "string" + "string"
 
 }
 

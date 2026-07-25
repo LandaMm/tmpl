@@ -1,6 +1,4 @@
-
-#ifndef ASSIGN_NODE_H_
-#define ASSIGN_NODE_H_
+#pragma once
 
 #include <memory>
 #include "include/location.h"
@@ -33,15 +31,10 @@ namespace AST::Nodes
 	public:
 		inline NodeType GetType() const override { return NodeType::Assign; }
 
-	public:
-		std::string Format() const override;
-
     public:
         inline PNode GetAssignee() const { return m_assignee; }
         inline PNode GetValue() const { return m_value; }
         inline AssignOperator GetAssignOp() const { return m_operator; }
     };
 }
-
-#endif // ASSIGN_NODE_H_
 

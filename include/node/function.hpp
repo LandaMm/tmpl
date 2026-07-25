@@ -1,12 +1,13 @@
-#ifndef FUNCTION_CALL_H
-#define FUNCTION_CALL_H
+#pragma once
+
 #include <vector>
 #include <memory>
+
 #include "../node.h"
 #include "../location.h"
-#include "include/node/type.h"
-#include "statement.h"
-#include "identifier.h"
+#include "include/node/type.hpp"
+#include "statement.hpp"
+#include "identifier.hpp"
 
 namespace AST
 {
@@ -14,15 +15,6 @@ namespace AST
 	{
 		class FunctionCall : public Node
 		{
-		private:
-			std::shared_ptr<Node> m_callee;
-			std::vector<std::shared_ptr<Node>> m_args;
-            std::vector<std::shared_ptr<TypeNode>> m_generics;
-
-		public:
-			std::string Format() const override;
-			inline NodeType GetType() const override { return NodeType::FunctionCall; }
-
 		public:
 			FunctionCall(std::shared_ptr<Node> callee, Location loc)
                 : m_callee(callee),
@@ -30,33 +22,38 @@ namespace AST
                   m_generics(std::vector<std::shared_ptr<TypeNode>>()),
                   Node(loc) {}
 			~FunctionCall() {}
-
+		public:
+			inline NodeType GetType() const override { return NodeType::FunctionCall; }
         public:
             void AddGeneric(std::shared_ptr<TypeNode> generic) { m_generics.push_back(generic); }
             std::shared_ptr<TypeNode> GetGeneric(unsigned int index) const { return m_generics[index]; }
             unsigned int GetGenericsSize() const { return m_generics.size(); }
-
 		public:
 			inline std::shared_ptr<Node> GetCallee() const { return m_callee; }
-
         public:
             void AddArgument(std::shared_ptr<Node> arg) { m_args.push_back(arg); }
             unsigned int GetArgumentsSize() const { return m_args.size(); }
             std::shared_ptr<Node> GetArgument(unsigned int index) const { return m_args[index]; }
+		private:
+			std::shared_ptr<Node> m_callee;
+			std::vector<std::shared_ptr<Node>> m_args;
+            std::vector<std::shared_ptr<TypeNode>> m_generics;
 		};
 
         class FunctionParam
         {
-        private:
-            std::shared_ptr<TypeNode> m_type;
-            std::shared_ptr<IdentifierNode> m_name;
         public:
             FunctionParam(std::shared_ptr<TypeNode> type, std::shared_ptr<IdentifierNode> name)
                 : m_type(type), m_name(name) { }
             ~FunctionParam() = default;
+
         public:
             inline std::shared_ptr<TypeNode> GetType() const { return m_type; }
             inline std::shared_ptr<IdentifierNode> GetName() const { return m_name; }
+
+        private:
+            std::shared_ptr<TypeNode> m_type;
+            std::shared_ptr<IdentifierNode> m_name;
         };
 
         enum class FunctionModifier
@@ -68,13 +65,6 @@ namespace AST
 
         class FunctionDeclaration : public Node
         {
-        private:
-            std::shared_ptr<Node> m_name;
-            std::vector<std::shared_ptr<FunctionParam>> m_params;
-            std::shared_ptr<TypeNode> m_ret_type;
-            std::shared_ptr<Statements::StatementsBody> m_body;
-            std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
-            FunctionModifier m_modifier;
         private:
             size_t m_index;
         public:
@@ -94,7 +84,7 @@ namespace AST
                 Node(loc) { }
             ~FunctionDeclaration() = default;
         public:
-            void AddParam(std::shared_ptr<FunctionParam> param);
+			void AddParam(std::shared_ptr<FunctionParam> param) { m_params.push_back(param); }
             void AddGeneric(std::shared_ptr<TemplateGeneric> generic) { m_generics.push_back(generic); }
             void SetReturnType(std::shared_ptr<TypeNode> retType) { m_ret_type = retType; }
         public:
@@ -112,9 +102,13 @@ namespace AST
             inline unsigned int GetGenericsSize() const { return m_generics.size(); }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
-            std::string Format() const override;
+        private:
+            std::shared_ptr<Node> m_name;
+            std::vector<std::shared_ptr<FunctionParam>> m_params;
+            std::shared_ptr<TypeNode> m_ret_type;
+            std::shared_ptr<Statements::StatementsBody> m_body;
+            std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
+            FunctionModifier m_modifier;
         };
 	}
 }
-
-#endif

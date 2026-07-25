@@ -1,7 +1,7 @@
 
 
 #include "../../include/parser.h"
-#include "../../include/node/object_member.h"
+#include "../../include/node/object_member.hpp"
 
 namespace AST
 {

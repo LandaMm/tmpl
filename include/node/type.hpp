@@ -1,11 +1,10 @@
-
-#ifndef TYPE_NODE_H
-#define TYPE_NODE_H
+#pragma once
 
 #include <memory>
 #include <vector>
+
 #include "../node.h"
-#include "include/node/identifier.h"
+#include "include/node/identifier.hpp"
 
 namespace AST
 {
@@ -15,9 +14,6 @@ namespace AST
         {
         public:
             using PId = std::shared_ptr<IdentifierNode>;
-        private:
-            PId m_typename;
-            std::vector<std::shared_ptr<TypeNode>> m_generics;
 
         public:
             TypeNode(PId target, Location loc)
@@ -25,7 +21,6 @@ namespace AST
 
         public:
             inline NodeType GetType() const override { return NodeType::Type; };
-            std::string Format() const override;
 
         public:
             void AddGenericType(std::shared_ptr<TypeNode> typ) { m_generics.push_back(typ); }
@@ -34,14 +29,14 @@ namespace AST
 
         public:
             inline PId GetTypeName() const { return m_typename; }
+
+        private:
+            PId m_typename;
+            std::vector<std::shared_ptr<TypeNode>> m_generics;
         };
 
         class TemplateGeneric
         {
-        private:
-            std::string m_name;
-            Location m_loc;
-            // TODO: base and default type
         public:
             TemplateGeneric(std::string name, Location loc)
                 : m_name(name), m_loc(loc) { }
@@ -49,6 +44,11 @@ namespace AST
         public:
             inline std::string GetName() const { return m_name; }
             inline Location GetLocation() const { return m_loc; }
+
+        private:
+            std::string m_name;
+            Location m_loc;
+            // TODO: base and default type
         };
 
         class TypeDfNode : public Node
@@ -57,11 +57,6 @@ namespace AST
             using PId = std::shared_ptr<IdentifierNode>;
             using PType = std::shared_ptr<TypeNode>;
             using PTG = std::shared_ptr<TemplateGeneric>;
-        private:
-            PId m_name;
-            PType m_value;
-
-            std::vector<PTG> m_generics;
 
         public:
             TypeDfNode(PId name, Location loc)
@@ -72,7 +67,6 @@ namespace AST
 
         public:
             inline NodeType GetType() const override { return NodeType::TypeDf; };
-            std::string Format() const override;
 
         public:
             void SetValue(PType value) { m_value = value; }
@@ -87,9 +81,13 @@ namespace AST
         public:
             inline PId GetTypeName() const { return m_name; }
             inline PType GetTypeValue() const { return m_value; }
+
+        private:
+            PId m_name;
+            PType m_value;
+
+            std::vector<PTG> m_generics;
         };
     }
 }
-
-#endif // TYPE_NODE_H
 

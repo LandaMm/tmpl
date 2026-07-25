@@ -1,4 +1,4 @@
-#include "include/node/type.h"
+#include "include/node/type.hpp"
 #include "include/parser.h"
 #include "include/token.h"
 

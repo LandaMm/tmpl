@@ -1,9 +1,8 @@
-#ifndef MACROS_H
-#define MACROS_H
+#pragma once
 
 #include <memory>
 #include "../node.h"
-#include "include/node/function.h"
+#include "include/node/function.hpp"
 
 namespace AST
 {
@@ -21,9 +20,6 @@ namespace AST
             inline std::string GetModule() const { return m_module; }
         public:
             inline NodeType GetType() const override { return NodeType::Require; };
-
-        public:
-            std::string Format() const override;
         };
 
         class ExternMacro : public Node
@@ -38,11 +34,7 @@ namespace AST
             inline std::shared_ptr<FunctionDeclaration> GetFnSignature() const { return std::dynamic_pointer_cast<FunctionDeclaration>(m_target); }
         public:
             inline NodeType GetType() const override { return NodeType::Extern; };
-
-        public:
-            std::string Format() const override;
         };
     }
 }
 
-#endif // MACROS_H

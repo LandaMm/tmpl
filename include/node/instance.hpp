@@ -1,9 +1,10 @@
-#ifndef INSTANCE_NODE_H
-#define INSTANCE_NODE_H
+#pragma once
 
 #include "../node.h"
-#include "function.h"
-#include "include/node/identifier.h"
+
+#include "function.hpp"
+
+#include "include/node/identifier.hpp"
 
 namespace AST
 {
@@ -11,24 +12,20 @@ namespace AST
     {
         class InstanceNode : public Node
         {
-        private:
-            std::shared_ptr<IdentifierNode> m_target;
-            std::shared_ptr<FunctionCall> m_fcall;
-
         public:
             InstanceNode(std::shared_ptr<IdentifierNode> target, std::shared_ptr<FunctionCall> fcall, Location loc)
                 : m_target(target), m_fcall(fcall), Node(loc) { }
             ~InstanceNode() = default;
         public:
             inline NodeType GetType() const override { return NodeType::Instance; }
-            std::string Format() const override;
 
         public:
             inline std::shared_ptr<IdentifierNode> GetTarget() const { return m_target; }
             inline std::shared_ptr<FunctionCall> GetFunctionCall() const { return m_fcall; }
+        private:
+            std::shared_ptr<IdentifierNode> m_target;
+            std::shared_ptr<FunctionCall> m_fcall;
         };
     }
 }
-
-#endif // INSTANCE_NODE_H
 

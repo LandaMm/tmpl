@@ -1,7 +1,7 @@
 #include <cassert>
 
 #include "include/parser.h"
-#include "include/node/export.h"
+#include "include/node/export.hpp"
 
 namespace AST
 {

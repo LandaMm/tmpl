@@ -1,9 +1,8 @@
-
+#include <filesystem>
+#include <iostream>
 
 #include"../include/cli.h"
 #include"../include/error.h"
-#include <filesystem>
-#include <iostream>
 
 namespace Runtime
 {

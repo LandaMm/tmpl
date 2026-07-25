@@ -1,5 +1,5 @@
-#ifndef LOGICAL_H
-#define LOGICAL_H
+#pragma once
+
 #include <memory>
 #include "../node.h"
 
@@ -20,18 +20,12 @@ namespace AST
 				NotEqual,
 				None
 			};
-		private:
-			std::shared_ptr<Node> m_left;
-			std::shared_ptr<Node> m_right;
-			ConditionType m_operator;
 		public:
 			Condition(Location loc)
                 : m_left(nullptr), m_right(nullptr), m_operator(ConditionType::None), Node(loc) { }
 			~Condition() { }
 		public:
 			inline NodeType GetType() const override { return NodeType::Condition; }
-		public:
-			std::string Format() const override;
 		public:
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
@@ -40,20 +34,18 @@ namespace AST
 			inline std::shared_ptr<Node> GetLeft() { return m_left; }
 			inline std::shared_ptr<Node> GetRight() { return m_right; }
 			inline ConditionType GetOperator() { return m_operator; }
+		private:
+			std::shared_ptr<Node> m_left;
+			std::shared_ptr<Node> m_right;
+			ConditionType m_operator;
 		};
 
 		class TernaryNode : public Node
 		{
-		private:
-			std::shared_ptr<Node> m_condition;
-			std::shared_ptr<Node> m_left;
-			std::shared_ptr<Node> m_right;
 		public:
 			inline NodeType GetType() const override { return NodeType::Ternary; }
         public:
             TernaryNode(Location loc) : Node(loc) { }
-		public:
-			std::string Format() const override;
 		public:
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
@@ -62,8 +54,11 @@ namespace AST
 			inline std::shared_ptr<Node> GetLeft() { return m_left; }
 			inline std::shared_ptr<Node> GetRight() { return m_right; }
 			inline std::shared_ptr<Node> GetCondition() { return m_condition; }
+		private:
+			std::shared_ptr<Node> m_condition;
+			std::shared_ptr<Node> m_left;
+			std::shared_ptr<Node> m_right;
 		};
 	}
 }
 
-#endif

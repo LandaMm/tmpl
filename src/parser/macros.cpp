@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "../../include/parser.h"
-#include "../../include/node/macros.h"
+#include "../../include/node/macros.hpp"
 
 namespace AST
 {

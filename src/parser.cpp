@@ -66,9 +66,6 @@ namespace AST
 			stmt = VariableDeclaration();
 			Eat(TokenType::Semicolon);
 			break;
-		case TokenType::SingleArrow:
-			stmt = ProcedureDeclaration();
-			break;
         case TokenType::Return:
             stmt = ReturnStatement();
             Eat(TokenType::Semicolon);
