@@ -184,7 +184,7 @@ namespace AST
 	{
 		std::shared_ptr<Node> result = Factor();
 		std::shared_ptr<Nodes::ExpressionNode> expr =
-            std::make_shared<Nodes::ExpressionNode>(Nodes::ExpressionNode(result->GetLocation()));
+            std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Multiply || m_lexer->GetToken()->GetType() == TokenType::Divide)
