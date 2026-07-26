@@ -51,6 +51,11 @@ namespace AST
 			m_root->AddStatement(Statement());
 		}
 	}
+	
+	std::shared_ptr<Node> Parser::CompileTimeStatement()
+	{
+		return FunctionDeclaration();
+	}
 
 	std::shared_ptr<Node> Parser::Statement()
 	{
@@ -69,12 +74,6 @@ namespace AST
         case TokenType::Return:
             stmt = ReturnStatement();
             Eat(TokenType::Semicolon);
-            break;
-        case TokenType::Fn:
-            stmt = FunctionDeclaration();
-            break;
-        case TokenType::Export:
-            stmt = ExportStmt();
             break;
         case TokenType::TypeDf:
             stmt = TypeDfStatement();
@@ -125,7 +124,14 @@ namespace AST
             }
             break;
         }
-		default:
+		case TokenType::Id:
+			auto next = m_lexer->SeekToken();
+
+			if (next->GetType() == TokenType::DoubleColon)
+			{
+				stmt = CompileTimeStatement();
+				break;
+			}
 			stmt = Assignment();
 			Eat(TokenType::Semicolon);
 			break;

@@ -71,12 +71,12 @@ namespace AST
 
 	private: // Statements
 		std::shared_ptr<Node> Statement();
+        std::shared_ptr<Node> CompileTimeStatement();
 		std::shared_ptr<Node> IfElseStatement();
 		std::shared_ptr<Node> VariableDeclaration();
         std::shared_ptr<Node> ReturnStatement();
         std::shared_ptr<Nodes::FunctionDeclaration> FunctionSignature();
         std::shared_ptr<Node> FunctionDeclaration();
-        std::shared_ptr<Node> ExportStmt();
         std::shared_ptr<Node> WhileLoop();
         std::shared_ptr<Node> ForLoop();
         std::shared_ptr<Node> BreakStmt();
