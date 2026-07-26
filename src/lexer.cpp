@@ -1,9 +1,9 @@
 #include <memory>
 #include <cassert>
 
-#include "include/basics/file.hpp"
-#include "../include/error.h"
-#include "../include/lexer.h"
+#include "basics/file.hpp"
+#include "error.h"
+#include "lexer.h"
 
 namespace AST
 {

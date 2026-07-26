@@ -1,7 +1,7 @@
 
-#include "../include/parser.h"
-#include "../include/error.h"
-#include "include/token.h"
+#include "parser.h"
+#include "error.h"
+#include "token.h"
 #include <memory>
 
 namespace AST

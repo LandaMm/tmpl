@@ -3,7 +3,7 @@
 #include<vector>
 #include<memory>
 #include"../node.h"
-#include "include/node/type.hpp"
+#include "node/type.hpp"
 
 namespace AST
 {

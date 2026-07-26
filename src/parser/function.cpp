@@ -1,10 +1,10 @@
 #include <memory>
 #include <cassert>
 
-#include "include/node/identifier.hpp"
-#include "include/parser.h"
-#include "include/token.h"
-#include "include/node/function.hpp"
+#include "node/identifier.hpp"
+#include "parser.h"
+#include "token.h"
+#include "node/function.hpp"
 
 namespace AST
 {

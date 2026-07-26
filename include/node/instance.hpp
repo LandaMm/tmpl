@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../node.h"
+#include "node.h"
 
 #include "function.hpp"
 
-#include "include/node/identifier.hpp"
+#include "node/identifier.hpp"
 
 namespace AST
 {

@@ -1,6 +1,6 @@
 
-#include "include/parser.h"
-#include "include/node/var_declaration.hpp"
+#include "parser.h"
+#include "node/var_declaration.hpp"
 
 namespace AST
 {

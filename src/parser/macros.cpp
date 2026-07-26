@@ -1,8 +1,8 @@
 
 
 #include <memory>
-#include "../../include/parser.h"
-#include "../../include/node/macros.hpp"
+#include "parser.h"
+#include "node/macros.hpp"
 
 namespace AST
 {

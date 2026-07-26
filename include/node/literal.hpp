@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "../node.h"
+#include "node.h"
 
 namespace AST
 {

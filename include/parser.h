@@ -1,6 +1,6 @@
 #pragma once
 
-#include "include/node/cast.hpp"
+#include "node/cast.hpp"
 #include "lexer.h"
 #include "node.h"
 #include "node/program.hpp"

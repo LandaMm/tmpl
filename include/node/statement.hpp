@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "../node.h"
+#include "node.h"
 
 namespace AST
 {

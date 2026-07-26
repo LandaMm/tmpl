@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "../node.h"
-#include "include/node/identifier.hpp"
+#include "node.h"
+#include "node/identifier.hpp"
 
 namespace AST
 {

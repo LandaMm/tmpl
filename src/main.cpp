@@ -1,11 +1,11 @@
 
 #include <cassert>
 #include <memory>
-#include "../include/lexer.h"
-#include "../include/parser.h"
-#include "../include/node/program.hpp"
-#include "../include/cli.h"
-#include "../include/error.h"
+#include "lexer.h"
+#include "parser.h"
+#include "node/program.hpp"
+#include "cli.h"
+#include "error.h"
 
 int main(int argc, char **argv)
 {

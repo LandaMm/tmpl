@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../node.h"
+#include "node.h"
 #include "type.hpp"
 
 namespace AST

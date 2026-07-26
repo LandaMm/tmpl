@@ -1,8 +1,8 @@
 
 #include"../../include/parser.h"
-#include "../../include/node/identifier.hpp"
-#include "include/token.h"
-#include "include/basics/string.hpp"
+#include "node/identifier.hpp"
+#include "token.h"
+#include "basics/string.hpp"
 
 namespace AST
 {

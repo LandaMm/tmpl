@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../node.h"
-#include "include/node/statement.hpp"
+#include "node.h"
+#include "node/statement.hpp"
 
 namespace AST::Nodes
 {

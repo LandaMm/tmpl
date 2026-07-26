@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../node.h"
+#include "node.h"
 #include <memory>
 
 namespace AST

@@ -24,7 +24,7 @@ file(GLOB_RECURSE SOURCES
 
 add_executable(cheetah ${SOURCES})
 
-target_include_directories(cheetah PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(cheetah PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET cheetah PROPERTY CXX_STANDARD 20)

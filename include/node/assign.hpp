@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "include/location.h"
-#include "include/node.h"
+#include "location.h"
+#include "node.h"
 
 namespace AST::Nodes
 {

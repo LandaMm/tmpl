@@ -2,9 +2,9 @@
 #include <cassert>
 #include <filesystem>
 #include <memory>
-#include "../include/error.h"
-#include "include/location.h"
-#include "include/basics/string.hpp"
+#include "error.h"
+#include "location.h"
+#include "basics/string.hpp"
 
 using namespace AST;
 namespace fs = std::filesystem;

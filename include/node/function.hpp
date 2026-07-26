@@ -3,9 +3,9 @@
 #include <vector>
 #include <memory>
 
-#include "../node.h"
-#include "../location.h"
-#include "include/node/type.hpp"
+#include "node.h"
+#include "location.h"
+#include "node/type.hpp"
 #include "statement.hpp"
 #include "identifier.hpp"
 

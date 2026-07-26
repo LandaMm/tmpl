@@ -1,6 +1,6 @@
-#include "include/node/type.hpp"
-#include "include/parser.h"
-#include "include/token.h"
+#include "node/type.hpp"
+#include "parser.h"
+#include "token.h"
 
 namespace AST
 {

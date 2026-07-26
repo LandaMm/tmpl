@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "../node.h"
-#include "include/node/function.hpp"
+#include "node.h"
+#include "node/function.hpp"
 
 namespace AST
 {
