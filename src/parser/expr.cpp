@@ -12,12 +12,11 @@ namespace AST
 {
     std::shared_ptr<Node> Parser::Assignment()
     {
-        // TODO: support for object member assignment
         if (m_lexer->GetToken()->GetType() == TokenType::Id)
         {
-            // TODO: when support object members use m_lexer.SaveState to look for "="
             if (m_lexer->SeekToken() != nullptr &&
                     (
+                     m_lexer->SeekToken()->GetType() == TokenType::ColonEqual ||
                      m_lexer->SeekToken()->GetType() == TokenType::Equal ||
                      m_lexer->SeekToken()->GetType() == TokenType::CompoundAdd ||
                      m_lexer->SeekToken()->GetType() == TokenType::CompoundMinus ||
@@ -31,8 +30,11 @@ namespace AST
 
                 switch (m_lexer->GetToken()->GetType())
                 {
+					case TokenType::ColonEqual:
+						assignOp = Nodes::AssignOperator::Declare;
+						break;
                     case TokenType::Equal:
-                        assignOp = Nodes::AssignOperator::Reassign;
+                        assignOp = Nodes::AssignOperator::Assign;
                         break;
                     case TokenType::CompoundAdd:
                         assignOp = Nodes::AssignOperator::Add;
@@ -56,7 +58,12 @@ namespace AST
 
                 Eat(m_lexer->GetToken()->GetType());
 
-                auto expr = Ternary();
+				// By calling Assignment again,
+				// we allow something like that:
+				// a := 5;
+				// x := y := a += 5;
+				// Expected result: x = y = a = 10
+                auto expr = Assignment();
 
                 return std::make_shared<Nodes::AssignmentNode>(assignee, expr, assignOp, assignee->GetLocation());
             }

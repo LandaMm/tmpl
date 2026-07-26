@@ -221,14 +221,24 @@ namespace AST
 				m_tokens.Push(std::make_shared<Token>(TokenType::Question, m_line, m_col));
 				break;
 			case ':':
-				if (m_pos < m_code.Size() && m_code[m_pos + 1] == ':')
+				if (m_pos < m_code.Size())
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::DoubleColon, m_line, m_col));
-					m_pos++;
-					m_col++;
+					if (m_code[m_pos + 1] == ':')
+					{
+						m_tokens.Push(std::make_shared<Token>(TokenType::DoubleColon, m_line, m_col));
+						m_pos++;
+						m_col++;
+						break;
+					}
+					else if (m_code[m_pos + 1] == '=')
+					{
+						m_tokens.Push(std::make_shared<Token>(TokenType::ColonEqual, m_line, m_col));
+						m_pos++;
+						m_col++;
+						break;
+					}
 				}
-				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
 				break;
 			default:
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();

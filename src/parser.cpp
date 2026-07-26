@@ -66,11 +66,6 @@ namespace AST
 		case TokenType::If:
 			stmt = IfElseStatement();
 			break;
-		case TokenType::Var:
-		case TokenType::Const:
-			stmt = VariableDeclaration();
-			Eat(TokenType::Semicolon);
-			break;
         case TokenType::Return:
             stmt = ReturnStatement();
             Eat(TokenType::Semicolon);
@@ -126,12 +121,13 @@ namespace AST
         }
 		case TokenType::Id:
 			auto next = m_lexer->SeekToken();
-
+			
 			if (next->GetType() == TokenType::DoubleColon)
 			{
 				stmt = CompileTimeStatement();
 				break;
 			}
+
 			stmt = Assignment();
 			Eat(TokenType::Semicolon);
 			break;

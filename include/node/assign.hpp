@@ -8,7 +8,8 @@ namespace AST::Nodes
 {
     enum class AssignOperator
     {
-        Reassign,
+        Declare,
+        Assign,
         Add,
         Subtract,
         Multiply,

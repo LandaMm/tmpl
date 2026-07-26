@@ -1,7 +1,8 @@
 #import "test"
 
-main :: (argc: int, argv: char) -> void {
-    var int result = 60;
-    result += 9;
-    return result;
+main :: (argc : int, argv: char) -> void {
+    a := 5;
+    x := y := a += 5;
+    return x;
 }
+
