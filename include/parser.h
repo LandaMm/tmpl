@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#pragma once
+
 #include "include/node/cast.hpp"
 #include "lexer.h"
 #include "node.h"
@@ -33,7 +33,7 @@ namespace AST
 
 	public:
 		inline std::shared_ptr<Node> GetRoot() const { return m_root; }
-        inline std::string GetFilename() const { return m_lexer->GetFilename(); }
+        inline String GetFilename() const { return m_lexer->GetFilename(); }
 
 	private:
 		Prelude::ErrorManager &GetErrorManager();
@@ -86,4 +86,3 @@ namespace AST
 	};
 }
 
-#endif
