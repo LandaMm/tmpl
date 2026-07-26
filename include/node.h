@@ -44,6 +44,13 @@ namespace AST
 	{
 	public:
         Node(Location loc) : m_loc(loc) { }
+		virtual ~Node() = default;
+
+		Node(const Node&) = delete;
+		Node& operator=(const Node&) = delete;
+
+		Node(Node&&) = delete;
+		Node& operator=(Node&&) = delete;
 	public:
 		template <typename T>
 		inline T *Get() const { return static_cast<T *>(this); };
