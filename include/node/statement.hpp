@@ -11,7 +11,7 @@ namespace AST
 		class StatementsNode : public Node
 		{
 		public:
-			StatementsNode(Location loc)
+			StatementsNode(LocationSpan loc)
                 : m_index(0), m_body(std::vector<std::shared_ptr<Node>>()), Node(loc) {}
 
 		public:
@@ -34,7 +34,7 @@ namespace AST
 		class StatementsBody : public StatementsNode
 		{
 		public:
-			StatementsBody(Location loc)
+			StatementsBody(LocationSpan loc)
 				: StatementsNode(loc) { }
 
 		public:
@@ -44,7 +44,7 @@ namespace AST
 		class IfElseStatement : public Node
 		{
 		public:
-			IfElseStatement(std::shared_ptr<Node> condition, Location loc)
+			IfElseStatement(std::shared_ptr<Node> condition, LocationSpan loc)
 				: m_condition(condition), m_else_statement(nullptr), Node(loc)
 			{
 			}

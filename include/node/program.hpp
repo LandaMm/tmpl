@@ -14,7 +14,7 @@ namespace AST
 		public:
 			ProgramNode()
                 : m_index(0), m_statements(std::vector<std::shared_ptr<Node>>()),
-                  Node(Location(-1, -1)) {}
+                  Node(LocationSpan{Location(-1, -1), Location(-1, -1) }) {}
 			~ProgramNode() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::Program; }

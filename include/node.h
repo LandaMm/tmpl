@@ -43,7 +43,7 @@ namespace AST
 	class Node
 	{
 	public:
-        Node(Location loc) : m_loc(loc) { }
+        Node(LocationSpan loc) : m_loc(loc) { }
 		virtual ~Node() = default;
 
 		Node(const Node&) = delete;
@@ -55,14 +55,14 @@ namespace AST
 		template <typename T>
 		inline T *Get() const { return static_cast<T *>(this); };
     public:
-        inline Location GetLocation() const { return m_loc; }
+        inline LocationSpan GetLocation() const { return m_loc; }
     public:
-        void SetLocation(Location loc) { m_loc = loc; }
+        void SetLocation(LocationSpan loc) { m_loc = loc; }
     public:
 		virtual inline NodeType GetType() const = 0;
         virtual inline bool IsBlock() { return false; }
     private:
-        Location m_loc;
+        LocationSpan m_loc;
 	};
 
 }

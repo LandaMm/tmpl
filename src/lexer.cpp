@@ -64,6 +64,9 @@ namespace AST
 				continue;
 			}
 
+			Location begin{ m_line, m_col };
+			Location end{ m_line, m_col + 1 };
+
 			HandleCharacter(ch);
 
 			switch (ch)
@@ -79,166 +82,179 @@ namespace AST
 				// m_tokens.Push(std::make_shared<Token>(TokenType::Whitespace));
 				break;
 			case '.':
-				m_tokens.Push(std::make_shared<Token>(TokenType::Point, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Point, begin, end));
 				break;
 			case ',':
-				m_tokens.Push(std::make_shared<Token>(TokenType::Comma, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Comma, begin, end));
 				break;
 			case '(':
-				m_tokens.Push(std::make_shared<Token>(TokenType::OpenBracket, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::OpenBracket, begin, end));
 				break;
 			case ')':
-				m_tokens.Push(std::make_shared<Token>(TokenType::CloseBracket, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::CloseBracket, begin, end));
 				break;
 			case '{':
-				m_tokens.Push(std::make_shared<Token>(TokenType::OpenCurly, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::OpenCurly, begin, end));
 				break;
 			case '}':
-				m_tokens.Push(std::make_shared<Token>(TokenType::CloseCurly, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::CloseCurly, begin, end));
 				break;
 			case '[':
-				m_tokens.Push(std::make_shared<Token>(TokenType::OpenSquareBracket, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::OpenSquareBracket, begin, end));
 				break;
 			case ']':
-				m_tokens.Push(std::make_shared<Token>(TokenType::CloseSquareBracket, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::CloseSquareBracket, begin, end));
 				break;
 			case '+':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundAdd, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundAdd, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-                    m_tokens.Push(std::make_shared<Token>(TokenType::Plus, m_line, m_col));
+                    m_tokens.Push(std::make_shared<Token>(TokenType::Plus, begin, end));
 				break;
 			case '@':
-				m_tokens.Push(std::make_shared<Token>(TokenType::At, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::At, begin, end));
 				break;
 			case '#':
-				m_tokens.Push(std::make_shared<Token>(TokenType::Hash, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Hash, begin, end));
 				break;
 			case '-':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '>')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::SingleArrow, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::SingleArrow, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundMinus, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundMinus, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Minus, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Minus, begin, end));
 				break;
 			case '*':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundMultiply, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundMultiply, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-                    m_tokens.Push(std::make_shared<Token>(TokenType::Multiply, m_line, m_col));
+                    m_tokens.Push(std::make_shared<Token>(TokenType::Multiply, begin, end));
 				break;
 			case '/':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundDivide, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::CompoundDivide, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-                    m_tokens.Push(std::make_shared<Token>(TokenType::Divide, m_line, m_col));
+                    m_tokens.Push(std::make_shared<Token>(TokenType::Divide, begin, end));
 				break;
 			case ';':
-				m_tokens.Push(std::make_shared<Token>(TokenType::Semicolon, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Semicolon, begin, end));
 				break;
 			case '=':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::Compare, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::Compare, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Equal, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Equal, begin, end));
 				break;
 			case '!':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::NotEqual, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::NotEqual, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Not, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Not, begin, end));
 				break;
 			case '&':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '&')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::And, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::And, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Ampersand, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Ampersand, begin, end));
 				break;
 			case '|':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '|')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::Or, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::Or, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Bind, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Bind, begin, end));
 				break;
 			case '<':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::LessEqual, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::LessEqual, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Less, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Less, begin, end));
 				break;
 			case '>':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
-					m_tokens.Push(std::make_shared<Token>(TokenType::GreaterEqual, m_line, m_col));
+					end.col++;
+					m_tokens.Push(std::make_shared<Token>(TokenType::GreaterEqual, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(std::make_shared<Token>(TokenType::Greater, m_line, m_col));
+					m_tokens.Push(std::make_shared<Token>(TokenType::Greater, begin, end));
 				break;
 			case '?':
-				m_tokens.Push(std::make_shared<Token>(TokenType::Question, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Question, begin, end));
 				break;
 			case ':':
 				if (m_pos < m_code.Size())
 				{
 					if (m_code[m_pos + 1] == ':')
 					{
-						m_tokens.Push(std::make_shared<Token>(TokenType::DoubleColon, m_line, m_col));
+						end.col++;
+						m_tokens.Push(std::make_shared<Token>(TokenType::DoubleColon, begin, end));
 						m_pos++;
 						m_col++;
 						break;
 					}
 					else if (m_code[m_pos + 1] == '=')
 					{
-						m_tokens.Push(std::make_shared<Token>(TokenType::ColonEqual, m_line, m_col));
+						end.col++;
+						m_tokens.Push(std::make_shared<Token>(TokenType::ColonEqual, begin, end));
 						m_pos++;
 						m_col++;
 						break;
 					}
 				}
-				m_tokens.Push(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Colon, begin, end));
 				break;
 			default:
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -249,12 +265,15 @@ namespace AST
 			m_pos++;
 		}
 
-		m_tokens.Push(std::make_shared<Token>(TokenType::_EOF, m_line, m_col));
+		Location begin{ m_line, m_col };
+		m_tokens.Push(std::make_shared<Token>(TokenType::_EOF, begin, begin));
 	}
 
 	void Lexer::Id()
 	{
 		String *id = new String();
+
+		Location begin{ m_line, m_col };
 
 		while (m_pos < m_code.Size())
 		{
@@ -289,38 +308,40 @@ namespace AST
 			}
 		}
 
+		Location end{ m_line, m_col };
+
 		if (*id == "import")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Import, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Import, begin, end));
 		else if (*id == "if")
-			m_tokens.Push(std::make_shared<Token>(TokenType::If, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::If, begin, end));
 		else if (*id == "else")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Else, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Else, begin, end));
 		else if (*id == "extern")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Extern, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Extern, begin, end));
 		else if (*id == "var")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Var, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Var, begin, end));
 		else if (*id == "const")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Const, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Const, begin, end));
 		else if (*id == "return")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Return, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Return, begin, end));
 		else if (*id == "true")
-            m_tokens.Push(std::make_shared<Token>(TokenType::True, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::True, begin, end));
 		else if (*id == "false")
-            m_tokens.Push(std::make_shared<Token>(TokenType::False, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::False, begin, end));
 		else if (*id == "typedf")
-            m_tokens.Push(std::make_shared<Token>(TokenType::TypeDf, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::TypeDf, begin, end));
 		else if (*id == "new")
-            m_tokens.Push(std::make_shared<Token>(TokenType::New, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::New, begin, end));
 		else if (*id == "while")
-            m_tokens.Push(std::make_shared<Token>(TokenType::While, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::While, begin, end));
 		else if (*id == "for")
-            m_tokens.Push(std::make_shared<Token>(TokenType::For, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::For, begin, end));
 		else if (*id == "break")
-            m_tokens.Push(std::make_shared<Token>(TokenType::Break, m_line, m_col));
+            m_tokens.Push(std::make_shared<Token>(TokenType::Break, begin, end));
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<String>> value = std::make_shared<Token::TypedValueHolder<String>>(std::make_shared<String>(*id));
-			m_tokens.Push(std::make_shared<Token>(TokenType::Id, value, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Id, value, begin, end));
 		}
 	}
 
@@ -328,6 +349,8 @@ namespace AST
 	{
 		String *id = new String();
 		bool string_closed = false;
+
+		Location begin(m_line, m_col);
 
 		// Skip opening string quote
 		m_pos++;
@@ -391,7 +414,10 @@ namespace AST
 		}
 
 		std::shared_ptr<Token::TypedValueHolder<String>> value = std::make_shared<Token::TypedValueHolder<String>>(std::make_shared<String>(*id));
-		m_tokens.Push(std::make_shared<Token>(TokenType::String, value, m_line, m_col + 1)); // additional column for closing quote
+
+		Location end(m_line, m_col + 1);
+
+		m_tokens.Push(std::make_shared<Token>(TokenType::String, value, begin, end)); // additional column for closing quote
 	}
 
 	void Lexer::Comment()
@@ -413,6 +439,8 @@ namespace AST
 	{
 		String *number = new String();
 		bool already_met_point = false;
+
+		Location begin(m_line, m_col);
 
 		while (m_pos < m_code.Size())
 		{
@@ -451,6 +479,8 @@ namespace AST
 			}
 		}
 
+		Location end(m_line, m_col);
+
 		if (already_met_point)
 		{
 			size_t pos = number->Find('.');
@@ -458,18 +488,18 @@ namespace AST
 			if (digitstr.Size() <= 7)
 			{
 				std::shared_ptr<Token::TypedValueHolder<float>> value = std::make_shared<Token::TypedValueHolder<float>>(std::make_shared<float>(std::stof(number->c_str())));
-				m_tokens.Push(std::make_shared<Token>(TokenType::Float, value, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Float, value, begin, end));
 			}
 			else
 			{
 				std::shared_ptr<Token::TypedValueHolder<double>> value = std::make_shared<Token::TypedValueHolder<double>>(std::make_shared<double>(std::stod(number->c_str())));
-				m_tokens.Push(std::make_shared<Token>(TokenType::Double, value, m_line, m_col));
+				m_tokens.Push(std::make_shared<Token>(TokenType::Double, value, begin, end));
 			}
 		}
 		else
 		{
 			std::shared_ptr<Token::TypedValueHolder<int>> value = std::make_shared<Token::TypedValueHolder<int>>(std::make_shared<int>(std::stoi(number->c_str())));
-			m_tokens.Push(std::make_shared<Token>(TokenType::Integer, value, m_line, m_col));
+			m_tokens.Push(std::make_shared<Token>(TokenType::Integer, value, begin, end));
 		}
 	}
 
@@ -477,7 +507,8 @@ namespace AST
 	{
 		if (m_index >= m_tokens.Size())
 		{
-			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
+			Location loc(m_line, m_col);
+			return std::make_shared<Token>(TokenType::_EOF, loc, loc);
 		}
 		return m_tokens[m_index];
 	}
@@ -495,7 +526,8 @@ namespace AST
 	{
 		if (m_index + 1 >= m_tokens.Size())
 		{
-			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
+			Location loc(m_line, m_col);
+			return std::make_shared<Token>(TokenType::_EOF, loc, loc);
 		}
 		return m_tokens[m_index + 1];
 	}
@@ -504,7 +536,8 @@ namespace AST
 	{
 		if (m_index + 1 >= m_tokens.Size())
 		{
-			return std::make_shared<Token>(TokenType::_EOF, 0, 0);
+			Location loc(m_line, m_col);
+			return std::make_shared<Token>(TokenType::_EOF, loc, loc);
 		}
 		return m_tokens[m_index++];
 	}

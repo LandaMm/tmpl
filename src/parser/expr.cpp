@@ -5,7 +5,6 @@
 #include "node/logical.hpp"
 #include "node/unary.hpp"
 #include "node/assign.hpp"
-#include "node/instance.hpp"
 #include "token.h"
 
 namespace AST
@@ -230,7 +229,6 @@ namespace AST
 		// var|(expr)|number (+|-) var|(expr)|number
 		// can also be function call: calc1() + calc(2)
 		// and string: "some_string" + "concat"
-		// object (+ function call): some.method.inside.class()
 		// !var || -5 || +3 (unary)
 
 		auto token = m_lexer->GetToken();
@@ -284,8 +282,7 @@ namespace AST
 				std::make_shared<Holder>(std::make_shared<bool>(active));
 			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::BOOL, v, token->GetLocation());
         }
-        /*else if (token->GetType() == TokenType::Boo)*/
-		// id || function call with args | object member | obj_member + call | call + obj_member
+		// id || function call with args
 		else if (token->GetType() == TokenType::Id)
 		{
 			std::shared_ptr<Node> res = Id();
@@ -319,19 +316,9 @@ namespace AST
 					std::shared_ptr<Node> fcall = FunctionCall(res);
 					res = fcall;
 				}
-				else if (current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
-				{
-					std::shared_ptr<Node> objm = ObjectMember(res);
-					res = objm;
-				}
 				current_type = m_lexer->GetToken()->GetType();
 			}
 			return res;
-		}
-		// [list]
-		else if (token->GetType() == TokenType::OpenSquareBracket)
-		{
-			return List();
 		}
 		// !factor
 		else if (token->GetType() == TokenType::Not)
@@ -374,24 +361,11 @@ namespace AST
 					std::shared_ptr<Node> fcall = FunctionCall(res);
 					res = fcall;
 				}
-				else if (current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket)
-				{
-					std::shared_ptr<Node> objm = ObjectMember(res);
-					res = objm;
-				}
 				current_type = m_lexer->GetToken()->GetType();
 			}
 
             return res;
 		}
-		else if (token->GetType() == TokenType::New)
-        {
-            auto loc = m_lexer->GetToken()->GetLocation();
-            Eat(TokenType::New);
-            auto fnName = Id();
-            auto fCall = FunctionCall(fnName);
-            return std::make_shared<Nodes::InstanceNode>(fnName, fCall, loc);
-        }
 		// unknown
 		else
 		{

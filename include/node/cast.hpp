@@ -13,7 +13,7 @@ namespace AST
             using PTypeNode = std::shared_ptr<TypeNode>;
             using PNode = std::shared_ptr<Node>;
         public:
-            CastNode(PTypeNode typ, PNode expr, Location loc)
+            CastNode(PTypeNode typ, PNode expr, LocationSpan loc)
                 : m_type(typ), m_expr(expr), Node(loc) { }
         public:
             inline NodeType GetType() const override { return NodeType::Cast; };

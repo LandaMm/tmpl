@@ -16,6 +16,14 @@ namespace AST
             this->col = col;
         }
     };
+
+    struct LocationSpan
+    {
+        Location begin, end;
+
+        LocationSpan(Location begin, Location end)
+            : begin(begin), end(end) { }
+    };
 }
 
 #endif // LOCATION_H

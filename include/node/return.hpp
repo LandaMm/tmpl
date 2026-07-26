@@ -12,7 +12,7 @@ namespace AST
         private:
             std::shared_ptr<Node> m_value;
         public:
-            ReturnNode(std::shared_ptr<Node> value, Location loc)
+            ReturnNode(std::shared_ptr<Node> value, LocationSpan loc)
                 : m_value(value), Node(loc) { }
             ~ReturnNode() = default;
         public:

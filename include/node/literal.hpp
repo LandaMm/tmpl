@@ -39,7 +39,7 @@ namespace AST
 		class LiteralNode : public Node
 		{
 		public:
-			LiteralNode(LiteralType type, std::shared_ptr<ValueHolder> value, Location loc)
+			LiteralNode(LiteralType type, std::shared_ptr<ValueHolder> value, LocationSpan loc)
                 : m_type(type), m_value(value), Node(loc) {}
 			~LiteralNode() {}
 

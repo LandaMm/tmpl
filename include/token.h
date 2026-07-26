@@ -150,10 +150,10 @@ namespace AST
 			inline std::shared_ptr<T> GetValue() const { return m_value; }
 		};
 	public:
-		Token(TokenType type, size_t line, size_t col)
-            : m_type(type), m_loc(Location(line, col)), m_value(nullptr) {}
-		Token(TokenType type, std::shared_ptr<ValueHolder> value, size_t line, size_t col)
-            : m_type(type), m_loc(Location(line, col)), m_value(value) {}
+		Token(TokenType type, Location begin, Location end)
+            : m_type(type), m_loc(begin, end), m_value(nullptr) {}
+		Token(TokenType type, std::shared_ptr<ValueHolder> value, Location begin, Location end)
+            : m_type(type), m_loc(begin, end), m_value(value) {}
 		~Token() = default;
 
 		Token(const Token&) = delete;
@@ -169,9 +169,9 @@ namespace AST
 			return holder ? holder->GetValue() : nullptr;
 		}
 	public:
-		inline size_t GetLine() const { return m_loc.line; }
-		inline size_t GetColumn() const { return m_loc.col; }
-        inline Location GetLocation() const { return m_loc; }
+		inline size_t GetLine() const { return m_loc.begin.line; }
+		inline size_t GetColumn() const { return m_loc.end.col; }
+        inline LocationSpan GetLocation() const { return m_loc; }
 	public:
 		static std::string GetTokenTypeCharacter(TokenType type)
 		{
@@ -182,7 +182,7 @@ namespace AST
 	private:
 		TokenType m_type;
 		std::shared_ptr<ValueHolder> m_value;
-        Location m_loc;
+        LocationSpan m_loc;
 	};
 }
 

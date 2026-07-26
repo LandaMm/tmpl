@@ -31,9 +31,9 @@ namespace AST
 		class ExpressionNode : public Node
 		{
 		public:
-			ExpressionNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right, Operator oper, Location loc)
+			ExpressionNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right, Operator oper, LocationSpan loc)
 				: m_left(left), m_right(right), m_operator(oper), Node(loc) {}
-			ExpressionNode(Location loc)
+			ExpressionNode(LocationSpan loc)
 				: m_left(nullptr), m_right(nullptr), m_operator(OperatorType::NONE), Node(loc) {}
 			~ExpressionNode() {}
 		public:

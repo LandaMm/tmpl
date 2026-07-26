@@ -16,7 +16,7 @@ namespace AST
 		class FunctionCall : public Node
 		{
 		public:
-			FunctionCall(std::shared_ptr<Node> callee, Location loc)
+			FunctionCall(std::shared_ptr<Node> callee, LocationSpan loc)
                 : m_callee(callee),
                   m_args(std::vector<std::shared_ptr<Node>>()),
                   m_generics(std::vector<std::shared_ptr<TypeNode>>()),
@@ -64,7 +64,7 @@ namespace AST
             FunctionDeclaration(
                     std::shared_ptr<Node> name,
                     std::shared_ptr<Statements::StatementsBody> body,
-                    Location loc
+                    LocationSpan loc
                     )
                 : m_name(name),
                 m_params(std::vector<std::shared_ptr<FunctionParam>>()),

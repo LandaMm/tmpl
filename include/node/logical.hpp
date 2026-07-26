@@ -21,7 +21,7 @@ namespace AST
 				None
 			};
 		public:
-			Condition(Location loc)
+			Condition(LocationSpan loc)
                 : m_left(nullptr), m_right(nullptr), m_operator(ConditionType::None), Node(loc) { }
 			~Condition() { }
 		public:
@@ -45,7 +45,7 @@ namespace AST
 		public:
 			inline NodeType GetType() const override { return NodeType::Ternary; }
         public:
-            TernaryNode(Location loc) : Node(loc) { }
+            TernaryNode(LocationSpan loc) : Node(loc) { }
 		public:
 			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
 			void SetRight(std::shared_ptr<Node> right) { m_right = right; }

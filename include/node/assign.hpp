@@ -26,7 +26,7 @@ namespace AST::Nodes
         PNode m_value;
 
     public:
-        AssignmentNode(PNode assignee, PNode value, AssignOperator op, Location loc)
+        AssignmentNode(PNode assignee, PNode value, AssignOperator op, LocationSpan loc)
             : m_assignee(assignee), m_value(value), m_operator(op), Node(loc) { }
 
 	public:

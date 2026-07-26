@@ -8,7 +8,7 @@ namespace AST::Nodes
     class BreakNode : public Node
     {
     public:
-        BreakNode(Location loc) : Node(loc) { }
+        BreakNode(LocationSpan loc) : Node(loc) { }
 	public:
 		inline NodeType GetType() const override { return NodeType::Break; };
     };
@@ -20,7 +20,7 @@ namespace AST::Nodes
         using PBody = std::shared_ptr<Statements::StatementsBody>;
 
     public:
-        WhileNode(PNode condition, PBody body, Location loc)
+        WhileNode(PNode condition, PBody body, LocationSpan loc)
             : m_condition(condition), m_body(body), Node(loc) { }
 
 	public:
@@ -41,7 +41,7 @@ namespace AST::Nodes
         using PNode = std::shared_ptr<Node>;
         using PBody = std::shared_ptr<Statements::StatementsBody>;
     public:
-        ForLoopNode(PNode decl, PNode condition, PNode assignment, PBody body, Location loc)
+        ForLoopNode(PNode decl, PNode condition, PNode assignment, PBody body, LocationSpan loc)
             : m_decl(decl),
               m_condition(condition),
               m_assignment(assignment),

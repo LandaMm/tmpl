@@ -27,14 +27,7 @@ namespace AST
 			}
 			else
 			{
-				if (std::shared_ptr<Token> prev = m_lexer->PrevToken())
-				{
-					GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), prev, m_lexer->GetToken(), type);
-				}
-				else
-				{
-					GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), m_lexer->GetToken(), m_lexer->GetToken(), type);
-				}
+				GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), m_lexer->GetToken(), m_lexer->GetToken(), type);
 			}
 		}
 	}

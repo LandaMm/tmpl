@@ -33,8 +33,9 @@ namespace Prelude
 		void NoInputFile();
 
     private:
-        void LogFileLocation(String filename, AST::Location loc, String prefix);
-        void LogFileLocation(String filename, AST::Location loc);
+        void LogCodePiece(String filename, AST::LocationSpan loc);
+        void LogFileLocation(String filename, AST::LocationSpan loc, String prefix);
+        void LogFileLocation(String filename, AST::LocationSpan loc);
         void LogPrefix(String prefix);
 
 	public: // Lexer (Tokenizer)
@@ -48,7 +49,7 @@ namespace Prelude
 		void UnexpectedToken(String filename, std::shared_ptr<AST::Token> locToken, std::shared_ptr<AST::Token> gotToken, AST::TokenType expectedTokenType);
 		void UnexpectedToken(String filename, std::shared_ptr<AST::Token> gotToken, String expected);
 		void MissingConstantDefinition(String filename, std::shared_ptr<AST::Token> token);
-        void UnexpectedFnModifier(String filename, std::shared_ptr<AST::Token> gotToken, AST::Location loc);
+        void UnexpectedFnModifier(String filename, std::shared_ptr<AST::Token> gotToken, AST::LocationSpan loc);
 
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);

@@ -16,7 +16,7 @@ namespace AST
             using PId = std::shared_ptr<IdentifierNode>;
 
         public:
-            TypeNode(PId target, Location loc)
+            TypeNode(PId target, LocationSpan loc)
                 : m_typename(target), Node(loc) { }
 
         public:
@@ -38,16 +38,16 @@ namespace AST
         class TemplateGeneric
         {
         public:
-            TemplateGeneric(std::string name, Location loc)
+            TemplateGeneric(std::string name, LocationSpan loc)
                 : m_name(name), m_loc(loc) { }
 
         public:
             inline std::string GetName() const { return m_name; }
-            inline Location GetLocation() const { return m_loc; }
+            inline LocationSpan GetLocation() const { return m_loc; }
 
         private:
             std::string m_name;
-            Location m_loc;
+            LocationSpan m_loc;
             // TODO: base and default type
         };
 
@@ -59,7 +59,7 @@ namespace AST
             using PTG = std::shared_ptr<TemplateGeneric>;
 
         public:
-            TypeDfNode(PId name, Location loc)
+            TypeDfNode(PId name, LocationSpan loc)
                 : m_name(name),
                   m_value(nullptr),
                   m_generics(std::vector<PTG>()),

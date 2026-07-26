@@ -17,7 +17,7 @@ namespace AST
 		class UnaryNode : public Node
 		{
 		public:
-			UnaryNode(UnaryOperator op, std::shared_ptr<Node> target, Location loc)
+			UnaryNode(UnaryOperator op, std::shared_ptr<Node> target, LocationSpan loc)
                 : m_operator(op), m_target(target), Node(loc) {}
 			~UnaryNode() {}
 

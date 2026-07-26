@@ -6,7 +6,6 @@
 #include "node/program.hpp"
 #include "node/identifier.hpp"
 #include "node/function.hpp"
-#include "node/list.hpp"
 #include "node/type.hpp"
 #include "error.h"
 #include <memory>
@@ -20,11 +19,11 @@ namespace AST
 		std::shared_ptr<Lexer> m_lexer;
 
     private:
-        std::vector<AST::Location> m_breaks;
+        std::vector<AST::LocationSpan> m_breaks;
 
 	public:
 		Parser(std::shared_ptr<Lexer> lexer)
-            : m_lexer(lexer), m_breaks(std::vector<AST::Location>()),
+            : m_lexer(lexer),
               m_root(std::make_shared<Nodes::ProgramNode>()) {}
 		~Parser() {}
 
@@ -43,7 +42,6 @@ namespace AST
 	private: // Common
 		std::shared_ptr<Nodes::IdentifierNode> Id();
 		std::shared_ptr<Nodes::FunctionCall> FunctionCall(std::shared_ptr<Node> callee);
-		std::shared_ptr<Nodes::ListNode> List();
 
 	private: // Expression
 		std::shared_ptr<Node> Factor();
@@ -55,9 +53,6 @@ namespace AST
 
     private: // Checkers
         bool IsTypeCastAhead();
-
-	private: // Object Member
-		std::shared_ptr<Node> ObjectMember(std::shared_ptr<Node> obj);
 
     private: // Helpers
         bool ParseGenericType();

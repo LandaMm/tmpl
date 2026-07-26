@@ -10,7 +10,7 @@ namespace AST
 		class IdentifierNode : public Node
 		{
 		public:
-			IdentifierNode(std::string name, Location loc): m_name(name), Node(loc) { }
+			IdentifierNode(std::string name, LocationSpan loc): m_name(name), Node(loc) { }
 			~IdentifierNode() { }
 
 		public:

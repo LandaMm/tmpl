@@ -13,9 +13,9 @@ namespace AST
 		class VarDeclaration : public Node
 		{
 		public:
-			VarDeclaration(std::shared_ptr<TypeNode> type, std::shared_ptr<std::string> name, std::shared_ptr<Node> value, bool editable, Location loc)
+			VarDeclaration(std::shared_ptr<TypeNode> type, std::shared_ptr<std::string> name, std::shared_ptr<Node> value, bool editable, LocationSpan loc)
 				: m_type(type), m_name(name), m_value(value), m_editable(editable), Node(loc) { }
-			VarDeclaration(std::shared_ptr<TypeNode> type, std::shared_ptr<std::string> name, Location loc)
+			VarDeclaration(std::shared_ptr<TypeNode> type, std::shared_ptr<std::string> name, LocationSpan loc)
 				: m_type(type), m_name(name), m_value(nullptr), m_editable(true), Node(loc) { }
 
 		public:

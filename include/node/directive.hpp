@@ -15,7 +15,7 @@ namespace AST
         private:
             String m_module;
         public:
-            ImportDirective(String module, Location loc)
+            ImportDirective(String module, LocationSpan loc)
                 : m_module(module), Node(loc) { }
             ~ImportDirective() = default;
         public:
@@ -29,7 +29,7 @@ namespace AST
         private:
             std::shared_ptr<Node> m_target;
         public:
-            ExternDirective(std::shared_ptr<Node> target, Location loc)
+            ExternDirective(std::shared_ptr<Node> target, LocationSpan loc)
                 : m_target(target), Node(loc) { }
             ~ExternDirective() = default;
         public:
