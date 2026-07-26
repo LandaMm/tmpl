@@ -2,6 +2,7 @@
 #include"../../include/parser.h"
 #include "../../include/node/identifier.hpp"
 #include "include/token.h"
+#include "include/basics/string.hpp"
 
 namespace AST
 {
@@ -9,7 +10,7 @@ namespace AST
 	{
 		auto token = m_lexer->GetToken();
 		Eat(TokenType::Id);
-		std::shared_ptr<std::string> name = token->GetValue<std::string>();
+		auto name = token->GetValue<String>();
 		return std::make_shared<Nodes::IdentifierNode>(name->c_str(), token->GetLocation());
 	}
 
