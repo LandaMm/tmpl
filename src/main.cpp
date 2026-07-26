@@ -14,19 +14,19 @@ int main(int argc, char **argv)
 
     CliRunner cliRunner(argc, argv);
 
-    std::string filename = cliRunner.GetScriptFilename();
+    String filename = cliRunner.GetScriptFilename();
 
-	std::ifstream input(filename);
+	FileReader reader(filename.c_str());
 
     Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
 
-    if (!input.good())
+    if (!reader.Ok())
     {
         errManager.FailedOpeningFile(filename);
         return 1;
     }
 
-	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(input, filename);
+	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(reader, filename);
 	lexer->Tokenize();
 
 	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
