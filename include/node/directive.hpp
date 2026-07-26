@@ -4,32 +4,34 @@
 #include "node.h"
 #include "node/function.hpp"
 
+#include "basics/string.hpp"
+
 namespace AST
 {
     namespace Nodes
     {
-        class RequireMacro : public Node
+        class ImportDirective : public Node
         {
         private:
-            std::string m_module;
+            String m_module;
         public:
-            RequireMacro(std::string module, Location loc)
+            ImportDirective(String module, Location loc)
                 : m_module(module), Node(loc) { }
-            ~RequireMacro() = default;
+            ~ImportDirective() = default;
         public:
-            inline std::string GetModule() const { return m_module; }
+            inline String GetModule() const { return m_module; }
         public:
             inline NodeType GetType() const override { return NodeType::Require; };
         };
 
-        class ExternMacro : public Node
+        class ExternDirective : public Node
         {
         private:
             std::shared_ptr<Node> m_target;
         public:
-            ExternMacro(std::shared_ptr<Node> target, Location loc)
+            ExternDirective(std::shared_ptr<Node> target, Location loc)
                 : m_target(target), Node(loc) { }
-            ~ExternMacro() = default;
+            ~ExternDirective() = default;
         public:
             inline std::shared_ptr<FunctionDeclaration> GetFnSignature() const { return std::dynamic_pointer_cast<FunctionDeclaration>(m_target); }
         public:

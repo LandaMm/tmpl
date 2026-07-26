@@ -61,7 +61,7 @@ Use the `examples/` folder to explore starter scripts and automation workflows.
 |----------------|----------|
 | Core DSL       | ✅ Working |
 | C++ module API | 🔧 In progress |
-| Macros & Type checks | 🚧 WIP |
+| Directives & Type checks | 🚧 WIP |
 | CLI & Formatting | 🚧 To do |
 | Documentation & Examples | 📝 On the way |
 

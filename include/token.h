@@ -47,8 +47,9 @@ namespace AST
 		Semicolon,
 		SingleArrow,
 		At,
+		Hash,
 		// Keywords
-		Require,
+		Import,
 		If,
 		Else,
 		Var,
@@ -110,8 +111,9 @@ namespace AST
 		"semicolon",
 		"->",
 		"@",
+		"#",
 		// Keywords
-		"require",
+		"import",
 		"if",
 		"else",
 		"var",

@@ -2,22 +2,23 @@
 
 #include <memory>
 #include "parser.h"
-#include "node/macros.hpp"
+#include "node/directive.hpp"
 
 namespace AST
 {
     using namespace AST::Nodes;
 
-    std::shared_ptr<Node> Parser::RequireStatement()
+    std::shared_ptr<Node> Parser::ImportStatement()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
-        Eat(TokenType::Require);
+        Eat(TokenType::Import);
 
         auto token = m_lexer->GetToken();
         Eat(TokenType::String);
-        std::shared_ptr<std::string> module = token->GetValue<std::string>();
+        auto module = token->GetValue<String>();
+        assert(module);
 
-        return std::make_shared<RequireMacro>(*module, loc);
+        return std::make_shared<ImportDirective>(*module, loc);
     }
 
     std::shared_ptr<Node> Parser::ExternStatement()
@@ -29,7 +30,7 @@ namespace AST
         auto fnSign = FunctionSignature();
         Eat(TokenType::Semicolon);
 
-        return std::make_shared<ExternMacro>(fnSign, loc);
+        return std::make_shared<ExternDirective>(fnSign, loc);
     }
 }
 

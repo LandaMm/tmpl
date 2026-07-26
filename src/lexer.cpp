@@ -56,10 +56,10 @@ namespace AST
 				continue;
 			}
 
-			if (ch == '#')
+			if (ch == '/' && m_pos + 1 < m_code.Size() && m_code[m_pos + 1] == '/')
 			{
 				// skip comment symbol
-				m_pos++;
+				m_pos += 2;
 				Comment();
 				continue;
 			}
@@ -114,6 +114,9 @@ namespace AST
 				break;
 			case '@':
 				m_tokens.Push(std::make_shared<Token>(TokenType::At, m_line, m_col));
+				break;
+			case '#':
+				m_tokens.Push(std::make_shared<Token>(TokenType::Hash, m_line, m_col));
 				break;
 			case '-':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '>')
@@ -269,8 +272,8 @@ namespace AST
 			}
 		}
 
-		if (*id == "require")
-			m_tokens.Push(std::make_shared<Token>(TokenType::Require, m_line, m_col));
+		if (*id == "import")
+			m_tokens.Push(std::make_shared<Token>(TokenType::Import, m_line, m_col));
 		else if (*id == "if")
 			m_tokens.Push(std::make_shared<Token>(TokenType::If, m_line, m_col));
 		else if (*id == "else")

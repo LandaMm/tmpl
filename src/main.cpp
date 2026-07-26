@@ -1,4 +1,3 @@
-
 #include <cassert>
 #include <memory>
 #include "lexer.h"

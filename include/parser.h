@@ -80,8 +80,8 @@ namespace AST
         std::shared_ptr<Node> WhileLoop();
         std::shared_ptr<Node> ForLoop();
         std::shared_ptr<Node> BreakStmt();
-    private: // Macros
-        std::shared_ptr<Node> RequireStatement();
+    private: // Directives
+        std::shared_ptr<Node> ImportStatement();
         std::shared_ptr<Node> ExternStatement();
 	};
 }

@@ -99,7 +99,7 @@ namespace AST
             }
             break;
         }
-        case TokenType::At:
+        case TokenType::Hash:
         {
             auto tokenType = Peek();
             if (tokenType == TokenType::_EOF)
@@ -108,12 +108,12 @@ namespace AST
                 manager.UnexpectedEOF(GetFilename(), token->GetLine(), token->GetColumn());
                 return nullptr;
             }
-            Eat(TokenType::At);
-            // Macros
+            Eat(TokenType::Hash);
+            // Directive
             switch (tokenType)
             {
-                case TokenType::Require:
-                    stmt = RequireStatement();
+                case TokenType::Import:
+                    stmt = ImportStatement();
                     break;
                 case TokenType::Extern:
                     stmt = ExternStatement();
