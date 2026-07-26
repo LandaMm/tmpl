@@ -14,6 +14,12 @@ file(GLOB_RECURSE SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/node/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/parser/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/basics/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/basics/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/node/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/node/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/.hpp"
 )
 
 add_executable(cheetah ${SOURCES})
