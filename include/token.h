@@ -151,15 +151,17 @@ namespace AST
 		public:
 			inline std::shared_ptr<T> GetValue() const { return m_value; }
 		};
-	private:
-		TokenType m_type;
-		std::shared_ptr<ValueHolder> m_value;
-        Location m_loc;
 	public:
 		Token(TokenType type, size_t line, size_t col)
             : m_type(type), m_loc(Location(line, col)), m_value(nullptr) {}
 		Token(TokenType type, std::shared_ptr<ValueHolder> value, size_t line, size_t col)
             : m_type(type), m_loc(Location(line, col)), m_value(value) {}
+		~Token() = default;
+
+		Token(const Token&) = delete;
+		Token& operator=(const Token&) = delete;
+		Token(Token&&) = delete;
+		Token& operator=(Token&&) = delete;
 	public:
 		inline TokenType GetType() const { return m_type; }
 		template<typename T>
@@ -179,6 +181,10 @@ namespace AST
 		}
 	public:
 		friend std::ostream& operator<<(std::ostream& stream, const Token& token);
+	private:
+		TokenType m_type;
+		std::shared_ptr<ValueHolder> m_value;
+        Location m_loc;
 	};
 }
 
