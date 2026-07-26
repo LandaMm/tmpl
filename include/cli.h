@@ -1,34 +1,31 @@
+#pragma once
 
-
-#ifndef CLI_H
-#define CLI_H
 #include<iostream>
-#include<string>
-#include<vector>
+#include "basics/array.hpp"
+#include "basics/string.hpp"
 
 namespace Runtime
 {
-
-    // Parse args and help main process identify procedure needed to run
-    // by operating with local `.tmpl` folder that should contain
-    // all the scripts
     class CliRunner
     {
-    private:
-        int m_argc;
-        char** m_argv;
     public:
         CliRunner(int argc, char* argv[]);
         ~CliRunner() = default;
+
+        CliRunner(const CliRunner&) = delete;
+        CliRunner& operator=(const CliRunner&) = delete;
+        CliRunner(CliRunner&&) = delete;
+        CliRunner& operator=(CliRunner&&) = delete;
     private:
         void CheckBasicCommands();
     public:
-        std::string GetScriptFilename();
-        std::string GetProcedureName();
-        std::vector<std::string> GetProcedureArgs();
+        String GetScriptFilename();
+        String GetProcedureName();
+        Array<String> GetProcedureArgs();
         void ShowUsage();
+    private:
+        int m_argc;
+        char** m_argv;
     };
 }
-
-#endif // CLI_H
 

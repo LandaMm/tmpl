@@ -31,7 +31,7 @@ namespace Runtime
         }
     }
 
-    std::string CliRunner::GetScriptFilename()
+    String CliRunner::GetScriptFilename()
     {
         Prelude::ErrorManager& errMan = Prelude::ErrorManager::getInstance();
         // example: tmpl <script_name> [procedure]
@@ -56,10 +56,10 @@ namespace Runtime
 
         std::filesystem::path scriptFilename = cwd / ".tmpl/" / (filename + ".tmpl");
 
-        return scriptFilename.string();
+        return static_cast<const char*>(scriptFilename.string().c_str());
     }
 
-    std::string CliRunner::GetProcedureName()
+    String CliRunner::GetProcedureName()
     {
         Prelude::ErrorManager& errMan = Prelude::ErrorManager::getInstance();
         // example: tmpl <script_name> [procedure]
@@ -68,25 +68,25 @@ namespace Runtime
             return "main";
         }
 
-        std::string procedure = m_argv[2];
+        String procedure = m_argv[2];
 
         return procedure;
     }
 
-    std::vector<std::string> CliRunner::GetProcedureArgs()
+    Array<String> CliRunner::GetProcedureArgs()
     {
+        Array<String> procArgs;
+
         Prelude::ErrorManager& errMan = Prelude::ErrorManager::getInstance();
         // example: tmpl <script_name> [procedure] [...args]
         if (m_argc < 4)
         {
-            return std::vector<std::string>();
+            return procArgs;
         }
-
-        std::vector<std::string> procArgs;
 
         for (int i = 3; i < m_argc; i++)
         {
-            procArgs.push_back(m_argv[i]);
+            procArgs.Push(m_argv[i]);
         }
 
         return procArgs;
