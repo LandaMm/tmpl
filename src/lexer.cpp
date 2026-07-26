@@ -221,7 +221,14 @@ namespace AST
 				m_tokens.Push(std::make_shared<Token>(TokenType::Question, m_line, m_col));
 				break;
 			case ':':
-				m_tokens.Push(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
+				if (m_pos < m_code.Size() && m_code[m_pos + 1] == ':')
+				{
+					m_tokens.Push(std::make_shared<Token>(TokenType::DoubleColon, m_line, m_col));
+					m_pos++;
+					m_col++;
+				}
+				else
+					m_tokens.Push(std::make_shared<Token>(TokenType::Colon, m_line, m_col));
 				break;
 			default:
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -286,22 +293,14 @@ namespace AST
 			m_tokens.Push(std::make_shared<Token>(TokenType::Const, m_line, m_col));
 		else if (*id == "return")
 			m_tokens.Push(std::make_shared<Token>(TokenType::Return, m_line, m_col));
-		else if (*id == "fn")
-            m_tokens.Push(std::make_shared<Token>(TokenType::Fn, m_line, m_col));
-		else if (*id == "export")
-            m_tokens.Push(std::make_shared<Token>(TokenType::Export, m_line, m_col));
 		else if (*id == "true")
             m_tokens.Push(std::make_shared<Token>(TokenType::True, m_line, m_col));
 		else if (*id == "false")
             m_tokens.Push(std::make_shared<Token>(TokenType::False, m_line, m_col));
 		else if (*id == "typedf")
             m_tokens.Push(std::make_shared<Token>(TokenType::TypeDf, m_line, m_col));
-		else if (*id == "construct")
-            m_tokens.Push(std::make_shared<Token>(TokenType::Construct, m_line, m_col));
 		else if (*id == "new")
             m_tokens.Push(std::make_shared<Token>(TokenType::New, m_line, m_col));
-		else if (*id == "cast")
-            m_tokens.Push(std::make_shared<Token>(TokenType::Cast, m_line, m_col));
 		else if (*id == "while")
             m_tokens.Push(std::make_shared<Token>(TokenType::While, m_line, m_col));
 		else if (*id == "for")
