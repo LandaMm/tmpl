@@ -56,13 +56,6 @@ namespace AST
             std::shared_ptr<IdentifierNode> m_name;
         };
 
-        enum class FunctionModifier
-        {
-            Construct,
-            Cast,
-            None,
-        };
-
         class FunctionDeclaration : public Node
         {
         private:
@@ -71,7 +64,6 @@ namespace AST
             FunctionDeclaration(
                     std::shared_ptr<Node> name,
                     std::shared_ptr<Statements::StatementsBody> body,
-                    FunctionModifier modifier,
                     Location loc
                     )
                 : m_name(name),
@@ -79,7 +71,6 @@ namespace AST
                 m_generics(std::vector<std::shared_ptr<TemplateGeneric>>()),
                 m_ret_type(nullptr),
                 m_body(body),
-                m_modifier(modifier),
                 m_index(0),
                 Node(loc) { }
             ~FunctionDeclaration() = default;
@@ -91,7 +82,6 @@ namespace AST
             inline std::shared_ptr<Node> GetName() const { return m_name; }
             inline std::shared_ptr<TypeNode> GetReturnType() const { return m_ret_type; }
             inline std::shared_ptr<Statements::StatementsBody> GetBody() const { return m_body; }
-            inline FunctionModifier GetModifier() const { return m_modifier; }
         public:
             inline std::shared_ptr<FunctionParam> GetParam(unsigned int index)
                 { return m_params[index]; }
@@ -108,7 +98,6 @@ namespace AST
             std::shared_ptr<TypeNode> m_ret_type;
             std::shared_ptr<Statements::StatementsBody> m_body;
             std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
-            FunctionModifier m_modifier;
         };
 	}
 }
