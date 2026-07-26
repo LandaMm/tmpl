@@ -1,11 +1,13 @@
-#ifndef LEXER_H
-#define LEXER_H
+#pragma once
+
 #include <algorithm>
-#include <vector>
-#include <string>
 #include <memory>
 #include <fstream>
+
 #include "token.h"
+#include "basics/string.hpp"
+#include "basics/array.hpp"
+#include "basics/file.hpp"
 
 namespace AST
 {
@@ -18,35 +20,12 @@ namespace AST
 
 	class Lexer
 	{
-	private:
-		std::vector<std::shared_ptr<Token>> m_tokens;
-		std::string m_filename;
-
-	private: // tokenizer
-		size_t m_pos;
-		std::string m_code;
-		size_t m_line;
-		size_t m_col;
-
-	private: // token manager
-		size_t m_index;
-        std::shared_ptr<LexerState> m_state;
+	public:
+		Lexer(String code);
+		Lexer(FileReader& reader, String filename);
 
 	public:
-		Lexer(std::string code) : m_code(code)
-		{
-			m_tokens = std::vector<std::shared_ptr<Token>>();
-			m_tokens.reserve(10);
-
-			m_index = 0;
-			m_pos = 0;
-			m_line = 1;
-			m_col = 1;
-		}
-		Lexer(std::ifstream &input, std::string filename);
-
-	public:
-		std::vector<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
+		Array<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
 
     public:
         bool OneOf(const std::vector<TokenType>& types, TokenType needle)
@@ -61,7 +40,7 @@ namespace AST
 	public:
 		void Tokenize();
 		void Id();
-		void String();
+		void StringLiteral();
 		void Number();
 		void Comment();
 
@@ -73,8 +52,20 @@ namespace AST
 		std::shared_ptr<Token> SeekToken();
 		std::shared_ptr<Token> NextToken();
 		std::shared_ptr<Token> PrevToken();
-		inline std::string GetFilename() const { return m_filename; }
+		inline String GetFilename() const { return m_filename; }
+	private:
+		Array<std::shared_ptr<Token>> m_tokens;
+		String m_filename;
+
+	private: // tokenizer
+		size_t m_pos;
+		String m_code;
+		size_t m_line;
+		size_t m_col;
+
+	private: // token manager
+		size_t m_index;
+        std::shared_ptr<LexerState> m_state;
 	};
 }
 
-#endif
