@@ -27,16 +27,16 @@ namespace AST
 		public:
 			inline NodeType GetType() const override { return NodeType::Condition; }
 		public:
-			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
-			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
+			void SetLeft(Node* left) { m_left = left; }
+			void SetRight(Node* right) { m_right = right; }
 			void SetOp(ConditionType op) { m_operator = op; }
 		public:
-			inline std::shared_ptr<Node> GetLeft() { return m_left; }
-			inline std::shared_ptr<Node> GetRight() { return m_right; }
+			inline Node* GetLeft() { return m_left; }
+			inline Node* GetRight() { return m_right; }
 			inline ConditionType GetOperator() { return m_operator; }
 		private:
-			std::shared_ptr<Node> m_left;
-			std::shared_ptr<Node> m_right;
+			Node* m_left;
+			Node* m_right;
 			ConditionType m_operator;
 		};
 
@@ -47,17 +47,17 @@ namespace AST
         public:
             TernaryNode(LocationSpan loc) : Node(loc) { }
 		public:
-			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
-			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
-			void SetCondition(std::shared_ptr<Node> condition) { m_condition = condition; }
+			void SetLeft(Node* left) { m_left = left; }
+			void SetRight(Node* right) { m_right = right; }
+			void SetCondition(Node* condition) { m_condition = condition; }
 		public:
-			inline std::shared_ptr<Node> GetLeft() { return m_left; }
-			inline std::shared_ptr<Node> GetRight() { return m_right; }
-			inline std::shared_ptr<Node> GetCondition() { return m_condition; }
+			inline Node* GetLeft() { return m_left; }
+			inline Node* GetRight() { return m_right; }
+			inline Node* GetCondition() { return m_condition; }
 		private:
-			std::shared_ptr<Node> m_condition;
-			std::shared_ptr<Node> m_left;
-			std::shared_ptr<Node> m_right;
+			Node* m_condition;
+			Node* m_left;
+			Node* m_right;
 		};
 	}
 }

@@ -4,7 +4,7 @@
 
 namespace AST
 {
-	std::shared_ptr<Node> Parser::VariableDeclaration()
+	Node* Parser::VariableDeclaration()
 	{
         auto keyword = m_lexer->GetToken();
 		bool editable = keyword->GetType() == TokenType::Var;
@@ -15,12 +15,12 @@ namespace AST
 		else
 			Eat(TokenType::Const);
 
-		std::shared_ptr<Nodes::TypeNode> type = Type();
+		Nodes::TypeNode* type = Type();
 
-		std::shared_ptr<Nodes::IdentifierNode> nameNode = Id();
-		std::shared_ptr<std::string> name = std::make_shared<std::string>(nameNode->GetName());
+		Nodes::IdentifierNode* nameNode = Id();
+		std::string* name = m_arena.Alloc<std::string>(nameNode->GetName());
 
-		std::shared_ptr<Node> value = nullptr;
+		Node* value = nullptr;
 
 		if (m_lexer->GetToken()->GetType() == TokenType::Equal)
 		{
@@ -35,9 +35,9 @@ namespace AST
 		}
 
 		if (value != nullptr)
-			return std::make_shared<Nodes::VarDeclaration>(type, name, value, editable, varLoc);
+			return m_arena.Alloc<Nodes::VarDeclaration>(type, name, value, editable, varLoc);
 		else
-			return std::make_shared<Nodes::VarDeclaration>(type, name, varLoc);
+			return m_arena.Alloc<Nodes::VarDeclaration>(type, name, varLoc);
 	}
 }
 

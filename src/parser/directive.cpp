@@ -8,7 +8,7 @@ namespace AST
 {
     using namespace AST::Nodes;
 
-    std::shared_ptr<Node> Parser::ImportStatement()
+    Node* Parser::ImportStatement()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Import);
@@ -18,10 +18,10 @@ namespace AST
         auto module = token->GetValue<String>();
         assert(module);
 
-        return std::make_shared<ImportDirective>(*module, loc);
+        return m_arena.Alloc<ImportDirective>(*module, loc);
     }
 
-    std::shared_ptr<Node> Parser::ExternStatement()
+    Node* Parser::ExternStatement()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Extern);
@@ -30,7 +30,7 @@ namespace AST
         auto fnSign = FunctionSignature();
         Eat(TokenType::Semicolon);
 
-        return std::make_shared<ExternDirective>(fnSign, loc);
+        return m_arena.Alloc<ExternDirective>(fnSign, loc);
     }
 }
 

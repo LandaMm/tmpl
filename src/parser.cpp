@@ -45,15 +45,15 @@ namespace AST
 		}
 	}
 	
-	std::shared_ptr<Node> Parser::CompileTimeStatement()
+	Node* Parser::CompileTimeStatement()
 	{
 		return FunctionDeclaration();
 	}
 
-	std::shared_ptr<Node> Parser::Statement()
+	Node* Parser::Statement()
 	{
 		auto token = m_lexer->GetToken();
-		std::shared_ptr<Node> stmt = nullptr;
+		Node* stmt = nullptr;
 		switch (token->GetType())
 		{
 		case TokenType::If:

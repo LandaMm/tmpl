@@ -6,17 +6,17 @@
 
 namespace AST
 {
-	std::shared_ptr<Nodes::IdentifierNode> Parser::Id()
+	Nodes::IdentifierNode* Parser::Id()
 	{
 		auto token = m_lexer->GetToken();
 		Eat(TokenType::Id);
 		auto name = token->GetValue<String>();
-		return std::make_shared<Nodes::IdentifierNode>(name->c_str(), token->GetLocation());
+		return m_arena.Alloc<Nodes::IdentifierNode>(name->c_str(), token->GetLocation());
 	}
 
-	std::shared_ptr<Nodes::FunctionCall> Parser::FunctionCall(std::shared_ptr<Node> callee)
+	Nodes::FunctionCall* Parser::FunctionCall(Node* callee)
 	{
-        auto fnCall = std::make_shared<Nodes::FunctionCall>(callee, callee->GetLocation());
+        auto fnCall = m_arena.Alloc<Nodes::FunctionCall>(callee, callee->GetLocation());
 
         if (m_lexer->GetToken()->GetType() == TokenType::Less)
         {
@@ -35,7 +35,7 @@ namespace AST
 		Eat(TokenType::OpenBracket);
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
-			std::shared_ptr<Node> arg = Expr();
+			Node* arg = Expr();
             fnCall->AddArgument(arg);
 			if (m_lexer->GetToken()->GetType() == TokenType::Comma)
 			{

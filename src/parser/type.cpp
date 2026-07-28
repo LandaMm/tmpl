@@ -4,11 +4,11 @@
 
 namespace AST
 {
-    std::shared_ptr<Nodes::TypeNode> Parser::Type()
+    Nodes::TypeNode* Parser::Type()
     {
         auto target = Id();
 
-        auto typ = std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
+        auto typ = m_arena.Alloc<Nodes::TypeNode>(target, target->GetLocation());
 
         if (m_lexer->GetToken()->GetType() == TokenType::Less)
         {
@@ -31,9 +31,9 @@ namespace AST
         return typ;
     }
 
-    std::shared_ptr<Nodes::TypeNode> Parser::Type(std::shared_ptr<Nodes::IdentifierNode> target)
+    Nodes::TypeNode* Parser::Type(Nodes::IdentifierNode* target)
     {
-        auto typ = std::make_shared<Nodes::TypeNode>(target, target->GetLocation());
+        auto typ = m_arena.Alloc<Nodes::TypeNode>(target, target->GetLocation());
 
         if (m_lexer->GetToken()->GetType() == TokenType::Less)
         {
@@ -56,7 +56,7 @@ namespace AST
         return typ;
     }
 
-    std::shared_ptr<Nodes::TemplateGeneric> Parser::TmplGeneric()
+    Nodes::TemplateGeneric* Parser::TmplGeneric()
     {
         auto currToken = m_lexer->GetToken()->GetType();
         if (currToken == TokenType::Comma)
@@ -66,17 +66,17 @@ namespace AST
 
         Eat(TokenType::Question);
         auto genericNode = Id();
-        auto generic = std::make_shared<Nodes::TemplateGeneric>(genericNode->GetName(), genericNode->GetLocation());
+        auto generic = m_arena.Alloc<Nodes::TemplateGeneric>(genericNode->GetName(), genericNode->GetLocation());
         return generic;
     }
 
-    std::shared_ptr<Nodes::CastNode> Parser::Cast(std::shared_ptr<Nodes::TypeNode> typ)
+    Nodes::CastNode* Parser::Cast(Nodes::TypeNode* typ)
     {
         Eat(TokenType::CloseBracket);
 
         auto target = Factor();
 
-        return std::make_shared<Nodes::CastNode>(typ, target, typ->GetLocation());
+        return m_arena.Alloc<Nodes::CastNode>(typ, target, typ->GetLocation());
     }
 
     bool Parser::IsTypeCastAhead()
@@ -122,14 +122,14 @@ namespace AST
         }, curr);
     }
 
-    std::shared_ptr<Nodes::TypeDfNode> Parser::TypeDfStatement()
+    Nodes::TypeDfNode* Parser::TypeDfStatement()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::TypeDf);
 
         auto typName = Id();
 
-        auto typDf = std::make_shared<Nodes::TypeDfNode>(typName, loc);
+        auto typDf = m_arena.Alloc<Nodes::TypeDfNode>(typName, loc);
 
         if (m_lexer->GetToken()->GetType() == TokenType::Less)
         {

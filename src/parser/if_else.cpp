@@ -3,18 +3,18 @@
 
 namespace AST
 {
-	std::shared_ptr<Node> Parser::IfElseStatement()
+	Node* Parser::IfElseStatement()
 	{
 		// if 5 == 5 ? true : false {} else {}
         auto loc = m_lexer->GetToken()->GetLocation();
 		Eat(TokenType::If);
 		// Eat(TokenType::OpenBracket);
-		std::shared_ptr<Node> condition = Ternary();
+		Node* condition = Ternary();
 		// Eat(TokenType::CloseBracket);
 
-		auto ifElse = std::make_shared<Statements::IfElseStatement>(condition, loc);
-        std::shared_ptr<Statements::StatementsBody> body =
-            std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
+		auto ifElse = m_arena.Alloc<Statements::IfElseStatement>(condition, loc);
+        Statements::StatementsBody* body =
+            m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
 		if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
 		{
@@ -25,7 +25,7 @@ namespace AST
 			Eat(TokenType::OpenCurly);
 			while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 			{
-				std::shared_ptr<Node> statement = Statement();
+				Node* statement = Statement();
 				body->AddItem(statement);
 			}
 			Eat(TokenType::CloseCurly);
@@ -39,12 +39,12 @@ namespace AST
 
 			if (m_lexer->GetToken()->GetType() == TokenType::If)
 			{
-				std::shared_ptr<Node> elseNode = IfElseStatement();
+				Node* elseNode = IfElseStatement();
 				ifElse->SetElseStatement(elseNode);
 			}
 			else
 			{
-				auto stmts = std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
+				auto stmts = m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 				if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
 				{
 					stmts->AddItem(Statement());
@@ -54,7 +54,7 @@ namespace AST
 					Eat(TokenType::OpenCurly);
 					while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 					{
-						std::shared_ptr<Node> statement = Statement();
+						Node* statement = Statement();
 						stmts->AddItem(statement);
 					}
 					Eat(TokenType::CloseCurly);

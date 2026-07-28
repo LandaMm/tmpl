@@ -31,7 +31,7 @@ namespace AST
 		class ExpressionNode : public Node
 		{
 		public:
-			ExpressionNode(std::shared_ptr<Node> left, std::shared_ptr<Node> right, Operator oper, LocationSpan loc)
+			ExpressionNode(Node* left, Node* right, Operator oper, LocationSpan loc)
 				: m_left(left), m_right(right), m_operator(oper), Node(loc) {}
 			ExpressionNode(LocationSpan loc)
 				: m_left(nullptr), m_right(nullptr), m_operator(OperatorType::NONE), Node(loc) {}
@@ -39,16 +39,16 @@ namespace AST
 		public:
 			inline NodeType GetType() const override { return NodeType::Expression; };
 		public:
-			inline std::shared_ptr<Node> GetLeft() const { return m_left; }
-			inline std::shared_ptr<Node> GetRight() const { return m_right; }
+			inline Node* GetLeft() const { return m_left; }
+			inline Node* GetRight() const { return m_right; }
 			inline Operator GetOperator() const { return m_operator; }
-			void SetRight(std::shared_ptr<Node> right) { m_right = right; }
-			void SetLeft(std::shared_ptr<Node> left) { m_left = left; }
+			void SetRight(Node* right) { m_right = right; }
+			void SetLeft(Node* left) { m_left = left; }
 			void SetOperator(Operator op) { m_operator = op; }
 		private:
-			std::shared_ptr<Node> m_left;
+			Node* m_left;
 			Operator m_operator;
-			std::shared_ptr<Node> m_right;
+			Node* m_right;
 		};
 	}
 }

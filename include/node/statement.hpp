@@ -12,13 +12,13 @@ namespace AST
 		{
 		public:
 			StatementsNode(LocationSpan loc)
-                : m_index(0), m_body(std::vector<std::shared_ptr<Node>>()), Node(loc) {}
+                : m_index(0), m_body(std::vector<Node*>()), Node(loc) {}
 
 		public:
-			void AddItem(std::shared_ptr<Node> item) { m_body.push_back(item); }
+			void AddItem(Node* item) { m_body.push_back(item); }
 
         public:
-            inline std::shared_ptr<Node> GetItem(unsigned int index) { return m_body[index]; }
+            inline Node* GetItem(unsigned int index) { return m_body[index]; }
 
         public:
             inline bool IsBlock() override { return true; }
@@ -27,7 +27,7 @@ namespace AST
 			inline size_t GetSize() const { return m_body.size(); }
 
 		private:
-			std::vector<std::shared_ptr<Node>> m_body;
+			std::vector<Node*> m_body;
 			size_t m_index;
 		};
 
@@ -44,7 +44,7 @@ namespace AST
 		class IfElseStatement : public Node
 		{
 		public:
-			IfElseStatement(std::shared_ptr<Node> condition, LocationSpan loc)
+			IfElseStatement(Node* condition, LocationSpan loc)
 				: m_condition(condition), m_else_statement(nullptr), Node(loc)
 			{
 			}
@@ -54,17 +54,17 @@ namespace AST
             inline bool IsBlock() override { return true; }
 
 		public:
-			void SetElseStatement(std::shared_ptr<Node> elseNode) { m_else_statement = elseNode; }
-            void SetBody(std::shared_ptr<StatementsBody> body) { m_body = body; }
+			void SetElseStatement(Node* elseNode) { m_else_statement = elseNode; }
+            void SetBody(StatementsBody* body) { m_body = body; }
         public:
-            inline std::shared_ptr<Node> GetCondition() const { return m_condition; }
-            inline std::shared_ptr<Node> GetElseNode() const { return m_else_statement; }
-            inline std::shared_ptr<StatementsBody> GetBody() const { return m_body; }
+            inline Node* GetCondition() const { return m_condition; }
+            inline Node* GetElseNode() const { return m_else_statement; }
+            inline StatementsBody* GetBody() const { return m_body; }
 
 		private:
-            std::shared_ptr<StatementsBody> m_body;
-			std::shared_ptr<Node> m_condition;
-			std::shared_ptr<Node> m_else_statement;
+            StatementsBody* m_body;
+			Node* m_condition;
+			Node* m_else_statement;
 		};
     }
 }

@@ -27,13 +27,13 @@ namespace AST
         class ExternDirective : public Node
         {
         private:
-            std::shared_ptr<Node> m_target;
+            Node* m_target;
         public:
-            ExternDirective(std::shared_ptr<Node> target, LocationSpan loc)
+            ExternDirective(Node* target, LocationSpan loc)
                 : m_target(target), Node(loc) { }
             ~ExternDirective() = default;
         public:
-            inline std::shared_ptr<FunctionDeclaration> GetFnSignature() const { return std::dynamic_pointer_cast<FunctionDeclaration>(m_target); }
+            inline FunctionDeclaration* GetFnSignature() const { return reinterpret_cast<FunctionDeclaration*>(m_target); }
         public:
             inline NodeType GetType() const override { return NodeType::Extern; };
         };

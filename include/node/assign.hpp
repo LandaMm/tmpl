@@ -19,7 +19,7 @@ namespace AST::Nodes
     class AssignmentNode : public Node
     {
     public:
-        using PNode = std::shared_ptr<Node>;
+        using PNode = Node*;
     private:
         AssignOperator m_operator;
         PNode m_assignee;

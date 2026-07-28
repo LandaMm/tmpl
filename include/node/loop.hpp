@@ -16,8 +16,8 @@ namespace AST::Nodes
     class WhileNode : public Node
     {
     private:
-        using PNode = std::shared_ptr<Node>;
-        using PBody = std::shared_ptr<Statements::StatementsBody>;
+        using PNode = Node*;
+        using PBody = Statements::StatementsBody*;
 
     public:
         WhileNode(PNode condition, PBody body, LocationSpan loc)
@@ -38,8 +38,8 @@ namespace AST::Nodes
     class ForLoopNode : public Node
     {
     private:
-        using PNode = std::shared_ptr<Node>;
-        using PBody = std::shared_ptr<Statements::StatementsBody>;
+        using PNode = Node*;
+        using PBody = Statements::StatementsBody*;
     public:
         ForLoopNode(PNode decl, PNode condition, PNode assignment, PBody body, LocationSpan loc)
             : m_decl(decl),

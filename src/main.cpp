@@ -5,6 +5,7 @@
 #include "node/program.hpp"
 #include "cli.h"
 #include "error.h"
+#include "basics/allocator/arena.hpp"
 
 int main(int argc, char **argv)
 {
@@ -28,10 +29,10 @@ int main(int argc, char **argv)
 	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(reader, filename);
 	lexer->Tokenize();
 
-	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer);
+	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer.get());
 	parser->Parse();
 
-    auto root = reinterpret_pointer_cast<AST::Nodes::ProgramNode>(parser->GetRoot());
+    auto root = reinterpret_cast<AST::Nodes::ProgramNode*>(parser->GetRoot());
     (void)root;
 
     // std::string procName = cliRunner.GetProcedureName();

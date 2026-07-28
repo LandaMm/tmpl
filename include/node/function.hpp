@@ -16,44 +16,44 @@ namespace AST
 		class FunctionCall : public Node
 		{
 		public:
-			FunctionCall(std::shared_ptr<Node> callee, LocationSpan loc)
+			FunctionCall(Node* callee, LocationSpan loc)
                 : m_callee(callee),
-                  m_args(std::vector<std::shared_ptr<Node>>()),
-                  m_generics(std::vector<std::shared_ptr<TypeNode>>()),
+                  m_args(std::vector<Node*>()),
+                  m_generics(std::vector<TypeNode*>()),
                   Node(loc) {}
 			~FunctionCall() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::FunctionCall; }
         public:
-            void AddGeneric(std::shared_ptr<TypeNode> generic) { m_generics.push_back(generic); }
-            std::shared_ptr<TypeNode> GetGeneric(unsigned int index) const { return m_generics[index]; }
+            void AddGeneric(TypeNode* generic) { m_generics.push_back(generic); }
+            TypeNode* GetGeneric(unsigned int index) const { return m_generics[index]; }
             unsigned int GetGenericsSize() const { return m_generics.size(); }
 		public:
-			inline std::shared_ptr<Node> GetCallee() const { return m_callee; }
+			inline Node* GetCallee() const { return m_callee; }
         public:
-            void AddArgument(std::shared_ptr<Node> arg) { m_args.push_back(arg); }
+            void AddArgument(Node* arg) { m_args.push_back(arg); }
             unsigned int GetArgumentsSize() const { return m_args.size(); }
-            std::shared_ptr<Node> GetArgument(unsigned int index) const { return m_args[index]; }
+            Node* GetArgument(unsigned int index) const { return m_args[index]; }
 		private:
-			std::shared_ptr<Node> m_callee;
-			std::vector<std::shared_ptr<Node>> m_args;
-            std::vector<std::shared_ptr<TypeNode>> m_generics;
+			Node* m_callee;
+			std::vector<Node*> m_args;
+            std::vector<TypeNode*> m_generics;
 		};
 
         class FunctionParam
         {
         public:
-            FunctionParam(std::shared_ptr<TypeNode> type, std::shared_ptr<IdentifierNode> name)
+            FunctionParam(TypeNode* type, IdentifierNode* name)
                 : m_type(type), m_name(name) { }
             ~FunctionParam() = default;
 
         public:
-            inline std::shared_ptr<TypeNode> GetType() const { return m_type; }
-            inline std::shared_ptr<IdentifierNode> GetName() const { return m_name; }
+            inline TypeNode* GetType() const { return m_type; }
+            inline IdentifierNode* GetName() const { return m_name; }
 
         private:
-            std::shared_ptr<TypeNode> m_type;
-            std::shared_ptr<IdentifierNode> m_name;
+            TypeNode* m_type;
+            IdentifierNode* m_name;
         };
 
         class FunctionDeclaration : public Node
@@ -62,42 +62,42 @@ namespace AST
             size_t m_index;
         public:
             FunctionDeclaration(
-                    std::shared_ptr<Node> name,
-                    std::shared_ptr<Statements::StatementsBody> body,
+                    Node* name,
+                    Statements::StatementsBody* body,
                     LocationSpan loc
                     )
                 : m_name(name),
-                m_params(std::vector<std::shared_ptr<FunctionParam>>()),
-                m_generics(std::vector<std::shared_ptr<TemplateGeneric>>()),
+                m_params(std::vector<FunctionParam*>()),
+                m_generics(std::vector<TemplateGeneric*>()),
                 m_ret_type(nullptr),
                 m_body(body),
                 m_index(0),
                 Node(loc) { }
             ~FunctionDeclaration() = default;
         public:
-			void AddParam(std::shared_ptr<FunctionParam> param) { m_params.push_back(param); }
-            void AddGeneric(std::shared_ptr<TemplateGeneric> generic) { m_generics.push_back(generic); }
-            void SetReturnType(std::shared_ptr<TypeNode> retType) { m_ret_type = retType; }
+			void AddParam(FunctionParam* param) { m_params.push_back(param); }
+            void AddGeneric(TemplateGeneric* generic) { m_generics.push_back(generic); }
+            void SetReturnType(TypeNode* retType) { m_ret_type = retType; }
         public:
-            inline std::shared_ptr<Node> GetName() const { return m_name; }
-            inline std::shared_ptr<TypeNode> GetReturnType() const { return m_ret_type; }
-            inline std::shared_ptr<Statements::StatementsBody> GetBody() const { return m_body; }
+            inline Node* GetName() const { return m_name; }
+            inline TypeNode* GetReturnType() const { return m_ret_type; }
+            inline Statements::StatementsBody* GetBody() const { return m_body; }
         public:
-            inline std::shared_ptr<FunctionParam> GetParam(unsigned int index)
+            inline FunctionParam* GetParam(unsigned int index)
                 { return m_params[index]; }
             inline unsigned int GetParamsSize() const { return m_params.size(); }
         public:
-            inline std::shared_ptr<TemplateGeneric> GetGeneric(unsigned int index)
+            inline TemplateGeneric* GetGeneric(unsigned int index)
                 { return m_generics[index]; }
             inline unsigned int GetGenericsSize() const { return m_generics.size(); }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
         private:
-            std::shared_ptr<Node> m_name;
-            std::vector<std::shared_ptr<FunctionParam>> m_params;
-            std::shared_ptr<TypeNode> m_ret_type;
-            std::shared_ptr<Statements::StatementsBody> m_body;
-            std::vector<std::shared_ptr<TemplateGeneric>> m_generics;
+            Node* m_name;
+            std::vector<FunctionParam*> m_params;
+            TypeNode* m_ret_type;
+            Statements::StatementsBody* m_body;
+            std::vector<TemplateGeneric*> m_generics;
         };
 	}
 }

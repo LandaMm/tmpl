@@ -17,20 +17,20 @@ namespace AST
 		class UnaryNode : public Node
 		{
 		public:
-			UnaryNode(UnaryOperator op, std::shared_ptr<Node> target, LocationSpan loc)
+			UnaryNode(UnaryOperator op, Node* target, LocationSpan loc)
                 : m_operator(op), m_target(target), Node(loc) {}
 			~UnaryNode() {}
 
         public:
             inline UnaryOperator GetOperator() const { return m_operator; }
-            inline std::shared_ptr<Node> GetTarget() const { return m_target; }
+            inline Node* GetTarget() const { return m_target; }
 
 		public:
 			inline NodeType GetType() const override { return NodeType::Unary; }
 
 		private:
 			UnaryOperator m_operator;
-			std::shared_ptr<Node> m_target;
+			Node* m_target;
 		};
 	}
 }

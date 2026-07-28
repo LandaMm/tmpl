@@ -9,7 +9,7 @@
 
 namespace AST
 {
-    std::shared_ptr<Node> Parser::Assignment()
+    Node* Parser::Assignment()
     {
         if (m_lexer->GetToken()->GetType() == TokenType::Id)
         {
@@ -64,27 +64,27 @@ namespace AST
 				// Expected result: x = y = a = 10
                 auto expr = Assignment();
 
-                return std::make_shared<Nodes::AssignmentNode>(assignee, expr, assignOp, assignee->GetLocation());
+                return m_arena.Alloc<Nodes::AssignmentNode>(assignee, expr, assignOp, assignee->GetLocation());
             }
         }
 
         return Ternary();
     }
 
-	std::shared_ptr<Node> Parser::Ternary()
+	Node* Parser::Ternary()
 	{
-		std::shared_ptr<Node> result = Cond();
+		Node* result = Cond();
 
 		// 5 == 5 ? 3 + 2 == 1 + 4 ? true : false : false
 		if (m_lexer->GetToken()->GetType() == TokenType::Question)
 		{
 			Eat(TokenType::Question);
 
-			std::shared_ptr<Node> left = Ternary();
+			Node* left = Ternary();
 			Eat(TokenType::Colon);
-			std::shared_ptr<Node> right = Ternary();
+			Node* right = Ternary();
 
-			auto node = std::make_shared<Nodes::TernaryNode>(result->GetLocation());
+			auto node = m_arena.Alloc<Nodes::TernaryNode>(result->GetLocation());
 
 			node->SetCondition(result);
 			node->SetLeft(left);
@@ -96,10 +96,10 @@ namespace AST
 		return result;
 	}
 
-	std::shared_ptr<Node> Parser::Cond()
+	Node* Parser::Cond()
 	{
-		std::shared_ptr<Node> result = Expr();
-		std::shared_ptr<Nodes::Condition> expr = std::make_shared<Nodes::Condition>(result->GetLocation());
+		Node* result = Expr();
+		Nodes::Condition* expr = m_arena.Alloc<Nodes::Condition>(result->GetLocation());
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Less || m_lexer->GetToken()->GetType() == TokenType::Greater ||
@@ -138,21 +138,21 @@ namespace AST
 				expr->SetOp(Nodes::Condition::ConditionType::NotEqual);
 			}
 
-			std::shared_ptr<Node> right = Expr();
+			Node* right = Expr();
 			expr->SetRight(right);
 
 			result = expr;
-			expr = std::make_shared<Nodes::Condition>(result->GetLocation());
+			expr = m_arena.Alloc<Nodes::Condition>(result->GetLocation());
 			expr->SetLeft(result);
 		}
 
 		return result;
 	}
 
-	std::shared_ptr<Node> Parser::Expr()
+	Node* Parser::Expr()
 	{
-		std::shared_ptr<Node> result = Term();
-		std::shared_ptr<Nodes::ExpressionNode> expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
+		Node* result = Term();
+		Nodes::ExpressionNode* expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Plus || m_lexer->GetToken()->GetType() == TokenType::Minus)
@@ -162,23 +162,23 @@ namespace AST
 			if (token->GetType() == TokenType::Plus)
 			{
 				Eat(TokenType::Plus);
-				std::shared_ptr<Node> right = Term();
+				Node* right = Term();
 				expr->SetRight(right);
 				expr->SetOperator(Operator(OperatorType::PLUS));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
+				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 			else if (token->GetType() == TokenType::Minus)
 			{
 				Eat(TokenType::Minus);
-				std::shared_ptr<Node> right = Term();
+				Node* right = Term();
 				expr->SetRight(right);
 				expr->SetOperator(Operator(OperatorType::MINUS));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
+				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 		}
@@ -186,11 +186,11 @@ namespace AST
 		return result;
 	}
 
-	std::shared_ptr<Node> Parser::Term()
+	Node* Parser::Term()
 	{
-		std::shared_ptr<Node> result = Factor();
-		std::shared_ptr<Nodes::ExpressionNode> expr =
-            std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
+		Node* result = Factor();
+		Nodes::ExpressionNode* expr =
+            m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
 		while (m_lexer->GetToken()->GetType() == TokenType::Multiply || m_lexer->GetToken()->GetType() == TokenType::Divide)
@@ -200,23 +200,23 @@ namespace AST
 			if (token->GetType() == TokenType::Multiply)
 			{
 				Eat(TokenType::Multiply);
-				std::shared_ptr<Node> right = Factor();
+				Node* right = Factor();
 				expr->SetRight(right);
 				expr->SetOperator(Operator(OperatorType::MULTIPLY));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
+				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 			else if (token->GetType() == TokenType::Divide)
 			{
 				Eat(TokenType::Divide);
-				std::shared_ptr<Node> right = Factor();
+				Node* right = Factor();
 				expr->SetRight(right);
 				expr->SetOperator(Operator(OperatorType::DIVIDE));
 
 				result = expr;
-				expr = std::make_shared<Nodes::ExpressionNode>(result->GetLocation());
+				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 				expr->SetLeft(result);
 			}
 		}
@@ -224,7 +224,7 @@ namespace AST
 		return result;
 	}
 
-	std::shared_ptr<Node> Parser::Factor()
+	Node* Parser::Factor()
 	{
 		// var|(expr)|number (+|-) var|(expr)|number
 		// can also be function call: calc1() + calc(2)
@@ -237,62 +237,62 @@ namespace AST
 		if (token->GetType() == TokenType::Integer)
 		{
 			Eat(TokenType::Integer);
-			std::shared_ptr<int> value = token->GetValue<int>();
+			int* value = token->GetValue<int>().get();
 			using Holder = Nodes::TypedValueHolder<int>;
-			std::shared_ptr<Holder> v =
-				std::make_shared<Holder>(std::make_shared<int>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::INT, v, token->GetLocation());
+			Holder* v =
+				m_arena.Alloc<Holder>(m_arena.Alloc<int>(*value));
+			return m_arena.Alloc<Nodes::LiteralNode>(Nodes::LiteralType::INT, v, token->GetLocation());
 		}
 		// float literal
 		else if (token->GetType() == TokenType::Float)
 		{
 			Eat(TokenType::Float);
-			std::shared_ptr<float> value = token->GetValue<float>();
+			float* value = token->GetValue<float>().get();
 			using Holder = Nodes::TypedValueHolder<float>;
-			std::shared_ptr<Holder> v =
-				std::make_shared<Holder>(std::make_shared<float>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::FLOAT, v, token->GetLocation());
+			Holder* v =
+				m_arena.Alloc<Holder>(m_arena.Alloc<float>(*value));
+			return m_arena.Alloc<Nodes::LiteralNode>(Nodes::LiteralType::FLOAT, v, token->GetLocation());
 		}
 		// double literal
 		else if (token->GetType() == TokenType::Double)
 		{
 			Eat(TokenType::Double);
-			std::shared_ptr<double> value = token->GetValue<double>();
+			double* value = token->GetValue<double>().get();
 			using Holder = Nodes::TypedValueHolder<double>;
-			std::shared_ptr<Holder> v =
-				std::make_shared<Holder>(std::make_shared<double>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, v, token->GetLocation());
+			Holder* v =
+				m_arena.Alloc<Holder>(m_arena.Alloc<double>(*value));
+			return m_arena.Alloc<Nodes::LiteralNode>(Nodes::LiteralType::DOUBLE, v, token->GetLocation());
 		}
 		// string literal
 		else if (token->GetType() == TokenType::String)
 		{
 			Eat(TokenType::String);
-			std::shared_ptr<std::string> value = token->GetValue<std::string>();
+			std::string* value = token->GetValue<std::string>().get();
 			using Holder = Nodes::TypedValueHolder<std::string>;
-			std::shared_ptr<Holder> v =
-				std::make_shared<Holder>(std::make_shared<std::string>(*value));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v, token->GetLocation());
+			Holder* v =
+				m_arena.Alloc<Holder>(m_arena.Alloc<std::string>(*value));
+			return m_arena.Alloc<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v, token->GetLocation());
 		}
 		else if (token->GetType() == TokenType::True || token->GetType() == TokenType::False)
         {
             bool active = token->GetType() == TokenType::True;
 			Eat(active ? TokenType::True : TokenType::False);
 			using Holder = Nodes::TypedValueHolder<bool>;
-			std::shared_ptr<Holder> v =
-				std::make_shared<Holder>(std::make_shared<bool>(active));
-			return std::make_shared<Nodes::LiteralNode>(Nodes::LiteralType::BOOL, v, token->GetLocation());
+			Holder* v =
+				m_arena.Alloc<Holder>(m_arena.Alloc<bool>(active));
+			return m_arena.Alloc<Nodes::LiteralNode>(Nodes::LiteralType::BOOL, v, token->GetLocation());
         }
 		// id || function call with args
 		else if (token->GetType() == TokenType::Id)
 		{
-			std::shared_ptr<Node> res = Id();
+			Node* res = Id();
 			TokenType current_type = m_lexer->GetToken()->GetType();
 			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
 			{
                 if (current_type == TokenType::OpenBracket)
                 {
                     // normal function (without generics)
-					std::shared_ptr<Node> fcall = FunctionCall(res);
+					Node* fcall = FunctionCall(res);
 					res = fcall;
                 }
 				if (current_type == TokenType::Less)
@@ -313,7 +313,7 @@ namespace AST
                     }
                     m_lexer->RestoreState();
 
-					std::shared_ptr<Node> fcall = FunctionCall(res);
+					Node* fcall = FunctionCall(res);
 					res = fcall;
 				}
 				current_type = m_lexer->GetToken()->GetType();
@@ -324,19 +324,19 @@ namespace AST
 		else if (token->GetType() == TokenType::Not)
 		{
 			Eat(TokenType::Not);
-			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryOperator::Not, Factor(), token->GetLocation());
+			return m_arena.Alloc<Nodes::UnaryNode>(Nodes::UnaryOperator::Not, Factor(), token->GetLocation());
 		}
 		// +factor
 		else if (token->GetType() == TokenType::Plus)
 		{
 			Eat(TokenType::Plus);
-			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryOperator::Positive, Factor(), token->GetLocation());
+			return m_arena.Alloc<Nodes::UnaryNode>(Nodes::UnaryOperator::Positive, Factor(), token->GetLocation());
 		}
 		// -factor
 		else if (token->GetType() == TokenType::Minus)
 		{
 			Eat(TokenType::Minus);
-			return std::make_shared<Nodes::UnaryNode>(Nodes::UnaryOperator::Negative, Factor(), token->GetLocation());
+			return m_arena.Alloc<Nodes::UnaryNode>(Nodes::UnaryOperator::Negative, Factor(), token->GetLocation());
 		}
 		// (expr)
 		else if (token->GetType() == TokenType::OpenBracket)
@@ -350,7 +350,7 @@ namespace AST
                 return Cast(typ);
             }
 
-            std::shared_ptr<Node> res = Ternary();
+            Node* res = Ternary();
             Eat(TokenType::CloseBracket);
 
 			TokenType current_type = m_lexer->GetToken()->GetType();
@@ -358,7 +358,7 @@ namespace AST
 			{
 				if (current_type == TokenType::OpenBracket || current_type == TokenType::Less)
 				{
-					std::shared_ptr<Node> fcall = FunctionCall(res);
+					Node* fcall = FunctionCall(res);
 					res = fcall;
 				}
 				current_type = m_lexer->GetToken()->GetType();

@@ -10,15 +10,15 @@ namespace AST
         class ReturnNode : public Node
         {
         private:
-            std::shared_ptr<Node> m_value;
+            Node* m_value;
         public:
-            ReturnNode(std::shared_ptr<Node> value, LocationSpan loc)
+            ReturnNode(Node* value, LocationSpan loc)
                 : m_value(value), Node(loc) { }
             ~ReturnNode() = default;
         public:
             inline NodeType GetType() const override { return NodeType::Return; }
         public:
-            inline std::shared_ptr<Node> GetValue() const { return m_value; }
+            inline Node* GetValue() const { return m_value; }
         };
     }
 }

@@ -4,12 +4,12 @@
 
 namespace AST
 {
-    std::shared_ptr<Node> Parser::BreakStmt()
+    Node* Parser::BreakStmt()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::Break);
 
-        return std::make_shared<Nodes::BreakNode>(loc);
+        return m_arena.Alloc<Nodes::BreakNode>(loc);
     }
 }
 

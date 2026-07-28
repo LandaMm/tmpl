@@ -4,7 +4,7 @@
 
 namespace AST
 {
-    std::shared_ptr<Node> Parser::WhileLoop()
+    Node* Parser::WhileLoop()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
         Eat(TokenType::While);
@@ -13,8 +13,8 @@ namespace AST
         auto condition = Ternary();
         Eat(TokenType::CloseBracket);
 
-        std::shared_ptr<Statements::StatementsBody> body =
-            std::make_shared<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
+        Statements::StatementsBody* body =
+            m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
 
         m_breaks.push_back(loc);
 
@@ -27,7 +27,7 @@ namespace AST
             Eat(TokenType::OpenCurly);
             while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
             {
-                std::shared_ptr<Node> statement = Statement();
+                Node* statement = Statement();
                 body->AddItem(statement);
             }
             Eat(TokenType::CloseCurly);
@@ -35,7 +35,7 @@ namespace AST
 
         m_breaks.pop_back();
 
-        return std::make_shared<Nodes::WhileNode>(condition, body, loc);
+        return m_arena.Alloc<Nodes::WhileNode>(condition, body, loc);
     }
 }
 

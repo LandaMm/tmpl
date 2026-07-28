@@ -10,8 +10,8 @@ namespace AST
         class CastNode : public Node
         {
         private:
-            using PTypeNode = std::shared_ptr<TypeNode>;
-            using PNode = std::shared_ptr<Node>;
+            using PTypeNode = TypeNode*;
+            using PNode = Node*;
         public:
             CastNode(PTypeNode typ, PNode expr, LocationSpan loc)
                 : m_type(typ), m_expr(expr), Node(loc) { }
@@ -21,8 +21,8 @@ namespace AST
             inline PTypeNode GetTypeNode() const { return m_type; }
             inline PNode GetExpr() const { return m_expr; }
         private:
-            std::shared_ptr<TypeNode> m_type;
-            std::shared_ptr<Node> m_expr;
+            TypeNode* m_type;
+            Node* m_expr;
         };
     }
 }

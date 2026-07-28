@@ -13,7 +13,7 @@ namespace AST
         class TypeNode : public Node
         {
         public:
-            using PId = std::shared_ptr<IdentifierNode>;
+            using PId = IdentifierNode*;
 
         public:
             TypeNode(PId target, LocationSpan loc)
@@ -23,16 +23,16 @@ namespace AST
             inline NodeType GetType() const override { return NodeType::Type; };
 
         public:
-            void AddGenericType(std::shared_ptr<TypeNode> typ) { m_generics.push_back(typ); }
+            void AddGenericType(TypeNode* typ) { m_generics.push_back(typ); }
             inline unsigned int GetGenericsSize() const { return m_generics.size(); }
-            std::shared_ptr<TypeNode> GetGeneric(unsigned int index) const { return m_generics[index]; }
+            TypeNode* GetGeneric(unsigned int index) const { return m_generics[index]; }
 
         public:
             inline PId GetTypeName() const { return m_typename; }
 
         private:
             PId m_typename;
-            std::vector<std::shared_ptr<TypeNode>> m_generics;
+            std::vector<TypeNode*> m_generics;
         };
 
         class TemplateGeneric
@@ -54,9 +54,9 @@ namespace AST
         class TypeDfNode : public Node
         {
         public:
-            using PId = std::shared_ptr<IdentifierNode>;
-            using PType = std::shared_ptr<TypeNode>;
-            using PTG = std::shared_ptr<TemplateGeneric>;
+            using PId = IdentifierNode*;
+            using PType = TypeNode*;
+            using PTG = TemplateGeneric*;
 
         public:
             TypeDfNode(PId name, LocationSpan loc)

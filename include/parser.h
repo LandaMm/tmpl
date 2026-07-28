@@ -8,30 +8,27 @@
 #include "node/function.hpp"
 #include "node/type.hpp"
 #include "error.h"
+#include "basics/allocator/arena.hpp"
 #include <memory>
 
 namespace AST
 {
 	class Parser
 	{
-	private:
-		std::shared_ptr<Nodes::ProgramNode> m_root;
-		std::shared_ptr<Lexer> m_lexer;
-
-    private:
-        std::vector<AST::LocationSpan> m_breaks;
-
 	public:
-		Parser(std::shared_ptr<Lexer> lexer)
+		Parser(Lexer* lexer)
             : m_lexer(lexer),
-              m_root(std::make_shared<Nodes::ProgramNode>()) {}
+              m_root(nullptr)
+		{
+			m_root = m_arena.Alloc<Nodes::ProgramNode>();
+		}
 		~Parser() {}
 
 	public:
 		void Parse();
 
 	public:
-		inline std::shared_ptr<Node> GetRoot() const { return m_root; }
+		inline Node* GetRoot() const { return m_root; }
         inline String GetFilename() const { return m_lexer->GetFilename(); }
 
 	private:
@@ -40,16 +37,16 @@ namespace AST
 		TokenType Peek();
 
 	private: // Common
-		std::shared_ptr<Nodes::IdentifierNode> Id();
-		std::shared_ptr<Nodes::FunctionCall> FunctionCall(std::shared_ptr<Node> callee);
+		Nodes::IdentifierNode* Id();
+		Nodes::FunctionCall* FunctionCall(Node* callee);
 
 	private: // Expression
-		std::shared_ptr<Node> Factor();
-		std::shared_ptr<Node> Term();
-		std::shared_ptr<Node> Expr();
-		std::shared_ptr<Node> Cond();
-		std::shared_ptr<Node> Ternary();
-		std::shared_ptr<Node> Assignment();
+		Node* Factor();
+		Node* Term();
+		Node* Expr();
+		Node* Cond();
+		Node* Ternary();
+		Node* Assignment();
 
     private: // Checkers
         bool IsTypeCastAhead();
@@ -58,26 +55,33 @@ namespace AST
         bool ParseGenericType();
 
     private: // Types
-        std::shared_ptr<Nodes::TypeNode> Type();
-        std::shared_ptr<Nodes::TypeNode> Type(std::shared_ptr<Nodes::IdentifierNode> target);
-        std::shared_ptr<Nodes::TemplateGeneric> TmplGeneric();
-        std::shared_ptr<Nodes::TypeDfNode> TypeDfStatement();
-        std::shared_ptr<Nodes::CastNode> Cast(std::shared_ptr<Nodes::TypeNode> typ);
+        Nodes::TypeNode* Type();
+        Nodes::TypeNode* Type(Nodes::IdentifierNode* target);
+        Nodes::TemplateGeneric* TmplGeneric();
+        Nodes::TypeDfNode* TypeDfStatement();
+        Nodes::CastNode* Cast(Nodes::TypeNode* typ);
 
 	private: // Statements
-		std::shared_ptr<Node> Statement();
-        std::shared_ptr<Node> CompileTimeStatement();
-		std::shared_ptr<Node> IfElseStatement();
-		std::shared_ptr<Node> VariableDeclaration();
-        std::shared_ptr<Node> ReturnStatement();
-        std::shared_ptr<Nodes::FunctionDeclaration> FunctionSignature();
-        std::shared_ptr<Node> FunctionDeclaration();
-        std::shared_ptr<Node> WhileLoop();
-        std::shared_ptr<Node> ForLoop();
-        std::shared_ptr<Node> BreakStmt();
+		Node* Statement();
+        Node* CompileTimeStatement();
+		Node* IfElseStatement();
+		Node* VariableDeclaration();
+        Node* ReturnStatement();
+        Nodes::FunctionDeclaration* FunctionSignature();
+        Node* FunctionDeclaration();
+        Node* WhileLoop();
+        Node* ForLoop();
+        Node* BreakStmt();
     private: // Directives
-        std::shared_ptr<Node> ImportStatement();
-        std::shared_ptr<Node> ExternStatement();
+        Node* ImportStatement();
+        Node* ExternStatement();
+
+	private:
+		ArenaAllocator<> m_arena;
+
+		Nodes::ProgramNode* m_root;
+		Lexer* m_lexer;
+        std::vector<AST::LocationSpan> m_breaks;
 	};
 }
 
