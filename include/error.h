@@ -45,11 +45,11 @@ namespace Prelude
 
 	public: // Parser
 		void UnexpectedEofWhileToken(String filename, AST::TokenType tokenType, size_t line, size_t col);
-		void UnexpectedToken(String filename, std::shared_ptr<AST::Token> locToken);
-		void UnexpectedToken(String filename, std::shared_ptr<AST::Token> locToken, std::shared_ptr<AST::Token> gotToken, AST::TokenType expectedTokenType);
-		void UnexpectedToken(String filename, std::shared_ptr<AST::Token> gotToken, String expected);
-		void MissingConstantDefinition(String filename, std::shared_ptr<AST::Token> token);
-        void UnexpectedFnModifier(String filename, std::shared_ptr<AST::Token> gotToken, AST::LocationSpan loc);
+		void UnexpectedToken(String filename, AST::Token* locToken);
+		void UnexpectedToken(String filename, AST::Token* locToken, AST::Token* gotToken, AST::TokenType expectedTokenType);
+		void UnexpectedToken(String filename, AST::Token* gotToken, String expected);
+		void MissingConstantDefinition(String filename, AST::Token* token);
+        void UnexpectedFnModifier(String filename, AST::Token* gotToken, AST::LocationSpan loc);
 
     public: // CliRunner
         void NotEnoughArgs(int expected, int got, bool atLeast);

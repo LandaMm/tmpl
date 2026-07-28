@@ -143,16 +143,16 @@ namespace AST
 		class TypedValueHolder : public ValueHolder
 		{
 		private:
-			std::shared_ptr<T> m_value;
+			T* m_value;
 		public:
-			TypedValueHolder(std::shared_ptr<T> value) : m_value(value) { }
+			TypedValueHolder(T* value) : m_value(value) { }
 		public:
-			inline std::shared_ptr<T> GetValue() const { return m_value; }
+			inline T* GetValue() const { return m_value; }
 		};
 	public:
 		Token(TokenType type, Location begin, Location end)
             : m_type(type), m_loc(begin, end), m_value(nullptr) {}
-		Token(TokenType type, std::shared_ptr<ValueHolder> value, Location begin, Location end)
+		Token(TokenType type, ValueHolder* value, Location begin, Location end)
             : m_type(type), m_loc(begin, end), m_value(value) {}
 		~Token() = default;
 
@@ -163,9 +163,9 @@ namespace AST
 	public:
 		inline TokenType GetType() const { return m_type; }
 		template<typename T>
-		std::shared_ptr<T> GetValue() const {
+		T* GetValue() const {
 			if (!m_value) return nullptr;
-			std::shared_ptr<TypedValueHolder<T>> holder = std::dynamic_pointer_cast<TypedValueHolder<T>>(m_value);
+			TypedValueHolder<T>* holder = reinterpret_cast<TypedValueHolder<T>*>(m_value);
 			return holder ? holder->GetValue() : nullptr;
 		}
 	public:
@@ -181,7 +181,7 @@ namespace AST
 		friend std::ostream& operator<<(std::ostream& stream, const Token& token);
 	private:
 		TokenType m_type;
-		std::shared_ptr<ValueHolder> m_value;
+		ValueHolder* m_value;
         LocationSpan m_loc;
 	};
 }

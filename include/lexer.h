@@ -1,13 +1,13 @@
 #pragma once
 
 #include <algorithm>
-#include <memory>
 #include <fstream>
 
 #include "token.h"
 #include "basics/string.hpp"
 #include "basics/array.hpp"
 #include "basics/file.hpp"
+#include "basics/allocator/arena.hpp"
 
 namespace AST
 {
@@ -25,7 +25,7 @@ namespace AST
 		Lexer(FileReader& reader, String filename);
 
 	public:
-		Array<std::shared_ptr<Token>> &GetTokens() { return m_tokens; };
+		Array<Token*> &GetTokens() { return m_tokens; };
 
     public:
         bool OneOf(const std::vector<TokenType>& types, TokenType needle)
@@ -34,7 +34,7 @@ namespace AST
         }
 
     public:
-        void SaveState() { m_state = std::make_shared<LexerState>(m_index); }
+        void SaveState() { m_state = m_arena.Alloc<LexerState>(m_index); }
         void RestoreState();
 
 	public:
@@ -48,13 +48,13 @@ namespace AST
 		void HandleCharacter(char ch);
 
 	public:
-		std::shared_ptr<Token> GetToken();
-		std::shared_ptr<Token> SeekToken();
-		std::shared_ptr<Token> NextToken();
-		std::shared_ptr<Token> PrevToken();
+		Token* GetToken();
+		Token* SeekToken();
+		Token* NextToken();
+		Token* PrevToken();
 		inline String GetFilename() const { return m_filename; }
 	private:
-		Array<std::shared_ptr<Token>> m_tokens;
+		Array<Token*> m_tokens;
 		String m_filename;
 
 	private: // tokenizer
@@ -65,7 +65,8 @@ namespace AST
 
 	private: // token manager
 		size_t m_index;
-        std::shared_ptr<LexerState> m_state;
+        LexerState* m_state;
+		ArenaAllocator<> m_arena;
 	};
 }
 

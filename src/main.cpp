@@ -26,14 +26,17 @@ int main(int argc, char **argv)
         return 1;
     }
 
-	std::shared_ptr<Lexer> lexer = std::make_shared<Lexer>(reader, filename);
+	Lexer* lexer = new Lexer(reader, filename);
 	lexer->Tokenize();
 
-	std::shared_ptr<Parser> parser = std::make_shared<Parser>(lexer.get());
+	Parser* parser = new Parser(lexer);
 	parser->Parse();
 
     auto root = reinterpret_cast<AST::Nodes::ProgramNode*>(parser->GetRoot());
     (void)root;
+
+    delete parser;
+    delete lexer;
 
     // std::string procName = cliRunner.GetProcedureName();
     // std::vector<std::string> args = cliRunner.GetProcedureArgs();

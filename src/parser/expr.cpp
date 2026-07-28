@@ -237,7 +237,7 @@ namespace AST
 		if (token->GetType() == TokenType::Integer)
 		{
 			Eat(TokenType::Integer);
-			int* value = token->GetValue<int>().get();
+			int* value = token->GetValue<int>();
 			using Holder = Nodes::TypedValueHolder<int>;
 			Holder* v =
 				m_arena.Alloc<Holder>(m_arena.Alloc<int>(*value));
@@ -247,7 +247,7 @@ namespace AST
 		else if (token->GetType() == TokenType::Float)
 		{
 			Eat(TokenType::Float);
-			float* value = token->GetValue<float>().get();
+			float* value = token->GetValue<float>();
 			using Holder = Nodes::TypedValueHolder<float>;
 			Holder* v =
 				m_arena.Alloc<Holder>(m_arena.Alloc<float>(*value));
@@ -257,7 +257,7 @@ namespace AST
 		else if (token->GetType() == TokenType::Double)
 		{
 			Eat(TokenType::Double);
-			double* value = token->GetValue<double>().get();
+			double* value = token->GetValue<double>();
 			using Holder = Nodes::TypedValueHolder<double>;
 			Holder* v =
 				m_arena.Alloc<Holder>(m_arena.Alloc<double>(*value));
@@ -267,7 +267,7 @@ namespace AST
 		else if (token->GetType() == TokenType::String)
 		{
 			Eat(TokenType::String);
-			std::string* value = token->GetValue<std::string>().get();
+			std::string* value = token->GetValue<std::string>();
 			using Holder = Nodes::TypedValueHolder<std::string>;
 			Holder* v =
 				m_arena.Alloc<Holder>(m_arena.Alloc<std::string>(*value));

@@ -130,32 +130,32 @@ namespace Prelude
         std::cerr << "Expected '" << Token::GetTokenTypeCharacter(tokenType) << "' character but got EOF" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UnexpectedToken(String filename, std::shared_ptr<Token> locToken)
+	void ErrorManager::UnexpectedToken(String filename, Token* locToken)
 	{
         LogFileLocation(filename, locToken->GetLocation(), "ParseError");
         std::cerr << "Unexpected token '" << Token::GetTokenTypeCharacter(locToken->GetType()) << "' token" << std::endl;
 		std::exit(-1);
 	}
-	void ErrorManager::UnexpectedToken(String filename, std::shared_ptr<Token> locToken, std::shared_ptr<Token> gotToken, TokenType expectedTokenType)
+	void ErrorManager::UnexpectedToken(String filename, Token* locToken, Token* gotToken, TokenType expectedTokenType)
 	{
         LogFileLocation(filename, locToken->GetLocation(), "ParseError");
         std::cerr << "Expected '" << Token::GetTokenTypeCharacter(expectedTokenType) << "' but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
 	}
-    void ErrorManager::UnexpectedToken(String filename, std::shared_ptr<AST::Token> gotToken, String expected)
+    void ErrorManager::UnexpectedToken(String filename, AST::Token* gotToken, String expected)
     {
         LogFileLocation(filename, gotToken->GetLocation(), "ParseError");
         std::cerr << "Expected " << expected << " but got '" << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
     }
-    void ErrorManager::UnexpectedFnModifier(String filename, std::shared_ptr<AST::Token> gotToken, AST::LocationSpan loc)
+    void ErrorManager::UnexpectedFnModifier(String filename, AST::Token* gotToken, AST::LocationSpan loc)
     {
         LogFileLocation(filename, loc, "ParseError");
         std::cerr << "Unexpected token used for fn modifier '"
             << Token::GetTokenTypeCharacter(gotToken->GetType()) << "'" << std::endl;
 		std::exit(-1);
     }
-	void ErrorManager::MissingConstantDefinition(String filename, std::shared_ptr<Token> token)
+	void ErrorManager::MissingConstantDefinition(String filename, Token* token)
 	{
         LogFileLocation(filename, token->GetLocation(), "ParseError");
         std::cerr << "Expected constant definition "
