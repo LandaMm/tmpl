@@ -28,10 +28,11 @@ public:
 	}
 
 	template<typename T, typename... Args>
+	requires std::constructible_from<T, Args...>
 	T* Alloc(Args&&... args)
 	{
 		void* ptr = AllocateRaw(sizeof(T), alignof(T));
-		T* object = std::construct_at<T>(static_cast<T*>(ptr), std::forward(args)...);
+		T* object = std::construct_at<T>(static_cast<T*>(ptr), std::forward<Args>(args)...);
 
 		if constexpr (!std::is_trivially_destructible_v<T>)
 		{
