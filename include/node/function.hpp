@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "node.h"
+#include "symbol.hpp"
 #include "location.h"
 #include "node/type.hpp"
 #include "statement.hpp"
@@ -56,27 +57,22 @@ namespace AST
             IdentifierNode* m_name;
         };
 
-        class FunctionDeclaration : public Node
+        class FunctionDeclaration : public Symbol
         {
-        private:
-            size_t m_index;
         public:
             FunctionDeclaration(
-                    Node* name,
-                    Statements::StatementsBody* body,
-                    LocationSpan loc
-                    )
-                : m_name(name),
-                m_params(std::vector<FunctionParam*>()),
-                m_generics(std::vector<TemplateGeneric*>()),
+				Node* name,
+				Statements::StatementsBody* body,
+                SymbolFlag symbolFlag,
+				LocationSpan loc
+			) : m_name(name),
                 m_ret_type(nullptr),
                 m_body(body),
-                m_index(0),
-                Node(loc) { }
+                Symbol(SymbolType::FUNCTION, symbolFlag, loc) { }
+
             ~FunctionDeclaration() = default;
         public:
 			void AddParam(FunctionParam* param) { m_params.push_back(param); }
-            void AddGeneric(TemplateGeneric* generic) { m_generics.push_back(generic); }
             void SetReturnType(TypeNode* retType) { m_ret_type = retType; }
         public:
             inline Node* GetName() const { return m_name; }
@@ -86,18 +82,14 @@ namespace AST
             inline FunctionParam* GetParam(unsigned int index)
                 { return m_params[index]; }
             inline unsigned int GetParamsSize() const { return m_params.size(); }
-        public:
-            inline TemplateGeneric* GetGeneric(unsigned int index)
-                { return m_generics[index]; }
-            inline unsigned int GetGenericsSize() const { return m_generics.size(); }
 		public:
 			inline NodeType GetType() const override { return NodeType::FnDecl; }
         private:
             Node* m_name;
             std::vector<FunctionParam*> m_params;
             TypeNode* m_ret_type;
+
             Statements::StatementsBody* m_body;
-            std::vector<TemplateGeneric*> m_generics;
         };
 	}
 }
