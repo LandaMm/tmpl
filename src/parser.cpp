@@ -47,7 +47,24 @@ namespace AST
 	
 	Node* Parser::CompileTimeStatement()
 	{
-		return FunctionDeclaration();
+		m_lexer->SaveState();
+		
+		Eat(TokenType::Id);
+
+		auto next = m_lexer->SeekToken();
+
+		m_lexer->RestoreState();
+
+		switch (next->GetType())
+		{
+		case TokenType::OpenBracket:
+			return FunctionDeclaration();
+		default: // Type Declaration
+			return TypeDeclaration();
+		}
+
+		assert(0 && "UNREACHABLE");
+		return nullptr;
 	}
 
 	Node* Parser::Statement()
@@ -61,10 +78,6 @@ namespace AST
 			break;
         case TokenType::Return:
             stmt = ReturnStatement();
-            Eat(TokenType::Semicolon);
-            break;
-        case TokenType::TypeDf:
-            stmt = TypeDfStatement();
             Eat(TokenType::Semicolon);
             break;
         case TokenType::While:
@@ -106,6 +119,7 @@ namespace AST
                     stmt = ExternStatement();
                     break;
                 default:
+					// TODO: better error
                     Prelude::ErrorManager& manager = GetErrorManager();
                     manager.UnexpectedToken(GetFilename(), m_lexer->SeekToken());
                     return nullptr;
@@ -113,16 +127,27 @@ namespace AST
             break;
         }
 		case TokenType::Id:
+		{
 			auto next = m_lexer->SeekToken();
 			
 			if (next->GetType() == TokenType::DoubleColon)
 			{
 				stmt = CompileTimeStatement();
-				break;
+			}
+			else if (next->GetType() == TokenType::Colon) // Variable Declaration
+			{
+				stmt = VariableDeclaration();
+			}
+			else {
+				stmt = Assignment();
 			}
 
-			stmt = Assignment();
 			Eat(TokenType::Semicolon);
+			break;
+		}
+		default:
+			auto& err = GetErrorManager();
+			err.UnexpectedToken(m_lexer->GetFilename(), token);
 			break;
 		}
 		return stmt;
