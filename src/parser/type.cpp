@@ -10,64 +10,13 @@ namespace AST
 
         auto typ = m_arena.Alloc<Nodes::TypeNode>(target, target->GetLocation());
 
-        if (m_lexer->GetToken()->GetType() == TokenType::Less)
-        {
-            Eat(TokenType::Less);
-            auto currToken = m_lexer->GetToken()->GetType();
-            while (currToken != TokenType::Greater)
-            {
-                if (currToken == TokenType::Comma)
-                {
-                    Eat(TokenType::Comma);
-                }
-
-                typ->AddGenericType(Type());
-
-                currToken = m_lexer->GetToken()->GetType();
-            }
-            Eat(TokenType::Greater);
-        }
-
         return typ;
     }
 
     Nodes::TypeNode* Parser::Type(Nodes::IdentifierNode* target)
     {
         auto typ = m_arena.Alloc<Nodes::TypeNode>(target, target->GetLocation());
-
-        if (m_lexer->GetToken()->GetType() == TokenType::Less)
-        {
-            Eat(TokenType::Less);
-            auto currToken = m_lexer->GetToken()->GetType();
-            while (currToken != TokenType::Greater)
-            {
-                if (currToken == TokenType::Comma)
-                {
-                    Eat(TokenType::Comma);
-                }
-
-                typ->AddGenericType(Type());
-
-                currToken = m_lexer->GetToken()->GetType();
-            }
-            Eat(TokenType::Greater);
-        }
-
         return typ;
-    }
-
-    Nodes::TemplateGeneric* Parser::TmplGeneric()
-    {
-        auto currToken = m_lexer->GetToken()->GetType();
-        if (currToken == TokenType::Comma)
-        {
-            Eat(TokenType::Comma);
-        }
-
-        Eat(TokenType::Question);
-        auto genericNode = Id();
-        auto generic = m_arena.Alloc<Nodes::TemplateGeneric>(genericNode->GetName(), genericNode->GetLocation());
-        return generic;
     }
 
     Nodes::CastNode* Parser::Cast(Nodes::TypeNode* typ)
@@ -122,32 +71,21 @@ namespace AST
         }, curr);
     }
 
-    Nodes::TypeDfNode* Parser::TypeDfStatement()
+	Nodes::TypeDeclaration* Parser::TypeDeclaration()
     {
         auto loc = m_lexer->GetToken()->GetLocation();
-        Eat(TokenType::TypeDf);
 
         auto typName = Id();
 
-        auto typDf = m_arena.Alloc<Nodes::TypeDfNode>(typName, loc);
-
-        if (m_lexer->GetToken()->GetType() == TokenType::Less)
-        {
-            Eat(TokenType::Less);
-            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
-            {
-                typDf->AddGeneric(TmplGeneric());
-            }
-            Eat(TokenType::Greater);
-        }
+        auto typDeclaration = m_arena.Alloc<Nodes::TypeDeclaration>(typName, loc);
         
-        Eat(TokenType::Equal);
+        Eat(TokenType::DoubleColon);
 
         auto value = Type();
 
-        typDf->SetValue(value);
+        typDeclaration->SetValue(value);
 
-        return typDf;
+        return typDeclaration;
     }
 }
 

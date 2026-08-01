@@ -57,8 +57,7 @@ namespace AST
     private: // Types
         Nodes::TypeNode* Type();
         Nodes::TypeNode* Type(Nodes::IdentifierNode* target);
-        Nodes::TemplateGeneric* TmplGeneric();
-        Nodes::TypeDfNode* TypeDfStatement();
+        Nodes::TypeDeclaration* TypeDeclaration();
         Nodes::CastNode* Cast(Nodes::TypeNode* typ);
 
 	private: // Statements
