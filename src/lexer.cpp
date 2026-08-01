@@ -312,6 +312,8 @@ namespace AST
 
 		if (*id == "import")
 			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Import, begin, end));
+		else if (*id == "foreign")
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Foreign, begin, end));
 		else if (*id == "if")
 			m_tokens.Push(m_arena.Alloc<Token>(TokenType::If, begin, end));
 		else if (*id == "else")
