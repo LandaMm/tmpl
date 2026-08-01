@@ -4,12 +4,34 @@
 #include<memory>
 
 #include"../node.h"
+#include "node/symbol.hpp"
 #include "node/type.hpp"
 
 namespace AST
 {
 	namespace Nodes
 	{
+		class VariableDeclaration : public Symbol
+		{
+		public:
+			VariableDeclaration(TypeNode* type, std::string* name, Node* value, LocationSpan loc)
+				: m_type(type), m_name(name), m_value(value), Symbol(SymbolType::VARIABLE, SymbolFlag::NONE, loc) { }
+
+		public:
+			inline NodeType GetType() const override { return NodeType::VarDecl; }
+
+		public:
+			inline TypeNode* GetType() { return m_type; }
+			inline Node* GetValue() { return m_value; }
+			inline std::string* GetName() { return m_name; }
+			inline bool HasValue() { return m_value != nullptr; }
+
+		private:
+			TypeNode* m_type;
+			std::string* m_name;
+			Node* m_value; // nullable
+		};
+
 		class VarDeclaration : public Node
 		{
 		public:
