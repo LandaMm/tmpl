@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "node.h"
+#include "node/symbol.hpp"
 #include "node/identifier.hpp"
 
 namespace AST
@@ -23,46 +24,22 @@ namespace AST
             inline NodeType GetType() const override { return NodeType::Type; };
 
         public:
-            void AddGenericType(TypeNode* typ) { m_generics.push_back(typ); }
-            inline unsigned int GetGenericsSize() const { return m_generics.size(); }
-            TypeNode* GetGeneric(unsigned int index) const { return m_generics[index]; }
-
-        public:
             inline PId GetTypeName() const { return m_typename; }
 
         private:
             PId m_typename;
-            std::vector<TypeNode*> m_generics;
         };
 
-        class TemplateGeneric
-        {
-        public:
-            TemplateGeneric(std::string name, LocationSpan loc)
-                : m_name(name), m_loc(loc) { }
-
-        public:
-            inline std::string GetName() const { return m_name; }
-            inline LocationSpan GetLocation() const { return m_loc; }
-
-        private:
-            std::string m_name;
-            LocationSpan m_loc;
-            // TODO: base and default type
-        };
-
-        class TypeDfNode : public Node
+        class TypeDeclaration : public Node
         {
         public:
             using PId = IdentifierNode*;
             using PType = TypeNode*;
-            using PTG = TemplateGeneric*;
 
         public:
-            TypeDfNode(PId name, LocationSpan loc)
+            TypeDeclaration(PId name, LocationSpan loc)
                 : m_name(name),
                   m_value(nullptr),
-                  m_generics(std::vector<PTG>()),
                   Node(loc) { }
 
         public:
@@ -72,21 +49,12 @@ namespace AST
             void SetValue(PType value) { m_value = value; }
 
         public:
-            void AddGeneric(PTG generic) { m_generics.push_back(generic); } 
-            unsigned int GetGenericsSize() const { return m_generics.size(); }
-            PTG GetGeneric(unsigned int index) const { return m_generics[index]; }
-
-            std::vector<PTG>* GetGenIterator() { return &m_generics; }
-
-        public:
             inline PId GetTypeName() const { return m_name; }
             inline PType GetTypeValue() const { return m_value; }
 
         private:
             PId m_name;
             PType m_value;
-
-            std::vector<PTG> m_generics;
         };
     }
 }
