@@ -31,12 +31,12 @@ int main(int argc, char **argv)
 
 	Parser* parser = new Parser(lexer);
 	parser->Parse();
+    delete lexer;
 
     auto root = reinterpret_cast<AST::Nodes::ProgramNode*>(parser->GetRoot());
     (void)root;
 
     delete parser;
-    delete lexer;
 
     // std::string procName = cliRunner.GetProcedureName();
     // std::vector<std::string> args = cliRunner.GetProcedureArgs();
