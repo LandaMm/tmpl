@@ -52,6 +52,7 @@ namespace AST
 		Hash,
 		// Keywords
 		Import,
+		Foreign,
 		If,
 		Else,
 		Var,
@@ -114,6 +115,7 @@ namespace AST
 		"#",
 		// Keywords
 		"import",
+		"foreign",
 		"if",
 		"else",
 		"var",
