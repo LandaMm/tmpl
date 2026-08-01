@@ -267,10 +267,9 @@ namespace AST
 		else if (token->GetType() == TokenType::String)
 		{
 			Eat(TokenType::String);
-			std::string* value = token->GetValue<std::string>();
-			using Holder = Nodes::TypedValueHolder<std::string>;
-			Holder* v =
-				m_arena.Alloc<Holder>(m_arena.Alloc<std::string>(*value));
+			auto value = token->GetValue<String>();
+			auto v =
+				m_arena.Alloc<Nodes::TypedValueHolder<String>>(m_arena.Alloc<String>(*value));
 			return m_arena.Alloc<Nodes::LiteralNode>(Nodes::LiteralType::STRING, v, token->GetLocation());
 		}
 		else if (token->GetType() == TokenType::True || token->GetType() == TokenType::False)
