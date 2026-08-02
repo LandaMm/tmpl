@@ -32,7 +32,7 @@ namespace AST
 			}
 			Nodes::IdentifierNode* name = Id();
 			Eat(TokenType::Colon);
-			Nodes::TypeNode* type = Type();
+			auto type = Type();
 			Nodes::FunctionParam* param = m_arena.Alloc<Nodes::FunctionParam>(type, name);
 			fnParams.Push(param);
 			currToken = m_lexer->GetToken()->GetType();
@@ -42,7 +42,7 @@ namespace AST
 
 		Eat(TokenType::SingleArrow);
 
-		Nodes::TypeNode* retType = Type();
+		auto retType = Type();
 
 		Nodes::SymbolFlag fnFlag = Nodes::SymbolFlag::NONE;
 		// Symbol Flag
@@ -85,7 +85,7 @@ namespace AST
 		return fn;
     }
 
-    Node* Parser::FunctionDeclaration()
+    Nodes::FunctionDeclaration* Parser::FunctionDeclaration()
     {
         // fn name(type param, type param2) : type {...}
         auto fn = FunctionSignature();
