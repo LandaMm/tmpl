@@ -4,10 +4,10 @@
 #include <fstream>
 
 #include "token.h"
-#include "basics/string.hpp"
-#include "basics/array.hpp"
-#include "basics/file.hpp"
-#include "basics/allocator/arena.hpp"
+#include "cpl-basics/string.hpp"
+#include "cpl-basics/array.hpp"
+#include "cpl-basics/file.hpp"
+#include "cpl-basics/allocator/arena.hpp"
 
 namespace AST
 {

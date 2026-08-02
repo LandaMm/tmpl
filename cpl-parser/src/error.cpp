@@ -4,10 +4,10 @@
 #include <filesystem>
 #include <memory>
 
-#include "basics/file.hpp"
+#include "cpl-basics/file.hpp"
 #include "error.h"
 #include "location.h"
-#include "basics/string.hpp"
+#include "cpl-basics/string.hpp"
 
 using namespace AST;
 namespace fs = std::filesystem;

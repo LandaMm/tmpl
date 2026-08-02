@@ -8,8 +8,8 @@
 #include "node/function.hpp"
 #include "node/type.hpp"
 #include "error.h"
-#include "basics/allocator/arena.hpp"
-#include "basics/def.hpp"
+#include "cpl-basics/allocator/arena.hpp"
+#include "cpl-basics/def.hpp"
 #include <memory>
 
 namespace AST

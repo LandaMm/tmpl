@@ -3,9 +3,9 @@
 #include <memory>
 #include <map>
 
-#include "basics/def.hpp"
-#include "basics/string.hpp"
-#include "basics/array.hpp"
+#include "cpl-basics/def.hpp"
+#include "cpl-basics/string.hpp"
+#include "cpl-basics/array.hpp"
 #include "node.h"
 #include "node/literal.hpp"
 #include "node/symbol.hpp"
