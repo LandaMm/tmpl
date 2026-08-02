@@ -45,6 +45,7 @@ namespace Prelude
         Uint32 requiredLineNumberWidth = std::to_string(loc.begin.line + 1).size() + 1;
         for (Uint32 i = 0; i < 2; ++i)
         {
+            if (lineStart >= content.Size()) break;
 			String line = content.Substr(lineStart, content.Substr(lineStart).Find('\n'));
 			std::cerr << "\033[90m";
             std::fprintf(stderr, "% *d", requiredLineNumberWidth, lookingForLine + i);
