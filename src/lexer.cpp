@@ -330,8 +330,10 @@ namespace AST
             m_tokens.Push(m_arena.Alloc<Token>(TokenType::True, begin, end));
 		else if (*id == "false")
             m_tokens.Push(m_arena.Alloc<Token>(TokenType::False, begin, end));
-		else if (*id == "typedf")
-            m_tokens.Push(m_arena.Alloc<Token>(TokenType::TypeDf, begin, end));
+		else if (*id == "struct")
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::Struct, begin, end));
+		else if (*id == "enum")
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::Enum, begin, end));
 		else if (*id == "new")
             m_tokens.Push(m_arena.Alloc<Token>(TokenType::New, begin, end));
 		else if (*id == "while")
