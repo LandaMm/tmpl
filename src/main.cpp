@@ -1,11 +1,15 @@
+#include <print>
 #include <cassert>
 #include <memory>
-#include "cpl-parser/lexer.h"
-#include "cpl-parser/parser.h"
-#include "cpl-parser/node/program.hpp"
-#include "cpl-parser/cli.h"
-#include "cpl-parser/error.h"
-#include "cpl-parser/basics/allocator/arena.hpp"
+
+#include <cpl-parser/lexer.h>
+#include <cpl-parser/parser.h>
+#include <cpl-parser/node/program.hpp>
+#include <cpl-parser/cli.h>
+#include <cpl-parser/error.h>
+#include <cpl-parser/basics/allocator/arena.hpp>
+
+#include <cpl-compiler/compiler.h>
 
 int main(int argc, char **argv)
 {
@@ -35,6 +39,10 @@ int main(int argc, char **argv)
 
     auto root = reinterpret_cast<AST::Nodes::ProgramNode*>(parser->GetRoot());
     (void)root;
+
+    int result = evaluate_program(root);
+
+    std::println("Evaluated root node with result = {}.", result);
 
     delete parser;
 
