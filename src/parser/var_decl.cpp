@@ -9,11 +9,11 @@ namespace AST
 		Nodes::IdentifierNode* nameNode = Id();
         auto varLoc = nameNode->GetLocation();
 
-		std::string* name = m_arena.Alloc<std::string>(nameNode->GetName());
+		auto name = m_arena.Alloc<String>(nameNode->GetName());
 
 		Eat(TokenType::Colon);
 
-		Nodes::TypeNode* type = Type();
+		auto type = Type();
 
 		Nodes::SymbolFlag symbolFlag = Nodes::SymbolFlag::NONE;
 		// Symbol Flag
@@ -55,7 +55,7 @@ namespace AST
 			value = Ternary();
 		}
 
-		return m_arena.Alloc<Nodes::VariableDeclaration>(type, name, value, varLoc);
+		return m_arena.Alloc<Nodes::VariableDeclaration>(type, name, value, symbolFlag, varLoc);
 	}
 }
 
