@@ -1,7 +1,7 @@
 #pragma once
 
-#include<string>
-#include"../node.h"
+#include "basics/string.hpp"
+#include "node.h"
 
 namespace AST
 {
@@ -16,9 +16,9 @@ namespace AST
 		public:
 			inline NodeType GetType() const override { return NodeType::Identifier; }
 		public:
-			inline std::string GetName() const { return m_name; }
+			inline String GetName() const { return m_name; }
 		private:
-			std::string m_name;
+			String m_name;
 		};
 	}
 }
