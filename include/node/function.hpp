@@ -20,15 +20,10 @@ namespace AST
 			FunctionCall(Node* callee, LocationSpan loc)
                 : m_callee(callee),
                   m_args(std::vector<Node*>()),
-                  m_generics(std::vector<TypeNode*>()),
                   Node(loc) {}
 			~FunctionCall() {}
 		public:
 			inline NodeType GetType() const override { return NodeType::FunctionCall; }
-        public:
-            void AddGeneric(TypeNode* generic) { m_generics.push_back(generic); }
-            TypeNode* GetGeneric(unsigned int index) const { return m_generics[index]; }
-            unsigned int GetGenericsSize() const { return m_generics.size(); }
 		public:
 			inline Node* GetCallee() const { return m_callee; }
         public:
@@ -38,22 +33,21 @@ namespace AST
 		private:
 			Node* m_callee;
 			std::vector<Node*> m_args;
-            std::vector<TypeNode*> m_generics;
 		};
 
         class FunctionParam
         {
         public:
-            FunctionParam(TypeNode* type, IdentifierNode* name)
+            FunctionParam(Type* type, IdentifierNode* name)
                 : m_type(type), m_name(name) { }
             ~FunctionParam() = default;
 
         public:
-            inline TypeNode* GetType() const { return m_type; }
+            inline Type* GetType() const { return m_type; }
             inline IdentifierNode* GetName() const { return m_name; }
 
         private:
-            TypeNode* m_type;
+            Type* m_type;
             IdentifierNode* m_name;
         };
 
@@ -73,10 +67,10 @@ namespace AST
             ~FunctionDeclaration() = default;
         public:
 			void AddParam(FunctionParam* param) { m_params.push_back(param); }
-            void SetReturnType(TypeNode* retType) { m_ret_type = retType; }
+            void SetReturnType(Type* retType) { m_ret_type = retType; }
         public:
             inline Node* GetName() const { return m_name; }
-            inline TypeNode* GetReturnType() const { return m_ret_type; }
+            inline Type* GetReturnType() const { return m_ret_type; }
             inline Statements::StatementsBody* GetBody() const { return m_body; }
         public:
             inline FunctionParam* GetParam(unsigned int index)
@@ -87,7 +81,7 @@ namespace AST
         private:
             Node* m_name;
             std::vector<FunctionParam*> m_params;
-            TypeNode* m_ret_type;
+            Type* m_ret_type;
 
             Statements::StatementsBody* m_body;
         };
