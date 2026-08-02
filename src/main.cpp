@@ -1,11 +1,11 @@
 #include <cassert>
 #include <memory>
-#include "lexer.h"
-#include "parser.h"
-#include "node/program.hpp"
-#include "cli.h"
-#include "error.h"
-#include "basics/allocator/arena.hpp"
+#include "cpl-parser/lexer.h"
+#include "cpl-parser/parser.h"
+#include "cpl-parser/node/program.hpp"
+#include "cpl-parser/cli.h"
+#include "cpl-parser/error.h"
+#include "cpl-parser/basics/allocator/arena.hpp"
 
 int main(int argc, char **argv)
 {

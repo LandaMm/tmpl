@@ -95,6 +95,7 @@ namespace AST
 
         // TODO: better error
         assert(false && "Invalid type");
+        return nullptr;
     }
 
     Nodes::CastNode* Parser::Cast(Nodes::Type* typ)

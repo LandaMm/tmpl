@@ -1,6 +1,6 @@
 
 #include<iostream>
-#include"../include/token.h"
+#include "token.h"
 
 namespace AST
 {

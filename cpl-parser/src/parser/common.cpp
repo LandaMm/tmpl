@@ -1,5 +1,5 @@
 
-#include"../../include/parser.h"
+#include "parser.h"
 #include "node/identifier.hpp"
 #include "token.h"
 #include "basics/string.hpp"
