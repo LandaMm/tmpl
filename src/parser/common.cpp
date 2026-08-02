@@ -18,20 +18,6 @@ namespace AST
 	{
         auto fnCall = m_arena.Alloc<Nodes::FunctionCall>(callee, callee->GetLocation());
 
-        if (m_lexer->GetToken()->GetType() == TokenType::Less)
-        {
-            Eat(TokenType::Less);
-            while (m_lexer->GetToken()->GetType() != TokenType::Greater)
-            {
-                fnCall->AddGeneric(Type());
-                if (m_lexer->GetToken()->GetType() == TokenType::Comma && m_lexer->SeekToken()->GetType() != TokenType::Greater)
-                {
-                    Eat(TokenType::Comma);
-                }
-            }
-            Eat(TokenType::Greater);
-        }
-
 		Eat(TokenType::OpenBracket);
 		while (m_lexer->GetToken()->GetType() != TokenType::CloseBracket && m_lexer->GetToken()->GetType() != TokenType::_EOF)
 		{
