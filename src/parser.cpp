@@ -55,16 +55,30 @@ namespace AST
 
 		m_lexer->RestoreState();
 
+		Node* stmt = nullptr;
+
 		switch (next->GetType())
 		{
 		case TokenType::OpenBracket:
-			return FunctionDeclaration();
+		{
+			auto fn = FunctionDeclaration();
+			stmt = fn;
+			if (fn->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN) Eat(TokenType::Semicolon);
+			break;
+		}
 		default: // Type Declaration
-			return TypeDeclaration();
+		{
+			auto typ = TypeDeclaration();
+			stmt = typ;
+			if ((typ->GetTypeValue()->GetKind() != Nodes::TypeKind::ENUM
+				&& typ->GetTypeValue()->GetKind() != Nodes::TypeKind::STRUCT)
+				|| m_lexer->GetToken()->GetType() == TokenType::Semicolon) Eat(TokenType::Semicolon);
+			break;
+		}
 		}
 
-		assert(0 && "UNREACHABLE");
-		return nullptr;
+		assert(stmt != nullptr && "SHOULD BE UNREACHABLE");
+		return stmt;
 	}
 
 	Node* Parser::Statement()
@@ -137,12 +151,13 @@ namespace AST
 			else if (next->GetType() == TokenType::Colon) // Variable Declaration
 			{
 				stmt = VariableDeclaration();
+				Eat(TokenType::Semicolon);
 			}
 			else {
 				stmt = Assignment();
+				Eat(TokenType::Semicolon);
 			}
 
-			Eat(TokenType::Semicolon);
 			break;
 		}
 		default:
