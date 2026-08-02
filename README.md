@@ -1,4 +1,4 @@
-# Cheetah (Work-in-Progress)
+# Compiled Programming Language
 
 **Cheetah** (temporary name) is a high-performance automation scripting language, designed to run fast with optional C/C++ acceleration.
 
