@@ -53,7 +53,7 @@ namespace AST
 			{
 				if (!m_value)
 					return nullptr;
-				TypedValueHolder<T*> holder = std::dynamic_pointer_cast<TypedValueHolder<T>>(m_value);
+				TypedValueHolder<T>* holder = dynamic_cast<TypedValueHolder<T>*>(m_value);
 				return holder ? holder->GetValue() : nullptr;
 			}
 		private:
