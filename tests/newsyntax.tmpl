@@ -7,85 +7,63 @@ byte :: u8;
 
 buffer: byte = 255;
 
-NodeType :: enum(int) {
-	Unknown = 0,
-	Binary,
-	Literal,
+NodeType :: enum {
+	Unknown = 0;
+	Binary;
+	Literal;
 }
 
 Node :: struct {
-	type: NodeType;
+	type: *NodeType;
 }
 
-LiteralNode :: struct <- Node(.type = ::Literal) {
+LiteralNode :: struct {
 	value: int;
 }
 
-BinaryOp :: enum(int) {
-	Add = 0,
-	Subtract,
-	Multiply,
-	Divide,
+BinaryOp :: enum {
+	Add = 0;
+	Subtract;
+	Multiply;
+	Divide;
 }
 
-BinaryNode :: struct <- Node(.type = ::Binary) {
+BinaryNode :: struct {
 	left: *Node;
 	right: *Node;
 	op: BinaryOp;
 }
 
-evaluate_expr :: (node: *Node) -> int {
-	return map node.type -> int {
-		::Literal {
-			return <LiteralNode>(node).value;
-		}
-		::Binary {
-			expr := <BinaryNode>(node);
-
-			left := evaluate_expr(expr.left);
-			right := evaluate_expr(expr.right);
-
-			return map expr.op -> int {
-				::Add {
-					return left.value + right.value;
-				}
-				::Subtract {
-					return left.value - right.value;
-				}
-				::Multiply {
-					return left.value * right.value;
-				}
-				::Divide {
-					return left.value / right.value;
-				}
-			}
-		}
-	}
-}
+// evaluate_expr :: (node: *Node) -> int {
+// 	return map node.type -> int {
+// 		::Literal {
+// 			return <LiteralNode>(node).value;
+// 		}
+// 		::Binary {
+// 			expr := <BinaryNode>(node);
+// 
+// 			left := evaluate_expr(expr.left);
+// 			right := evaluate_expr(expr.right);
+// 
+// 			return map expr.op -> int {
+// 				::Add {
+// 					return left.value + right.value;
+// 				}
+// 				::Subtract {
+// 					return left.value - right.value;
+// 				}
+// 				::Multiply {
+// 					return left.value * right.value;
+// 				}
+// 				::Divide {
+// 					return left.value / right.value;
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
 main :: (argc: int, argv: *char) -> int {
-	l := LiteralNode {
-		.value = 34,
-	};
-
-	r := BinaryNode {
-		.left = LiteralNode {
-			.value = 100,
-		},
-		.right = LiteralNode {
-			.value = 120,
-		},
-		.op = ::Add,
-	};
-
-	expr := Node{
-		.left = l,
-		.right = r,
-		.op = ::Subtract,
-	};
-
-	print("result = %\n", evaluate_expr(expr));
-
 	return 0;
 }
 
