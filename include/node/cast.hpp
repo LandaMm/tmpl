@@ -10,7 +10,7 @@ namespace AST
         class CastNode : public Node
         {
         private:
-            using PTypeNode = TypeNode*;
+            using PTypeNode = Type*;
             using PNode = Node*;
         public:
             CastNode(PTypeNode typ, PNode expr, LocationSpan loc)
@@ -21,7 +21,7 @@ namespace AST
             inline PTypeNode GetTypeNode() const { return m_type; }
             inline PNode GetExpr() const { return m_expr; }
         private:
-            TypeNode* m_type;
+            Type* m_type;
             Node* m_expr;
         };
     }
