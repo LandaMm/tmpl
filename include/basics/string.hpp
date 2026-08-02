@@ -8,6 +8,10 @@
 #include <ostream>
 #include <string_view>
 
+#if __cplusplus >= 202002L
+#include <compare>
+#endif
+
 #include "def.hpp"
 #include "array.hpp"
 
@@ -130,6 +134,11 @@ public:
 	bool operator==(const BasicString& other) const noexcept
 	{
 		return View() == other.View();
+	}
+
+	std::strong_ordering operator<=>(const BasicString& other) const noexcept
+	{
+		return View() <=> other.View();
 	}
 
 #if __cplusplus < 202002L
