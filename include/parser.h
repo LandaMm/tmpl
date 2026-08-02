@@ -9,6 +9,7 @@
 #include "node/type.hpp"
 #include "error.h"
 #include "basics/allocator/arena.hpp"
+#include "basics/def.hpp"
 #include <memory>
 
 namespace AST
@@ -53,12 +54,12 @@ namespace AST
 
     private: // Helpers
         bool ParseGenericType();
+		Uint64 EvaluateIntegerConstantExpression(Node* node) const;
 
     private: // Types
-        Nodes::TypeNode* Type();
-        Nodes::TypeNode* Type(Nodes::IdentifierNode* target);
+        Nodes::Type* Type();
         Nodes::TypeDeclaration* TypeDeclaration();
-        Nodes::CastNode* Cast(Nodes::TypeNode* typ);
+        Nodes::CastNode* Cast(Nodes::Type* typ);
 
 	private: // Statements
 		Node* Statement();
@@ -67,7 +68,7 @@ namespace AST
 		Node* VariableDeclaration();
         Node* ReturnStatement();
         Nodes::FunctionDeclaration* FunctionSignature();
-        Node* FunctionDeclaration();
+		Nodes::FunctionDeclaration *FunctionDeclaration();
         Node* WhileLoop();
         Node* ForLoop();
         Node* BreakStmt();
