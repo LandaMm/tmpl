@@ -9,6 +9,57 @@
 
 namespace AST
 {
+	Uint64 Parser::EvaluateIntegerConstantExpression(Node* node) const
+	{
+		switch (node->GetType())
+		{
+		case NodeType::Expression:
+		{
+			auto expr = reinterpret_cast<Nodes::ExpressionNode*>(node);
+			auto left = EvaluateIntegerConstantExpression(expr->GetLeft());
+			auto right = EvaluateIntegerConstantExpression(expr->GetRight());
+			
+			switch (expr->GetOperator().GetType())
+			{
+			case OperatorType::PLUS:
+				return left + right;
+			case OperatorType::MINUS:
+				return left - right;
+			case OperatorType::MULTIPLY:
+				return left * right;
+			case OperatorType::DIVIDE:
+				return left / right;
+			default:
+			{
+				// TODO: better error
+				assert(false && "unknown operator encountered");
+				return ~0u;
+			}
+			}
+		}
+		case NodeType::Literal:
+		{
+			auto literal = reinterpret_cast<Nodes::LiteralNode*>(node);
+			
+			if (literal->GetLiteralType() != Nodes::LiteralType::INT)
+			{
+				// TODO: better error
+				assert(false && "only integer literals are supported");
+				return ~0u;
+			}
+
+			auto v = literal->GetValue<int>();
+			return *v;
+		}
+		default:
+			// TODO: better error
+			assert(false && "unsupported node used for expression evaluation");
+			return ~0u;
+		}
+
+		assert(false && "UNREACHABLE");
+	}
+
     Node* Parser::Assignment()
     {
         if (m_lexer->GetToken()->GetType() == TokenType::Id)
