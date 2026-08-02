@@ -10,14 +10,15 @@ endif()
 
 project(cpl)
 
+add_subdirectory(cpl-basics)
 add_subdirectory(cpl-parser)
-add_subdirectory(cpl-compiler)
+add_subdirectory(cpl-ir)
 
 add_executable(cpl "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 target_include_directories(cpl PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-target_link_libraries(cpl cpl-parser cpl-compiler)
+target_link_libraries(cpl cpl-basics cpl-parser cpl-ir)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET cpl PROPERTY CXX_STANDARD 23)
