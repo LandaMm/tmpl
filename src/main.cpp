@@ -9,7 +9,7 @@
 #include <cpl-parser/error.h>
 #include <cpl-basics/allocator/arena.hpp>
 
-#include <cpl-ir/compiler.h>
+#include <cpl-ir/ir.h>
 
 int main(int argc, char **argv)
 {
@@ -40,7 +40,9 @@ int main(int argc, char **argv)
     auto root = reinterpret_cast<AST::Nodes::ProgramNode*>(parser->GetRoot());
     (void)root;
 
-    auto compiler = new Compiler();
+    auto compiler = new IRGenerate::IR(root);
+
+    compiler->GenerateIR();
 
     delete parser;
 
