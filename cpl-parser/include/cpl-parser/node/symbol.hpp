@@ -13,7 +13,7 @@ enum class SymbolFlag
 	NONE = 0,
 	FOREIGN,
 	COUNT_SYMBOL_FLAGS,
-}; // enum class SymbolClass
+}; // enum class SymbolFlag
 
 enum class SymbolType
 {
@@ -21,7 +21,7 @@ enum class SymbolType
 	VARIABLE,
 	FUNCTION,
 	COUNT_SYMBOL_TYPES,
-};
+}; // enum class SymbolType
 
 class Symbol : public Node
 {
