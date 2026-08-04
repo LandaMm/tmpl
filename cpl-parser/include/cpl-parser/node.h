@@ -54,6 +54,10 @@ namespace AST
 	public:
 		template <typename T>
 		inline T *Get() const { return static_cast<T *>(this); };
+
+		template<typename T>
+		requires std::derived_from<T, Node>
+		inline T* As() { return dynamic_cast<T*>(this); }
     public:
         inline LocationSpan GetLocation() const { return m_loc; }
     public:
