@@ -52,12 +52,12 @@ namespace AST
         class PointerType : public Type
         {
         public:
-            PointerType(Node* targetType, LocationSpan loc)
+            PointerType(Type* targetType, LocationSpan loc)
                 : m_targetType(targetType), Type(TypeKind::POINTER, loc) { }
         public:
-            inline const Node* GetTargetType() const noexcept { return m_targetType; }
+            inline Type* GetTargetType() const noexcept { return m_targetType; }
         private:
-            Node* m_targetType = nullptr;
+            Type* m_targetType = nullptr;
         };
 
         class StructType : public Type
@@ -97,23 +97,18 @@ namespace AST
         public:
             using PId = IdentifierNode*;
             using PType = Type*;
-
         public:
             TypeDeclaration(PId name, LocationSpan loc)
                 : m_name(name),
                   m_value(nullptr),
                   Node(loc) { }
-
         public:
             inline NodeType GetType() const override { return NodeType::TypeDf; };
-
         public:
             void SetValue(PType value) { m_value = value; }
-
         public:
             inline PId GetTypeName() const { return m_name; }
             inline PType GetTypeValue() const { return m_value; }
-
         private:
             PId m_name;
             PType m_value;
