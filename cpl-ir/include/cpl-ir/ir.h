@@ -7,7 +7,11 @@
 #include <cpl-basics/string.hpp>
 #include <cpl-parser/parser.h>
 #include <cpl-parser/node/function.hpp>
+#include <cpl-parser/node/var_declaration.hpp>
+#include <cpl-parser/node/type.hpp>
 
+#include "type.hpp"
+#include "function.hpp"
 #include "symbol.hpp"
 #include "instr.h"
 #include "block.h"
@@ -17,13 +21,12 @@
 namespace IRGenerate
 {
 
-using Node = AST::Node;
-using namespace AST::Nodes;
+using namespace AST;
 
 class CPL_EXPORT IR
 {
 public:
-	explicit IR(ProgramNode* root);
+	explicit IR(Nodes::ProgramNode* root);
 
 	IR(const IR&) = delete;
 	IR& operator=(const IR&) = delete;
@@ -33,15 +36,23 @@ public:
 	void GenerateIR();
 private:
 	[[nodiscard]] Instr* GenerateInstr(Node* node);
-	void GenerateFunction(FunctionDeclaration* fn);
+	void GenerateFunction(Nodes::FunctionDeclaration* fn);
+	void GenerateVariableDeclaration(Nodes::VariableDeclaration* var);
+	void GenerateTypeDeclaration(Nodes::TypeDeclaration* typ);
 private:
-	void AddSymbol(const Symbol& symbol);
-	const Symbol* const FindSymbol(const String &name) const noexcept;
+	Type* ParseType(Nodes::Type* typ);
+private:
+	void AddType(const String& name, Type* typ);
+	Type* FindType(const String& name) const noexcept;
+
+	void AddSymbol(Symbol* symbol);
+	Symbol* FindSymbol(const String& name) const noexcept;
 private:
 	ArenaAllocator<> m_arena;
-	ProgramNode* m_rootNode;
-	std::map<String, Symbol> m_symbols;
-	Array<NamedBlock> m_localFunctions;
+	Nodes::ProgramNode* m_rootNode;
+	std::map<String, Symbol*> m_symbols;
+	std::map<String, Type*> m_localTypes;
+	std::map<String, Function*> m_functions;
 };
 
 } // namespace IRGenerate
