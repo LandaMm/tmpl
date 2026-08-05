@@ -4,8 +4,8 @@
 #include<memory>
 
 #include"../node.h"
-#include "node/symbol.hpp"
-#include "node/type.hpp"
+#include "cpl-parser/node/symbol.hpp"
+#include "cpl-parser/node/type.hpp"
 
 namespace AST
 {
