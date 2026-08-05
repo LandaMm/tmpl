@@ -2,6 +2,8 @@
 
 #include "cpl-basics/string.hpp"
 
+#include "type.hpp"
+
 namespace IRGenerate
 {
 
@@ -24,15 +26,17 @@ enum class SymbolOrigin
 class Symbol
 {
 public:
-	explicit Symbol(SymbolType typ, SymbolOrigin origin, const String &name)
-		: m_type(typ), m_origin(origin), m_name(name) { }
+	explicit Symbol(SymbolType typ, Type* valueType, SymbolOrigin origin, const String &name)
+		: m_type(typ), m_valueType(valueType), m_origin(origin), m_name(name) {}
 public:
-	SymbolType Type() const noexcept { return m_type; }
+	SymbolType SymType() const noexcept { return m_type; }
+	Type* ValueType() const noexcept { return m_valueType; }
 	SymbolOrigin Origin() const noexcept { return m_origin; }
 	const String& Name() const { return m_name; }
 private:
 	SymbolType m_type;
 	SymbolOrigin m_origin;
+	Type* m_valueType;
 	String m_name;
 };
 
