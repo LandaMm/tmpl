@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 // Important type definitions
 
 // Integer primitives
