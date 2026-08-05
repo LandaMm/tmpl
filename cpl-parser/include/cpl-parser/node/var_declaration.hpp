@@ -21,7 +21,7 @@ namespace AST
 			inline NodeType GetType() const override { return NodeType::VarDecl; }
 
 		public:
-			inline Type* GetType() { return m_type; }
+			inline Type* GetValueType() { return m_type; }
 			inline Node* GetValue() { return m_value; }
 			inline String* GetName() { return m_name; }
 			inline bool HasValue() { return m_value != nullptr; }
