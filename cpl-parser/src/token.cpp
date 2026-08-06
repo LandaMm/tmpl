@@ -4,6 +4,16 @@
 
 namespace AST
 {
+	bool Token::OneOf(std::initializer_list<TokenType> types) const noexcept
+	{
+		for (auto typ : types)
+		{
+			if (m_type == typ) return true;
+		}
+
+		return false;
+	}
+
 	std::ostream& operator<<(std::ostream& stream, const Token& token)
 	{
 		stream << "Token(";

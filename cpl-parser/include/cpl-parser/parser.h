@@ -55,7 +55,6 @@ namespace AST
         bool IsTypeCastAhead();
 
     private: // Helpers
-        bool ParseGenericType();
 		Uint64 EvaluateIntegerConstantExpression(Node* node) const;
 
     private: // Types

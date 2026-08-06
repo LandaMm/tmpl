@@ -38,7 +38,7 @@ namespace AST
             //   ..
             // }
             std::map<String, const Nodes::Type*> fields;
-            while (Current()->GetType() != TokenType::CloseCurly)
+            while (Current()->Not(TokenType::CloseCurly))
             {
                 auto fieldName = Id();
                 Eat(TokenType::Colon);
@@ -64,12 +64,12 @@ namespace AST
             //   ..
             // }
             auto enumType = m_arena.Alloc<Nodes::EnumType>(token->GetLocation());
-            while (Current()->GetType() != TokenType::CloseCurly)
+            while (Current()->Not(TokenType::CloseCurly))
             {
                 auto fieldName = Id();
 
                 Uint64 fieldValue = 0;
-                if (Current()->GetType() == TokenType::Equal)
+                if (Current()->Is(TokenType::Equal))
                 {
 					Eat(TokenType::Equal);
                     auto value = Expr();
@@ -111,7 +111,7 @@ namespace AST
     {
         m_lexer->SaveState();
 
-        if (Current()->GetType() != TokenType::Id)
+        if (Current()->Not(TokenType::Id))
         {
             m_lexer->RestoreState();
             return false;
@@ -119,35 +119,26 @@ namespace AST
 
         Eat(TokenType::Id);
 
-        if (Current()->GetType() == TokenType::Less)
-        {
-            if (!ParseGenericType())
-            {
-                m_lexer->RestoreState();
-                return false;
-            }
-        }
-
-        if (Current()->GetType() != TokenType::CloseBracket)
+        if (Current()->Not(TokenType::CloseBracket))
         {
             m_lexer->RestoreState();
             return false;
         }
 
-        Eat(Current()->GetType());
+        Advance();
 
         auto curr = Current()->GetType();
 
         m_lexer->RestoreState();
 
-        return m_lexer->OneOf({
-            TokenType::Integer,
-            TokenType::Double,
-            TokenType::Float,
-            TokenType::String,
-            TokenType::OpenBracket,
-            TokenType::Id
-        }, curr);
+		return Current()->OneOf({
+			TokenType::Integer,
+			TokenType::Double,
+			TokenType::Float,
+			TokenType::String,
+			TokenType::OpenBracket,
+			TokenType::Id
+		});
     }
 
 	Nodes::TypeDeclaration* Parser::TypeDeclaration()

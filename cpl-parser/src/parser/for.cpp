@@ -27,14 +27,14 @@ namespace AST
 
         m_breaks.push_back(loc);
 
-        if (Current()->GetType() != TokenType::OpenCurly)
+        if (Current()->Not(TokenType::OpenCurly))
         {
 			body->AddItem(Statement());
         }
         else
         {
             Eat(TokenType::OpenCurly);
-            while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
+            while (Current()->Not(TokenType::CloseCurly))
             {
                 Node* statement = Statement();
                 body->AddItem(statement);

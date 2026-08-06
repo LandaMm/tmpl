@@ -20,13 +20,11 @@ namespace AST
 		// 2. params
 		Eat(TokenType::OpenBracket);
 
-		auto currToken = Current()->GetType();
-
 		Array<Nodes::FunctionParam*> fnParams;
-		while (currToken != TokenType::CloseBracket
-			&& currToken != TokenType::_EOF)
+		while (Current()->Not(TokenType::CloseBracket))
 		{
-			if (currToken == TokenType::Comma)
+			// TODO: think if we should allow trailing comma in function signature
+			if (Current()->Is(TokenType::Comma))
 			{
 				Eat(TokenType::Comma);
 			}
@@ -35,7 +33,6 @@ namespace AST
 			auto type = Type();
 			Nodes::FunctionParam* param = m_arena.Alloc<Nodes::FunctionParam>(type, name);
 			fnParams.Push(param);
-			currToken = Current()->GetType();
 		}
 
 		Eat(TokenType::CloseBracket);
@@ -47,7 +44,7 @@ namespace AST
 		Nodes::SymbolFlag fnFlag = Nodes::SymbolFlag::NONE;
 		// Symbol Flag
 		// (none) | #foreign
-		if (Current()->GetType() == TokenType::Hash)
+		if (Current()->Is(TokenType::Hash))
 		{
 			Eat(TokenType::Hash);
 
@@ -101,7 +98,7 @@ namespace AST
 
         Eat(TokenType::OpenCurly);
 
-        while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
+        while (Current()->Not(TokenType::CloseCurly))
         {
             Node* statement = Statement();
             body->AddItem(statement);

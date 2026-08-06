@@ -1,5 +1,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
+
+#include <initializer_list>
 #include<vector>
 #include<memory>
 #include "cpl-parser/location.h"
@@ -164,6 +166,18 @@ namespace AST
 		Token& operator=(const Token&) = delete;
 		Token(Token&&) = delete;
 		Token& operator=(Token&&) = delete;
+	public:
+		bool OneOf(std::initializer_list<TokenType> types) const noexcept;
+
+		inline bool Is(TokenType typ) const noexcept
+		{
+			return m_type == typ;
+		}
+
+		inline bool Not(TokenType typ) const noexcept
+		{
+			return m_type != typ;
+		}
 	public:
 		inline TokenType GetType() const { return m_type; }
 		template<typename T>

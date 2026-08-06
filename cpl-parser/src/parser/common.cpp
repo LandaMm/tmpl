@@ -19,11 +19,12 @@ namespace AST
         auto fnCall = m_arena.Alloc<Nodes::FunctionCall>(callee, callee->GetLocation());
 
 		Eat(TokenType::OpenBracket);
-		while (Current()->GetType() != TokenType::CloseBracket && Current()->GetType() != TokenType::_EOF)
+		while (Current()->Not(TokenType::CloseBracket))
 		{
 			Node* arg = Expr();
             fnCall->AddArgument(arg);
-			if (Current()->GetType() == TokenType::Comma)
+			// TODO: think if we should allow trailing comma in function call
+			if (Current()->Is(TokenType::Comma))
 			{
 				Eat(TokenType::Comma);
 			}

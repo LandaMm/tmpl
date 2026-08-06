@@ -19,18 +19,18 @@ namespace AST
 
 	void Parser::Advance()
 	{
-		m_lexer->NextToken();
+		Eat(Current()->GetType());
 	}
 
 	void Parser::Eat(TokenType type)
 	{
-		if (Current()->GetType() == type)
+		if (Current()->Is(type))
 		{
 			m_lexer->NextToken();
 		}
 		else
 		{
-			if (Current()->GetType() == TokenType::_EOF)
+			if (Current()->Is(TokenType::_EOF))
 			{
 				auto token = Current();
 				GetErrorManager().UnexpectedEofWhileToken(GetFilename(), type, token->GetLine(), token->GetColumn());
@@ -49,7 +49,7 @@ namespace AST
 
 	void Parser::Parse()
 	{
-		while (Current()->GetType() != TokenType::_EOF)
+		while (Current()->Not(TokenType::_EOF))
 		{
 			m_root->AddStatement(Statement());
 		}

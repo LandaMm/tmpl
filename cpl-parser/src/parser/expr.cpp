@@ -62,7 +62,7 @@ namespace AST
 
     Node* Parser::Assignment()
     {
-        if (Current()->GetType() == TokenType::Id)
+        if (Current()->Is(TokenType::Id))
         {
             if (m_lexer->SeekToken() != nullptr &&
                     (
@@ -127,7 +127,7 @@ namespace AST
 		Node* result = Cond();
 
 		// 5 == 5 ? 3 + 2 == 1 + 4 ? true : false : false
-		if (Current()->GetType() == TokenType::Question)
+		if (Current()->Is(TokenType::Question))
 		{
 			Eat(TokenType::Question);
 
@@ -153,40 +153,37 @@ namespace AST
 		Nodes::Condition* expr = m_arena.Alloc<Nodes::Condition>(result->GetLocation());
 		expr->SetLeft(result);
 
-		while (Current()->GetType() == TokenType::Less || Current()->GetType() == TokenType::Greater ||
-			   Current()->GetType() == TokenType::LessEqual || Current()->GetType() == TokenType::GreaterEqual ||
-			   Current()->GetType() == TokenType::Compare || Current()->GetType() == TokenType::NotEqual)
+		while (Current()->OneOf({
+			TokenType::Less, TokenType::Greater, TokenType::LessEqual,
+			TokenType::GreaterEqual, TokenType::Compare, TokenType::NotEqual
+		}))
 		{
 			auto token = Current();
-			if (token->GetType() == TokenType::Greater)
+			
+			Advance();
+
+			switch (token->GetType())
 			{
-				Eat(TokenType::Greater);
+			case TokenType::Greater:
 				expr->SetOp(Nodes::Condition::ConditionType::Greater);
-			}
-			else if (token->GetType() == TokenType::Less)
-			{
-				Eat(TokenType::Less);
+				break;
+			case TokenType::Less:
 				expr->SetOp(Nodes::Condition::ConditionType::Less);
-			}
-			else if (token->GetType() == TokenType::LessEqual)
-			{
-				Eat(TokenType::LessEqual);
+				break;
+			case TokenType::LessEqual:
 				expr->SetOp(Nodes::Condition::ConditionType::LessEqual);
-			}
-			else if (token->GetType() == TokenType::GreaterEqual)
-			{
-				Eat(TokenType::GreaterEqual);
+				break;
+			case TokenType::GreaterEqual:
 				expr->SetOp(Nodes::Condition::ConditionType::GreaterEqual);
-			}
-			else if (token->GetType() == TokenType::Compare)
-			{
-				Eat(TokenType::Compare);
+				break;
+			case TokenType::Compare:
 				expr->SetOp(Nodes::Condition::ConditionType::Compare);
-			}
-			else if (token->GetType() == TokenType::NotEqual)
-			{
-				Eat(TokenType::NotEqual);
+				break;
+			case TokenType::NotEqual:
 				expr->SetOp(Nodes::Condition::ConditionType::NotEqual);
+				break;
+			default:
+				assert(false && "UNREACHABLE");
 			}
 
 			Node* right = Expr();
@@ -206,32 +203,31 @@ namespace AST
 		Nodes::ExpressionNode* expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
-		while (Current()->GetType() == TokenType::Plus || Current()->GetType() == TokenType::Minus)
+		while (Current()->OneOf({TokenType::Plus, TokenType::Minus}))
 		{
 			auto token = Current();
 
-			if (token->GetType() == TokenType::Plus)
+			switch (token->GetType())
 			{
-				Eat(TokenType::Plus);
-				Node* right = Term();
-				expr->SetRight(right);
+			case TokenType::Plus:
 				expr->SetOperator(Operator(OperatorType::PLUS));
-
-				result = expr;
-				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
-				expr->SetLeft(result);
-			}
-			else if (token->GetType() == TokenType::Minus)
-			{
-				Eat(TokenType::Minus);
-				Node* right = Term();
-				expr->SetRight(right);
+				break;
+			case TokenType::Minus:
 				expr->SetOperator(Operator(OperatorType::MINUS));
-
-				result = expr;
-				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
-				expr->SetLeft(result);
+				break;
+			default:
+				assert(false && "UNREACHABLE");
+				break;
 			}
+
+			Advance();
+
+			Node* right = Term();
+			expr->SetRight(right);
+
+			result = expr;
+			expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
+			expr->SetLeft(result);
 		}
 
 		return result;
@@ -244,32 +240,31 @@ namespace AST
             m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
-		while (Current()->GetType() == TokenType::Multiply || Current()->GetType() == TokenType::Divide)
+		while (Current()->OneOf({ TokenType::Multiply, TokenType::Divide }))
 		{
 			auto token = Current();
 
-			if (token->GetType() == TokenType::Multiply)
+			switch (token->GetType())
 			{
-				Eat(TokenType::Multiply);
-				Node* right = Factor();
-				expr->SetRight(right);
+			case TokenType::Multiply:
 				expr->SetOperator(Operator(OperatorType::MULTIPLY));
-
-				result = expr;
-				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
-				expr->SetLeft(result);
-			}
-			else if (token->GetType() == TokenType::Divide)
-			{
-				Eat(TokenType::Divide);
-				Node* right = Factor();
-				expr->SetRight(right);
+				break;
+			case TokenType::Divide:
 				expr->SetOperator(Operator(OperatorType::DIVIDE));
-
-				result = expr;
-				expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
-				expr->SetLeft(result);
+				break;
+			default:
+				assert(false && "UNREACHABLE");
+				break;
 			}
+
+			Advance();
+
+			Node* right = Factor();
+			expr->SetRight(right);
+
+			result = expr;
+			expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
+			expr->SetLeft(result);
 		}
 
 		return result;
@@ -336,37 +331,12 @@ namespace AST
 		else if (token->GetType() == TokenType::Id)
 		{
 			Node* res = Id();
-			TokenType current_type = Current()->GetType();
-			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
+			// while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
+			// res = id | fcall() | fcall()()..
+			while (Current()->Is(TokenType::OpenBracket))
 			{
-                if (current_type == TokenType::OpenBracket)
-                {
-                    // normal function (without generics)
-					Node* fcall = FunctionCall(res);
-					res = fcall;
-                }
-				if (current_type == TokenType::Less)
-				{
-                    // f<box<int>, int>(...)
-                    m_lexer->SaveState();
-                    Eat(TokenType::Less);
-                    if (Current()->GetType() != TokenType::Id)
-                    {
-                        m_lexer->RestoreState();
-                        return res;
-                    }
-                    Eat(TokenType::Id);
-                    if (!m_lexer->OneOf({TokenType::Less, TokenType::Comma, TokenType::Greater}, Current()->GetType()))
-                    {
-                        m_lexer->RestoreState();
-                        return res;
-                    }
-                    m_lexer->RestoreState();
-
-					Node* fcall = FunctionCall(res);
-					res = fcall;
-				}
-				current_type = Current()->GetType();
+				Node* fcall = FunctionCall(res);
+				res = fcall;
 			}
 			return res;
 		}
@@ -388,7 +358,7 @@ namespace AST
 			Eat(TokenType::Minus);
 			return m_arena.Alloc<Nodes::UnaryNode>(Nodes::UnaryOperator::Negative, Factor(), token->GetLocation());
 		}
-		// (expr)
+		// (expr) | (cast_type)factor
 		else if (token->GetType() == TokenType::OpenBracket)
 		{
 			Eat(TokenType::OpenBracket);
@@ -400,19 +370,9 @@ namespace AST
                 return Cast(typ);
             }
 
+			// TODO: think if we should do call Assignment() instead
             Node* res = Ternary();
             Eat(TokenType::CloseBracket);
-
-			TokenType current_type = Current()->GetType();
-			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
-			{
-				if (current_type == TokenType::OpenBracket || current_type == TokenType::Less)
-				{
-					Node* fcall = FunctionCall(res);
-					res = fcall;
-				}
-				current_type = Current()->GetType();
-			}
 
             return res;
 		}

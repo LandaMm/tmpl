@@ -16,14 +16,14 @@ namespace AST
         Statements::StatementsBody* body =
             m_arena.Alloc<Statements::StatementsBody>(Current()->GetLocation());
 
-		if (Current()->GetType() != TokenType::OpenCurly)
+		if (Current()->Not(TokenType::OpenCurly))
 		{
 			body->AddItem(Statement());
 		}
 		else
 		{
 			Eat(TokenType::OpenCurly);
-			while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
+			while (Current()->Not(TokenType::CloseCurly))
 			{
 				Node* statement = Statement();
 				body->AddItem(statement);
@@ -33,11 +33,11 @@ namespace AST
 
         ifElse->SetBody(body);
 
-		if (Current()->GetType() == TokenType::Else)
+		if (Current()->Is(TokenType::Else))
 		{
 			Eat(TokenType::Else);
 
-			if (Current()->GetType() == TokenType::If)
+			if (Current()->Is(TokenType::If))
 			{
 				Node* elseNode = IfElseStatement();
 				ifElse->SetElseStatement(elseNode);
@@ -45,14 +45,14 @@ namespace AST
 			else
 			{
 				auto stmts = m_arena.Alloc<Statements::StatementsBody>(Current()->GetLocation());
-				if (Current()->GetType() != TokenType::OpenCurly)
+				if (Current()->Not(TokenType::OpenCurly))
 				{
 					stmts->AddItem(Statement());
 				}
 				else
 				{
 					Eat(TokenType::OpenCurly);
-					while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
+					while (Current()->Not(TokenType::CloseCurly))
 					{
 						Node* statement = Statement();
 						stmts->AddItem(statement);

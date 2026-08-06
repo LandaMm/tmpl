@@ -18,7 +18,7 @@ namespace AST
 		Nodes::SymbolFlag symbolFlag = Nodes::SymbolFlag::NONE;
 		// Symbol Flag
 		// (none) | #foreign
-		if (Current()->GetType() == TokenType::Hash)
+		if (Current()->Is(TokenType::Hash))
 		{
 			Eat(TokenType::Hash);
 
@@ -43,7 +43,7 @@ namespace AST
 
 		Node* value = nullptr;
 
-		if (Current()->GetType() == TokenType::Equal)
+		if (Current()->Is(TokenType::Equal))
 		{
 			// Default values are not allowed for externed symbols
 			if (symbolFlag == Nodes::SymbolFlag::FOREIGN)
