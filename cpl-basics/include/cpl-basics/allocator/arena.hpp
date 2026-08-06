@@ -99,6 +99,4 @@ private:
 private:
 	Array<Block> m_blocks;
 	Array<DestructorEntry> m_destructors;
-	SizeT m_capacity;
-	SizeT m_offset = 0;
 };
