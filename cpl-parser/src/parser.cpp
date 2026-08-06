@@ -12,22 +12,32 @@ namespace AST
 		return errorManager;
 	}
 
+	Token* Parser::Current() const noexcept
+	{
+		return m_lexer->GetToken();
+	}
+
+	void Parser::Advance()
+	{
+		m_lexer->NextToken();
+	}
+
 	void Parser::Eat(TokenType type)
 	{
-		if (m_lexer->GetToken()->GetType() == type)
+		if (Current()->GetType() == type)
 		{
 			m_lexer->NextToken();
 		}
 		else
 		{
-			if (m_lexer->GetToken()->GetType() == TokenType::_EOF)
+			if (Current()->GetType() == TokenType::_EOF)
 			{
-				auto token = m_lexer->GetToken();
+				auto token = Current();
 				GetErrorManager().UnexpectedEofWhileToken(GetFilename(), type, token->GetLine(), token->GetColumn());
 			}
 			else
 			{
-				GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), m_lexer->GetToken(), m_lexer->GetToken(), type);
+				GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), Current(), Current(), type);
 			}
 		}
 	}
@@ -39,7 +49,7 @@ namespace AST
 
 	void Parser::Parse()
 	{
-		while (m_lexer->GetToken()->GetType() != TokenType::_EOF)
+		while (Current()->GetType() != TokenType::_EOF)
 		{
 			m_root->AddStatement(Statement());
 		}
@@ -72,7 +82,7 @@ namespace AST
 			stmt = typ;
 			if ((typ->GetTypeValue()->GetKind() != Nodes::TypeKind::ENUM
 				&& typ->GetTypeValue()->GetKind() != Nodes::TypeKind::STRUCT)
-				|| m_lexer->GetToken()->GetType() == TokenType::Semicolon) Eat(TokenType::Semicolon);
+				|| Current()->GetType() == TokenType::Semicolon) Eat(TokenType::Semicolon);
 			break;
 		}
 		}
@@ -83,7 +93,7 @@ namespace AST
 
 	Node* Parser::Statement()
 	{
-		auto token = m_lexer->GetToken();
+		auto token = Current();
 		Node* stmt = nullptr;
 		switch (token->GetType())
 		{

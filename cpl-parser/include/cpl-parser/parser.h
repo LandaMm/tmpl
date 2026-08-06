@@ -34,8 +34,10 @@ namespace AST
 
 	private:
 		Prelude::ErrorManager &GetErrorManager();
+		[[nodiscard]] Token* Current() const noexcept;
+		[[nodiscard]] TokenType Peek();
+		void Advance();
 		void Eat(TokenType type);
-		TokenType Peek();
 
 	private: // Common
 		Nodes::IdentifierNode* Id();
