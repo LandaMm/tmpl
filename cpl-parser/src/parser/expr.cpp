@@ -64,15 +64,14 @@ namespace AST
     {
         if (Current()->Is(TokenType::Id))
         {
-            if (m_lexer->SeekToken() != nullptr &&
-                    (
-                     m_lexer->SeekToken()->GetType() == TokenType::ColonEqual ||
-                     m_lexer->SeekToken()->GetType() == TokenType::Equal ||
-                     m_lexer->SeekToken()->GetType() == TokenType::CompoundAdd ||
-                     m_lexer->SeekToken()->GetType() == TokenType::CompoundMinus ||
-                     m_lexer->SeekToken()->GetType() == TokenType::CompoundMultiply ||
-                     m_lexer->SeekToken()->GetType() == TokenType::CompoundDivide
-                    ))
+			if (Peek()->OneOf({
+				 TokenType::ColonEqual,
+				 TokenType::Equal,
+				 TokenType::CompoundAdd,
+				 TokenType::CompoundMinus,
+				 TokenType::CompoundMultiply,
+				 TokenType::CompoundDivide,
+			}))
             {
                 auto assignee = Id();
 
@@ -380,7 +379,7 @@ namespace AST
 		else
 		{
 			Prelude::ErrorManager &errManager = GetErrorManager();
-			errManager.UnexpectedToken(m_lexer->GetFilename(), token);
+			errManager.UnexpectedToken(GetFilename(), token);
 			return nullptr;
 		}
 	}

@@ -35,7 +35,7 @@ namespace AST
 	private:
 		Prelude::ErrorManager &GetErrorManager();
 		[[nodiscard]] Token* Current() const noexcept;
-		[[nodiscard]] TokenType Peek();
+		[[nodiscard]] Token* Peek() const noexcept;
 		void Advance();
 		void Eat(TokenType type);
 

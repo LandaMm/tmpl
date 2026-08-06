@@ -61,7 +61,7 @@ namespace AST
 			default:
 			{
 				auto &errManager = GetErrorManager();
-				errManager.UnexpectedToken(m_lexer->GetFilename(), nextToken);
+				errManager.UnexpectedToken(GetFilename(), nextToken);
 				break;
 			}
 			}

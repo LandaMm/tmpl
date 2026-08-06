@@ -37,14 +37,14 @@ namespace AST
 			}
 			else
 			{
-				GetErrorManager().UnexpectedToken(m_lexer->GetFilename(), Current(), Current(), type);
+				GetErrorManager().UnexpectedToken(GetFilename(), Current(), Current(), type);
 			}
 		}
 	}
 
-	TokenType Parser::Peek()
+	Token* Parser::Peek() const noexcept
 	{
-		return m_lexer->SeekToken()->GetType();
+		return m_lexer->SeekToken();
 	}
 
 	void Parser::Parse()
@@ -61,7 +61,7 @@ namespace AST
 		
 		Eat(TokenType::Id);
 
-		auto next = m_lexer->SeekToken();
+		auto next = Peek();
 
 		m_lexer->RestoreState();
 
@@ -125,8 +125,8 @@ namespace AST
         }
         case TokenType::Hash:
         {
-            auto tokenType = Peek();
-            if (tokenType == TokenType::_EOF)
+            auto token = Peek();
+            if (token->Is(TokenType::_EOF))
             {
                 Prelude::ErrorManager& manager = GetErrorManager();
                 manager.UnexpectedEOF(GetFilename(), token->GetLine(), token->GetColumn());
@@ -134,7 +134,7 @@ namespace AST
             }
             Eat(TokenType::Hash);
             // Directive
-            switch (tokenType)
+            switch (token->GetType())
             {
                 case TokenType::Import:
                     stmt = ImportStatement();
@@ -145,14 +145,14 @@ namespace AST
                 default:
 					// TODO: better error
                     Prelude::ErrorManager& manager = GetErrorManager();
-                    manager.UnexpectedToken(GetFilename(), m_lexer->SeekToken());
+                    manager.UnexpectedToken(GetFilename(), Peek());
                     return nullptr;
             }
             break;
         }
 		case TokenType::Id:
 		{
-			auto next = m_lexer->SeekToken();
+			auto next = Peek();
 			
 			if (next->GetType() == TokenType::DoubleColon)
 			{
@@ -172,7 +172,7 @@ namespace AST
 		}
 		default:
 			auto& err = GetErrorManager();
-			err.UnexpectedToken(m_lexer->GetFilename(), token);
+			err.UnexpectedToken(GetFilename(), token);
 			break;
 		}
 		return stmt;
