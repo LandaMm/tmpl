@@ -13,6 +13,12 @@ namespace IRGenerate
 IR::IR(Nodes::ProgramNode* root)
 	: m_rootNode(root) { }
 
+const std::map<String, Symbol*> IR::Symbols() const noexcept { return m_symbols; }
+
+const std::map<String, Type*> IR::Types() const noexcept { return m_localTypes; }
+
+const std::map<String, Function*> IR::Functions() const noexcept { return m_functions; }
+
 void IR::GenerateIR()
 {
 	using NT = AST::NodeType;
@@ -123,7 +129,10 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 		}
 	}
 
-	m_functions.insert({ symbolName, m_arena.Alloc<Function>(symbolName, std::move(params), block, retType) });
+	if (origin != SymbolOrigin::FOREIGN)
+	{
+		m_functions.insert({ symbolName, m_arena.Alloc<Function>(symbolName, std::move(params), block, retType) });
+	}
 }
 
 void IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)

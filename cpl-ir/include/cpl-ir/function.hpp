@@ -23,6 +23,7 @@ public:
 public:
 	const String& Name() const noexcept { return m_name; }
 	const Array<FunctionParam>& Params() const noexcept { return m_params; }
+	const NamedBlock* Body() const noexcept { return m_body; }
 	Type* RetType() const noexcept { return m_retType; }
 private:
 	String m_name;

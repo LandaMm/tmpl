@@ -21,6 +21,7 @@ public:
 	BasicBlock(BasicBlock&&) = delete;
 	BasicBlock& operator=(BasicBlock&&) = delete;
 public:
+	const Array<Instr*>& Body() const noexcept;
 	void AddInstr(Instr* instr);
 private:
 	Array<Instr*> m_body;

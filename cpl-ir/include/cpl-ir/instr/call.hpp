@@ -13,6 +13,8 @@ class CPL_EXPORT CallInstr : public Instr
 public:
 	explicit CallInstr(const Symbol &callSymbol)
 		: m_callSymbol(callSymbol), Instr(InstrOp::CALL) { }
+public:
+	const Symbol& CallSymbol() const noexcept { return m_callSymbol; }
 private:
 	Symbol m_callSymbol;
 };

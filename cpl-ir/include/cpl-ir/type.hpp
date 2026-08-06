@@ -79,6 +79,8 @@ class PointerType : public Type
 public:
 	PointerType(const Type* underlyingType)
 		: m_underlyingType(underlyingType), Type(TypeClass::POINTER) { }
+public:
+	const Type* UnderlyingType() const noexcept { return m_underlyingType; }
 private:
 	const Type* m_underlyingType;
 };

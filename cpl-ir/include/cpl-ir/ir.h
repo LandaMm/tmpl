@@ -34,6 +34,10 @@ public:
 	IR& operator=(IR&&) = delete;
 public:
 	void GenerateIR();
+public:
+	const std::map<String, Symbol*> Symbols() const noexcept;
+	const std::map<String, Type*> Types() const noexcept;
+	const std::map<String, Function*> Functions() const noexcept;
 private:
 	[[nodiscard]] Instr* GenerateInstr(Node* node);
 	void GenerateFunction(Nodes::FunctionDeclaration* fn);
