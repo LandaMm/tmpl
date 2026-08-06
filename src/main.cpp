@@ -30,7 +30,9 @@ int main(int argc, char **argv)
         return 1;
     }
 
-	Lexer* lexer = new Lexer(reader, filename);
+    ArenaAllocator<> lexerAllocator;
+
+	Lexer* lexer = new Lexer(reader, filename, &lexerAllocator);
 	lexer->Tokenize();
 
 	Parser* parser = new Parser(lexer);
