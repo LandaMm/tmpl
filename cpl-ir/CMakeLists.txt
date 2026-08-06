@@ -25,7 +25,6 @@ add_library(cpl-ir
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/ir.h"
 )
 
-target_include_directories(cpl-ir PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir")
 target_include_directories(cpl-ir PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 target_link_libraries(cpl-ir cpl-parser)

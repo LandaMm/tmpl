@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "location.h"
-#include "node.h"
+#include "cpl-parser/location.h"
+#include "cpl-parser/node.h"
 
 namespace AST::Nodes
 {

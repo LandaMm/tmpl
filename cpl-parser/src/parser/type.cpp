@@ -1,9 +1,9 @@
 #include <map>
 
-#include "node/type.hpp"
-#include "node/literal.hpp"
-#include "parser.h"
-#include "token.h"
+#include "cpl-parser/node/type.hpp"
+#include "cpl-parser/node/literal.hpp"
+#include "cpl-parser/parser.h"
+#include "cpl-parser/token.h"
 
 namespace AST
 {

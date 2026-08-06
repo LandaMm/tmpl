@@ -2,7 +2,7 @@
 #define NODE_H
 #include <iostream>
 #include <string>
-#include "location.h"
+#include "cpl-parser/location.h"
 
 namespace AST
 {

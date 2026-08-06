@@ -21,7 +21,6 @@ file(GLOB_RECURSE SOURCES
 add_library(cpl-parser ${SOURCES})
 
 target_include_directories(cpl-parser PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_include_directories(cpl-parser PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-parser")
 
 target_link_libraries(cpl-parser cpl-basics)
 

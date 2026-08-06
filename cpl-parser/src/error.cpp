@@ -5,8 +5,8 @@
 #include <memory>
 
 #include "cpl-basics/file.hpp"
-#include "error.h"
-#include "location.h"
+#include "cpl-parser/error.h"
+#include "cpl-parser/location.h"
 #include "cpl-basics/string.hpp"
 
 using namespace AST;

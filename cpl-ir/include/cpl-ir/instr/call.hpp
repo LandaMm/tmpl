@@ -1,7 +1,7 @@
 #pragma once
 
-#include "instr.h"
-#include "symbol.hpp"
+#include "cpl-ir/instr.h"
+#include "cpl-ir/symbol.hpp"
 
 #include "cplbuild.h"
 

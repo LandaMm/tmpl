@@ -1,13 +1,13 @@
 #pragma once
 
-#include "node/cast.hpp"
-#include "lexer.h"
-#include "node.h"
-#include "node/program.hpp"
-#include "node/identifier.hpp"
-#include "node/function.hpp"
-#include "node/type.hpp"
-#include "error.h"
+#include "cpl-parser/node/cast.hpp"
+#include "cpl-parser/lexer.h"
+#include "cpl-parser/node.h"
+#include "cpl-parser/node/program.hpp"
+#include "cpl-parser/node/identifier.hpp"
+#include "cpl-parser/node/function.hpp"
+#include "cpl-parser/node/type.hpp"
+#include "cpl-parser/error.h"
 #include "cpl-basics/allocator/arena.hpp"
 #include "cpl-basics/def.hpp"
 #include <memory>

@@ -2,8 +2,8 @@
 #include <cassert>
 
 #include "cpl-basics/file.hpp"
-#include "error.h"
-#include "lexer.h"
+#include "cpl-parser/error.h"
+#include "cpl-parser/lexer.h"
 
 namespace AST
 {

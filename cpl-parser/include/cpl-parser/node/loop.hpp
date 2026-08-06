@@ -1,7 +1,7 @@
 #pragma once
 
-#include "node.h"
-#include "node/statement.hpp"
+#include "cpl-parser/node.h"
+#include "cpl-parser/node/statement.hpp"
 
 namespace AST::Nodes
 {

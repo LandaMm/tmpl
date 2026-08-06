@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "cpl-basics/string.hpp"
-#include "location.h"
-#include "token.h"
+#include "cpl-parser/location.h"
+#include "cpl-parser/token.h"
 
 namespace Prelude
 {

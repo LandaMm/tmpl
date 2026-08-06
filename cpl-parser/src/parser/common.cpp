@@ -1,7 +1,7 @@
 
-#include "parser.h"
-#include "node/identifier.hpp"
-#include "token.h"
+#include "cpl-parser/parser.h"
+#include "cpl-parser/node/identifier.hpp"
+#include "cpl-parser/token.h"
 #include "cpl-basics/string.hpp"
 
 namespace AST

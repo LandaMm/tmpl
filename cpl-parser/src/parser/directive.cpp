@@ -1,8 +1,8 @@
 
 
 #include <memory>
-#include "parser.h"
-#include "node/directive.hpp"
+#include "cpl-parser/parser.h"
+#include "cpl-parser/node/directive.hpp"
 
 namespace AST
 {

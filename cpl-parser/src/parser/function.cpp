@@ -2,10 +2,10 @@
 #include <cassert>
 
 #include "cpl-basics/array.hpp"
-#include "node/identifier.hpp"
-#include "parser.h"
-#include "token.h"
-#include "node/function.hpp"
+#include "cpl-parser/node/identifier.hpp"
+#include "cpl-parser/parser.h"
+#include "cpl-parser/token.h"
+#include "cpl-parser/node/function.hpp"
 
 namespace AST
 {

@@ -2,7 +2,7 @@
 #define TOKEN_H
 #include<vector>
 #include<memory>
-#include "location.h"
+#include "cpl-parser/location.h"
 
 namespace AST
 {

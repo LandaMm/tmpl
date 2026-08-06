@@ -18,7 +18,6 @@ add_library(cpl-basics INTERFACE
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/allocator/arena.hpp"
 )
 
-# target_include_directories(cpl-basics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics")
 target_include_directories(cpl-basics INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

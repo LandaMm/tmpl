@@ -1,4 +1,4 @@
-#include "instr.h"
+#include "cpl-ir/instr.h"
 
 namespace IRGenerate
 {

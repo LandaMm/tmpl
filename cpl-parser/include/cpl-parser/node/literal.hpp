@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "node.h"
+#include "cpl-parser/node.h"
 
 namespace AST
 {

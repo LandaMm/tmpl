@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <fstream>
 
-#include "token.h"
+#include "cpl-parser/token.h"
 #include "cpl-basics/string.hpp"
 #include "cpl-basics/array.hpp"
 #include "cpl-basics/file.hpp"

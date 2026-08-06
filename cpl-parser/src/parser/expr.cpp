@@ -1,11 +1,11 @@
 
-#include "parser.h"
-#include "node/expression.hpp"
-#include "node/literal.hpp"
-#include "node/logical.hpp"
-#include "node/unary.hpp"
-#include "node/assign.hpp"
-#include "token.h"
+#include "cpl-parser/parser.h"
+#include "cpl-parser/node/expression.hpp"
+#include "cpl-parser/node/literal.hpp"
+#include "cpl-parser/node/logical.hpp"
+#include "cpl-parser/node/unary.hpp"
+#include "cpl-parser/node/assign.hpp"
+#include "cpl-parser/token.h"
 
 namespace AST
 {

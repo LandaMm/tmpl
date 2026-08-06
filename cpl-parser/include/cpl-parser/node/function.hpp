@@ -3,12 +3,13 @@
 #include <vector>
 #include <memory>
 
-#include "node.h"
-#include "symbol.hpp"
-#include "location.h"
-#include "node/type.hpp"
-#include "statement.hpp"
-#include "identifier.hpp"
+#include "cpl-parser/node.h"
+#include "cpl-parser/node/symbol.hpp"
+#include "cpl-parser/node/type.hpp"
+#include "cpl-parser/node/statement.hpp"
+#include "cpl-parser/node/identifier.hpp"
+
+#include "cpl-parser/location.h"
 
 namespace AST
 {

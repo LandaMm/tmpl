@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include "node.h"
-#include "node/function.hpp"
+#include "cpl-parser/node.h"
+#include "cpl-parser/node/function.hpp"
 
 #include "cpl-basics/string.hpp"
 

@@ -1,4 +1,4 @@
-#include "block.h"
+#include "cpl-ir/block.h"
 
 namespace IRGenerate
 {

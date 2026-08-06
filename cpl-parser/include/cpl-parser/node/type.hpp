@@ -6,10 +6,10 @@
 #include "cpl-basics/def.hpp"
 #include "cpl-basics/string.hpp"
 #include "cpl-basics/array.hpp"
-#include "node.h"
-#include "node/literal.hpp"
-#include "node/symbol.hpp"
-#include "node/identifier.hpp"
+#include "cpl-parser/node.h"
+#include "cpl-parser/node/literal.hpp"
+#include "cpl-parser/node/symbol.hpp"
+#include "cpl-parser/node/identifier.hpp"
 
 namespace AST
 {

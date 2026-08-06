@@ -1,6 +1,6 @@
 #pragma once
 
-#include "node.h"
+#include "cpl-parser/node.h"
 
 namespace AST
 {

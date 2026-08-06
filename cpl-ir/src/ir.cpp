@@ -1,11 +1,11 @@
-#include "ir.h"
+#include "cpl-ir/ir.h"
 
 #include <iostream>
 
 #include <cpl-parser/node/function.hpp>
 #include <cpl-parser/node/identifier.hpp>
 
-#include "instr/call.hpp"
+#include "cpl-ir/instr/call.hpp"
 
 namespace IRGenerate
 {

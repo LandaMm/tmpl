@@ -1,6 +1,6 @@
 
-#include "node/loop.hpp"
-#include "parser.h"
+#include "cpl-parser/node/loop.hpp"
+#include "cpl-parser/parser.h"
 
 namespace AST
 {
