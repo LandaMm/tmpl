@@ -18,11 +18,11 @@ namespace AST
 		Nodes::SymbolFlag symbolFlag = Nodes::SymbolFlag::NONE;
 		// Symbol Flag
 		// (none) | #foreign
-		if (m_lexer->GetToken()->GetType() == TokenType::Hash)
+		if (Current()->GetType() == TokenType::Hash)
 		{
 			Eat(TokenType::Hash);
 
-			auto nextToken = m_lexer->GetToken();
+			auto nextToken = Current();
 			assert(static_cast<int>(Nodes::SymbolFlag::COUNT_SYMBOL_FLAGS) == 2);
 
 			switch (nextToken->GetType())
@@ -43,7 +43,7 @@ namespace AST
 
 		Node* value = nullptr;
 
-		if (m_lexer->GetToken()->GetType() == TokenType::Equal)
+		if (Current()->GetType() == TokenType::Equal)
 		{
 			// Default values are not allowed for externed symbols
 			if (symbolFlag == Nodes::SymbolFlag::FOREIGN)

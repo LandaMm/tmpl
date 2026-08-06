@@ -6,7 +6,7 @@ namespace AST
 {
     Node* Parser::WhileLoop()
     {
-        auto loc = m_lexer->GetToken()->GetLocation();
+        auto loc = Current()->GetLocation();
         Eat(TokenType::While);
 
         Eat(TokenType::OpenBracket);
@@ -14,18 +14,18 @@ namespace AST
         Eat(TokenType::CloseBracket);
 
         Statements::StatementsBody* body =
-            m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
+            m_arena.Alloc<Statements::StatementsBody>(Current()->GetLocation());
 
         m_breaks.push_back(loc);
 
-        if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
+        if (Current()->GetType() != TokenType::OpenCurly)
         {
 			body->AddItem(Statement());
         }
         else
         {
             Eat(TokenType::OpenCurly);
-            while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+            while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
             {
                 Node* statement = Statement();
                 body->AddItem(statement);

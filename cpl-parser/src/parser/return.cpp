@@ -6,7 +6,7 @@ namespace AST
 {
     Node* Parser::ReturnStatement()
     {
-        auto token = m_lexer->GetToken();
+        auto token = Current();
         Eat(TokenType::Return);
 
         Node* value = Ternary();

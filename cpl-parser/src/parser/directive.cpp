@@ -10,10 +10,10 @@ namespace AST
 
     Node* Parser::ImportStatement()
     {
-        auto loc = m_lexer->GetToken()->GetLocation();
+        auto loc = Current()->GetLocation();
         Eat(TokenType::Import);
 
-        auto token = m_lexer->GetToken();
+        auto token = Current();
         Eat(TokenType::String);
         auto module = token->GetValue<String>();
         assert(module);
@@ -23,7 +23,7 @@ namespace AST
 
     Node* Parser::ExternStatement()
     {
-        auto loc = m_lexer->GetToken()->GetLocation();
+        auto loc = Current()->GetLocation();
         Eat(TokenType::Extern);
 
         // TODO: maybe add support for static variables from c

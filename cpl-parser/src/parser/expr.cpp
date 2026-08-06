@@ -62,7 +62,7 @@ namespace AST
 
     Node* Parser::Assignment()
     {
-        if (m_lexer->GetToken()->GetType() == TokenType::Id)
+        if (Current()->GetType() == TokenType::Id)
         {
             if (m_lexer->SeekToken() != nullptr &&
                     (
@@ -78,7 +78,7 @@ namespace AST
 
                 Nodes::AssignOperator assignOp;
 
-                switch (m_lexer->GetToken()->GetType())
+                switch (Current()->GetType())
                 {
 					case TokenType::ColonEqual:
 						assignOp = Nodes::AssignOperator::Declare;
@@ -101,12 +101,12 @@ namespace AST
                     default:
                     {
                         Prelude::ErrorManager& errManager = GetErrorManager();
-                        errManager.UnexpectedToken(GetFilename(), m_lexer->GetToken(), "assign operator (e.g. '=', '+=')");
+                        errManager.UnexpectedToken(GetFilename(), Current(), "assign operator (e.g. '=', '+=')");
                         return nullptr;
                     }
                 }
 
-                Eat(m_lexer->GetToken()->GetType());
+                Eat(Current()->GetType());
 
 				// By calling Assignment again,
 				// we allow something like that:
@@ -127,7 +127,7 @@ namespace AST
 		Node* result = Cond();
 
 		// 5 == 5 ? 3 + 2 == 1 + 4 ? true : false : false
-		if (m_lexer->GetToken()->GetType() == TokenType::Question)
+		if (Current()->GetType() == TokenType::Question)
 		{
 			Eat(TokenType::Question);
 
@@ -153,11 +153,11 @@ namespace AST
 		Nodes::Condition* expr = m_arena.Alloc<Nodes::Condition>(result->GetLocation());
 		expr->SetLeft(result);
 
-		while (m_lexer->GetToken()->GetType() == TokenType::Less || m_lexer->GetToken()->GetType() == TokenType::Greater ||
-			   m_lexer->GetToken()->GetType() == TokenType::LessEqual || m_lexer->GetToken()->GetType() == TokenType::GreaterEqual ||
-			   m_lexer->GetToken()->GetType() == TokenType::Compare || m_lexer->GetToken()->GetType() == TokenType::NotEqual)
+		while (Current()->GetType() == TokenType::Less || Current()->GetType() == TokenType::Greater ||
+			   Current()->GetType() == TokenType::LessEqual || Current()->GetType() == TokenType::GreaterEqual ||
+			   Current()->GetType() == TokenType::Compare || Current()->GetType() == TokenType::NotEqual)
 		{
-			auto token = m_lexer->GetToken();
+			auto token = Current();
 			if (token->GetType() == TokenType::Greater)
 			{
 				Eat(TokenType::Greater);
@@ -206,9 +206,9 @@ namespace AST
 		Nodes::ExpressionNode* expr = m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
-		while (m_lexer->GetToken()->GetType() == TokenType::Plus || m_lexer->GetToken()->GetType() == TokenType::Minus)
+		while (Current()->GetType() == TokenType::Plus || Current()->GetType() == TokenType::Minus)
 		{
-			auto token = m_lexer->GetToken();
+			auto token = Current();
 
 			if (token->GetType() == TokenType::Plus)
 			{
@@ -244,9 +244,9 @@ namespace AST
             m_arena.Alloc<Nodes::ExpressionNode>(result->GetLocation());
 		expr->SetLeft(result);
 
-		while (m_lexer->GetToken()->GetType() == TokenType::Multiply || m_lexer->GetToken()->GetType() == TokenType::Divide)
+		while (Current()->GetType() == TokenType::Multiply || Current()->GetType() == TokenType::Divide)
 		{
-			auto token = m_lexer->GetToken();
+			auto token = Current();
 
 			if (token->GetType() == TokenType::Multiply)
 			{
@@ -282,7 +282,7 @@ namespace AST
 		// and string: "some_string" + "concat"
 		// !var || -5 || +3 (unary)
 
-		auto token = m_lexer->GetToken();
+		auto token = Current();
 
 		// integer literal
 		if (token->GetType() == TokenType::Integer)
@@ -336,7 +336,7 @@ namespace AST
 		else if (token->GetType() == TokenType::Id)
 		{
 			Node* res = Id();
-			TokenType current_type = m_lexer->GetToken()->GetType();
+			TokenType current_type = Current()->GetType();
 			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
 			{
                 if (current_type == TokenType::OpenBracket)
@@ -350,13 +350,13 @@ namespace AST
                     // f<box<int>, int>(...)
                     m_lexer->SaveState();
                     Eat(TokenType::Less);
-                    if (m_lexer->GetToken()->GetType() != TokenType::Id)
+                    if (Current()->GetType() != TokenType::Id)
                     {
                         m_lexer->RestoreState();
                         return res;
                     }
                     Eat(TokenType::Id);
-                    if (!m_lexer->OneOf({TokenType::Less, TokenType::Comma, TokenType::Greater}, m_lexer->GetToken()->GetType()))
+                    if (!m_lexer->OneOf({TokenType::Less, TokenType::Comma, TokenType::Greater}, Current()->GetType()))
                     {
                         m_lexer->RestoreState();
                         return res;
@@ -366,7 +366,7 @@ namespace AST
 					Node* fcall = FunctionCall(res);
 					res = fcall;
 				}
-				current_type = m_lexer->GetToken()->GetType();
+				current_type = Current()->GetType();
 			}
 			return res;
 		}
@@ -403,7 +403,7 @@ namespace AST
             Node* res = Ternary();
             Eat(TokenType::CloseBracket);
 
-			TokenType current_type = m_lexer->GetToken()->GetType();
+			TokenType current_type = Current()->GetType();
 			while (current_type == TokenType::OpenBracket || current_type == TokenType::Point || current_type == TokenType::OpenSquareBracket || current_type == TokenType::Less)
 			{
 				if (current_type == TokenType::OpenBracket || current_type == TokenType::Less)
@@ -411,7 +411,7 @@ namespace AST
 					Node* fcall = FunctionCall(res);
 					res = fcall;
 				}
-				current_type = m_lexer->GetToken()->GetType();
+				current_type = Current()->GetType();
 			}
 
             return res;

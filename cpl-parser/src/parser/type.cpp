@@ -11,7 +11,7 @@ namespace AST
     {
         // type_name|*type_name|struct {..}|enum {..}
 
-        auto token = m_lexer->GetToken();
+        auto token = Current();
 
         switch (token->GetType())
         {
@@ -38,7 +38,7 @@ namespace AST
             //   ..
             // }
             std::map<String, const Nodes::Type*> fields;
-            while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly)
+            while (Current()->GetType() != TokenType::CloseCurly)
             {
                 auto fieldName = Id();
                 Eat(TokenType::Colon);
@@ -64,12 +64,12 @@ namespace AST
             //   ..
             // }
             auto enumType = m_arena.Alloc<Nodes::EnumType>(token->GetLocation());
-            while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly)
+            while (Current()->GetType() != TokenType::CloseCurly)
             {
                 auto fieldName = Id();
 
                 Uint64 fieldValue = 0;
-                if (m_lexer->GetToken()->GetType() == TokenType::Equal)
+                if (Current()->GetType() == TokenType::Equal)
                 {
 					Eat(TokenType::Equal);
                     auto value = Expr();
@@ -111,7 +111,7 @@ namespace AST
     {
         m_lexer->SaveState();
 
-        if (m_lexer->GetToken()->GetType() != TokenType::Id)
+        if (Current()->GetType() != TokenType::Id)
         {
             m_lexer->RestoreState();
             return false;
@@ -119,7 +119,7 @@ namespace AST
 
         Eat(TokenType::Id);
 
-        if (m_lexer->GetToken()->GetType() == TokenType::Less)
+        if (Current()->GetType() == TokenType::Less)
         {
             if (!ParseGenericType())
             {
@@ -128,15 +128,15 @@ namespace AST
             }
         }
 
-        if (m_lexer->GetToken()->GetType() != TokenType::CloseBracket)
+        if (Current()->GetType() != TokenType::CloseBracket)
         {
             m_lexer->RestoreState();
             return false;
         }
 
-        Eat(m_lexer->GetToken()->GetType());
+        Eat(Current()->GetType());
 
-        auto curr = m_lexer->GetToken()->GetType();
+        auto curr = Current()->GetType();
 
         m_lexer->RestoreState();
 
@@ -152,7 +152,7 @@ namespace AST
 
 	Nodes::TypeDeclaration* Parser::TypeDeclaration()
     {
-        auto loc = m_lexer->GetToken()->GetLocation();
+        auto loc = Current()->GetLocation();
 
         auto typName = Id();
 

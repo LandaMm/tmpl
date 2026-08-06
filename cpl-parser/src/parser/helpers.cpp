@@ -10,7 +10,7 @@ namespace AST
         int depth = 1;  // Track nested generics like `box<vector<int>>`
         while (depth > 0)
         {
-            auto tok = m_lexer->GetToken();
+            auto tok = Current();
             if (tok->GetType() == TokenType::Less)
             {
                 depth++;

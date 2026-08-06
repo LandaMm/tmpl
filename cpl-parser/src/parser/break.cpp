@@ -6,7 +6,7 @@ namespace AST
 {
     Node* Parser::BreakStmt()
     {
-        auto loc = m_lexer->GetToken()->GetLocation();
+        auto loc = Current()->GetLocation();
         Eat(TokenType::Break);
 
         return m_arena.Alloc<Nodes::BreakNode>(loc);

@@ -6,7 +6,7 @@ namespace AST
 	Node* Parser::IfElseStatement()
 	{
 		// if 5 == 5 ? true : false {} else {}
-        auto loc = m_lexer->GetToken()->GetLocation();
+        auto loc = Current()->GetLocation();
 		Eat(TokenType::If);
 		// Eat(TokenType::OpenBracket);
 		Node* condition = Ternary();
@@ -14,16 +14,16 @@ namespace AST
 
 		auto ifElse = m_arena.Alloc<Statements::IfElseStatement>(condition, loc);
         Statements::StatementsBody* body =
-            m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
+            m_arena.Alloc<Statements::StatementsBody>(Current()->GetLocation());
 
-		if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
+		if (Current()->GetType() != TokenType::OpenCurly)
 		{
 			body->AddItem(Statement());
 		}
 		else
 		{
 			Eat(TokenType::OpenCurly);
-			while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+			while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
 			{
 				Node* statement = Statement();
 				body->AddItem(statement);
@@ -33,26 +33,26 @@ namespace AST
 
         ifElse->SetBody(body);
 
-		if (m_lexer->GetToken()->GetType() == TokenType::Else)
+		if (Current()->GetType() == TokenType::Else)
 		{
 			Eat(TokenType::Else);
 
-			if (m_lexer->GetToken()->GetType() == TokenType::If)
+			if (Current()->GetType() == TokenType::If)
 			{
 				Node* elseNode = IfElseStatement();
 				ifElse->SetElseStatement(elseNode);
 			}
 			else
 			{
-				auto stmts = m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
-				if (m_lexer->GetToken()->GetType() != TokenType::OpenCurly)
+				auto stmts = m_arena.Alloc<Statements::StatementsBody>(Current()->GetLocation());
+				if (Current()->GetType() != TokenType::OpenCurly)
 				{
 					stmts->AddItem(Statement());
 				}
 				else
 				{
 					Eat(TokenType::OpenCurly);
-					while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+					while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
 					{
 						Node* statement = Statement();
 						stmts->AddItem(statement);

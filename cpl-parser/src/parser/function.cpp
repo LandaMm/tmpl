@@ -20,7 +20,7 @@ namespace AST
 		// 2. params
 		Eat(TokenType::OpenBracket);
 
-		auto currToken = m_lexer->GetToken()->GetType();
+		auto currToken = Current()->GetType();
 
 		Array<Nodes::FunctionParam*> fnParams;
 		while (currToken != TokenType::CloseBracket
@@ -35,7 +35,7 @@ namespace AST
 			auto type = Type();
 			Nodes::FunctionParam* param = m_arena.Alloc<Nodes::FunctionParam>(type, name);
 			fnParams.Push(param);
-			currToken = m_lexer->GetToken()->GetType();
+			currToken = Current()->GetType();
 		}
 
 		Eat(TokenType::CloseBracket);
@@ -47,11 +47,11 @@ namespace AST
 		Nodes::SymbolFlag fnFlag = Nodes::SymbolFlag::NONE;
 		// Symbol Flag
 		// (none) | #foreign
-		if (m_lexer->GetToken()->GetType() == TokenType::Hash)
+		if (Current()->GetType() == TokenType::Hash)
 		{
 			Eat(TokenType::Hash);
 
-			auto nextToken = m_lexer->GetToken();
+			auto nextToken = Current();
 			assert(static_cast<int>(Nodes::SymbolFlag::COUNT_SYMBOL_FLAGS) == 2);
 
 			switch (nextToken->GetType())
@@ -71,7 +71,7 @@ namespace AST
 		}
 
 		Statements::StatementsBody* body =
-			m_arena.Alloc<Statements::StatementsBody>(m_lexer->GetToken()->GetLocation());
+			m_arena.Alloc<Statements::StatementsBody>(Current()->GetLocation());
 
 		Nodes::FunctionDeclaration* fn =
 			m_arena.Alloc<Nodes::FunctionDeclaration>(fnName, body, fnFlag, fnLoc);
@@ -101,7 +101,7 @@ namespace AST
 
         Eat(TokenType::OpenCurly);
 
-        while (m_lexer->GetToken()->GetType() != TokenType::CloseCurly && m_lexer->GetToken()->GetType() != TokenType::_EOF)
+        while (Current()->GetType() != TokenType::CloseCurly && Current()->GetType() != TokenType::_EOF)
         {
             Node* statement = Statement();
             body->AddItem(statement);
