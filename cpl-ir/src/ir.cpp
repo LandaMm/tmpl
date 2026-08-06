@@ -40,6 +40,11 @@ void IR::GenerateIR()
 		case NT::TypeDf:
 			GenerateTypeDeclaration(statement->As<Nodes::TypeDeclaration>());
 			break;
+		case NT::Require:
+		{
+			// skip, as it is already handled by the parser
+			break;
+		}
 		default:
 		{
 			// TODO: better error
