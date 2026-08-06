@@ -1,0 +1,8 @@
+#import "std.mt"
+
+print :: (message: *char) -> void #foreign;
+
+main :: () -> void {
+	print("Hello, World!");
+}
+
