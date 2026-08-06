@@ -125,16 +125,9 @@ namespace AST
         }
         case TokenType::Hash:
         {
-            auto token = Peek();
-            if (token->Is(TokenType::_EOF))
-            {
-                Prelude::ErrorManager& manager = GetErrorManager();
-                manager.UnexpectedEOF(GetFilename(), token->GetLine(), token->GetColumn());
-                return nullptr;
-            }
             Eat(TokenType::Hash);
             // Directive
-            switch (token->GetType())
+            switch (Current()->GetType())
             {
                 case TokenType::Import:
                     stmt = ImportStatement();
