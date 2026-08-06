@@ -21,32 +21,24 @@ namespace AST
 	class Lexer
 	{
 	public:
-		Lexer(String code);
-		Lexer(FileReader& reader, String filename);
-
+		explicit Lexer(FileReader& reader, String filename, ArenaAllocator<>* allocator);
+		~Lexer() = default;
 	public:
-		Array<Token*> &GetTokens() { return m_tokens; };
-
+		const Array<Token*>& GetTokens() { return m_tokens; };
+	public:
+		ArenaAllocator<>* Allocator() const noexcept { return m_arena; }
+		void MergeLexer(const Lexer& other);
     public:
-        bool OneOf(const std::vector<TokenType>& types, TokenType needle)
-        {
-            return std::find(types.begin(), types.end(), needle) != types.end();
-        }
-
-    public:
-        void SaveState() { m_state = m_arena.Alloc<LexerState>(m_index); }
+        void SaveState() { m_state = m_arena->Alloc<LexerState>(m_index); }
         void RestoreState();
-
 	public:
 		void Tokenize();
 		void Id();
 		void StringLiteral();
 		void Number();
 		void Comment();
-
 	private:
 		void HandleCharacter(char ch);
-
 	public:
 		Token* GetToken();
 		Token* SeekToken();
@@ -54,19 +46,17 @@ namespace AST
 		Token* PrevToken();
 		inline String GetFilename() const { return m_filename; }
 	private:
-		Array<Token*> m_tokens;
 		String m_filename;
-
 	private: // tokenizer
 		size_t m_pos;
 		String m_code;
 		size_t m_line;
 		size_t m_col;
-
 	private: // token manager
+		Array<Token*> m_tokens;
 		size_t m_index;
         LexerState* m_state;
-		ArenaAllocator<> m_arena;
+		ArenaAllocator<>* m_arena;
 	};
 }
 
