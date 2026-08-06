@@ -169,6 +169,90 @@ public:
 		return m_data[m_size - 1];
 	}
 
+	void InsertAt(SizeT index, const Array& other)
+	{
+		assert(index <= m_size);
+
+		if (other.m_size == 0)
+			return;
+
+		constexpr SizeT maxSize =
+			std::numeric_limits<SizeT>::max();
+
+		if (other.m_size > maxSize - m_size)
+		{
+			throw std::length_error(
+				"Array insertion exceeds maximum size"
+			);
+		}
+
+		const SizeT oldSize = m_size;
+		const SizeT insertedSize = other.m_size;
+		const SizeT newSize =
+			static_cast<SizeT>(oldSize + insertedSize);
+
+		const SizeT newCapacity =
+			CalculateCapacity(newSize);
+
+		Item* newData = Allocate(newCapacity);
+		SizeT constructed = 0;
+
+		try
+		{
+			// Copy everything before the insertion point.
+			if (index > 0)
+			{
+				CopyItems(
+					newData,
+					m_data,
+					index
+				);
+
+				constructed =
+					static_cast<SizeT>(constructed + index);
+			}
+
+			// Copy the inserted array.
+			CopyItems(
+				newData + constructed,
+				other.m_data,
+				insertedSize
+			);
+
+			constructed =
+				static_cast<SizeT>(constructed + insertedSize);
+
+			// Copy everything after the insertion point.
+			const SizeT tailSize =
+				static_cast<SizeT>(oldSize - index);
+
+			if (tailSize > 0)
+			{
+				CopyItems(
+					newData + constructed,
+					m_data + index,
+					tailSize
+				);
+
+				constructed =
+					static_cast<SizeT>(constructed + tailSize);
+			}
+		}
+		catch (...)
+		{
+			DestroyItems(newData, constructed);
+			Deallocate(newData, newCapacity);
+			throw;
+		}
+
+		DestroyItems(m_data, m_size);
+		Deallocate(m_data, m_capacity);
+
+		m_data = newData;
+		m_size = newSize;
+		m_capacity = newCapacity;
+	}
+
 	void Shift()
 	{
 		assert(m_size > 0);
@@ -317,10 +401,10 @@ public:
 	}
 
 private:
-	void EnsureCapacity(SizeT expectedCapacity)
+	SizeT CalculateCapacity(SizeT expectedCapacity) const
 	{
 		if (expectedCapacity <= m_capacity)
-			return;
+			return m_capacity;
 
 		constexpr SizeT maxCapacity =
 			std::numeric_limits<SizeT>::max();
@@ -334,7 +418,8 @@ private:
 		}
 		else
 		{
-			SizeT growth = static_cast<SizeT>(newCapacity / 2);
+			SizeT growth =
+				static_cast<SizeT>(newCapacity / 2);
 
 			if (growth == 0)
 				growth = 1;
@@ -346,12 +431,25 @@ private:
 			else
 			{
 				newCapacity =
-					static_cast<SizeT>(newCapacity + growth);
+					static_cast<SizeT>(
+						newCapacity + growth
+						);
 			}
 		}
 
 		if (newCapacity < expectedCapacity)
 			newCapacity = expectedCapacity;
+
+		return newCapacity;
+	}
+
+	void EnsureCapacity(SizeT expectedCapacity)
+	{
+		const SizeT newCapacity =
+			CalculateCapacity(expectedCapacity);
+
+		if (newCapacity == m_capacity)
+			return;
 
 		Extend(newCapacity);
 	}
