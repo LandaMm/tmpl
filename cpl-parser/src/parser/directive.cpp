@@ -31,10 +31,10 @@ namespace AST
 				throw std::runtime_error("file failed to open");
 			}
 
-			Lexer lexer(reader, module->c_str(), m_lexer->Allocator());
-			lexer.Tokenize();
+			Lexer* lexer = new Lexer(reader, modulePath.string());
+			lexer->Tokenize();
 
-			m_lexer->MergeLexer(lexer);
+			PushLexer(lexer);
 		} catch (...) {
 			GetErrorManager().FailedOpeningFile(module->c_str());
 			return importDirective;

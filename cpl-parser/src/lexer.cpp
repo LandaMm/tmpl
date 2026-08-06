@@ -7,15 +7,10 @@
 
 namespace AST
 {
-	Lexer::Lexer(FileReader& reader, String filename, ArenaAllocator<>* allocator)
-		: m_filename(filename), m_index(0), m_pos(0), m_line(1), m_col(0), m_code(reader.ReadEntireText()), m_arena(allocator) { }
+	Lexer::Lexer(FileReader& reader, String filename)
+		: m_filename(filename), m_index(0), m_pos(0), m_line(1), m_col(0), m_code(reader.ReadEntireText()) { }
 
-	void Lexer::MergeLexer(const Lexer& other)
-	{
-		assert(m_arena == other.m_arena && "both tokenizers must have same arena allocator");
-		if (other.m_tokens.Empty()) return;
-		m_tokens.InsertAt(m_index, other.m_tokens);
-	}
+	Lexer::~Lexer() = default;
 
 	void Lexer::HandleCharacter(char ch)
 	{
@@ -71,166 +66,166 @@ namespace AST
 			{
 			case '\n':
 				// skip newline
-				// m_tokens.Push(m_arena->Alloc<Token>(TokenType::Newline));
+				// m_tokens.Push(m_arena.Alloc<Token>(TokenType::Newline));
 				break;
 			case ' ':
 			case '\t':
 			case '\r':
 				// skip those characters
-				// m_tokens.Push(m_arena->Alloc<Token>(TokenType::Whitespace));
+				// m_tokens.Push(m_arena.Alloc<Token>(TokenType::Whitespace));
 				break;
 			case '.':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Point, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Point, begin, end));
 				break;
 			case ',':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Comma, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Comma, begin, end));
 				break;
 			case '(':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::OpenBracket, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::OpenBracket, begin, end));
 				break;
 			case ')':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::CloseBracket, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::CloseBracket, begin, end));
 				break;
 			case '{':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::OpenCurly, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::OpenCurly, begin, end));
 				break;
 			case '}':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::CloseCurly, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::CloseCurly, begin, end));
 				break;
 			case '[':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::OpenSquareBracket, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::OpenSquareBracket, begin, end));
 				break;
 			case ']':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::CloseSquareBracket, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::CloseSquareBracket, begin, end));
 				break;
 			case '+':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::CompoundAdd, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::CompoundAdd, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-                    m_tokens.Push(m_arena->Alloc<Token>(TokenType::Plus, begin, end));
+                    m_tokens.Push(m_arena.Alloc<Token>(TokenType::Plus, begin, end));
 				break;
 			case '@':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::At, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::At, begin, end));
 				break;
 			case '#':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Hash, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Hash, begin, end));
 				break;
 			case '-':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '>')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::SingleArrow, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::SingleArrow, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::CompoundMinus, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::CompoundMinus, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Minus, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Minus, begin, end));
 				break;
 			case '*':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::CompoundMultiply, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::CompoundMultiply, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-                    m_tokens.Push(m_arena->Alloc<Token>(TokenType::Multiply, begin, end));
+                    m_tokens.Push(m_arena.Alloc<Token>(TokenType::Multiply, begin, end));
 				break;
 			case '/':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::CompoundDivide, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::CompoundDivide, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-                    m_tokens.Push(m_arena->Alloc<Token>(TokenType::Divide, begin, end));
+                    m_tokens.Push(m_arena.Alloc<Token>(TokenType::Divide, begin, end));
 				break;
 			case ';':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Semicolon, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Semicolon, begin, end));
 				break;
 			case '=':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Compare, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Compare, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Equal, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Equal, begin, end));
 				break;
 			case '!':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::NotEqual, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::NotEqual, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Not, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Not, begin, end));
 				break;
 			case '&':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '&')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::And, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::And, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Ampersand, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Ampersand, begin, end));
 				break;
 			case '|':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '|')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Or, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Or, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Bind, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Bind, begin, end));
 				break;
 			case '<':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::LessEqual, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::LessEqual, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Less, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Less, begin, end));
 				break;
 			case '>':
 				if (m_pos < m_code.Size() && m_code[m_pos + 1] == '=')
 				{
 					end.col++;
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::GreaterEqual, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::GreaterEqual, begin, end));
 					m_pos++;
 					m_col++;
 				}
 				else
-					m_tokens.Push(m_arena->Alloc<Token>(TokenType::Greater, begin, end));
+					m_tokens.Push(m_arena.Alloc<Token>(TokenType::Greater, begin, end));
 				break;
 			case '?':
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Question, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Question, begin, end));
 				break;
 			case ':':
 				if (m_pos < m_code.Size())
@@ -238,7 +233,7 @@ namespace AST
 					if (m_code[m_pos + 1] == ':')
 					{
 						end.col++;
-						m_tokens.Push(m_arena->Alloc<Token>(TokenType::DoubleColon, begin, end));
+						m_tokens.Push(m_arena.Alloc<Token>(TokenType::DoubleColon, begin, end));
 						m_pos++;
 						m_col++;
 						break;
@@ -246,13 +241,13 @@ namespace AST
 					else if (m_code[m_pos + 1] == '=')
 					{
 						end.col++;
-						m_tokens.Push(m_arena->Alloc<Token>(TokenType::ColonEqual, begin, end));
+						m_tokens.Push(m_arena.Alloc<Token>(TokenType::ColonEqual, begin, end));
 						m_pos++;
 						m_col++;
 						break;
 					}
 				}
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Colon, begin, end));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Colon, begin, end));
 				break;
 			default:
 				Prelude::ErrorManager &errorManager = Prelude::ErrorManager::getInstance();
@@ -264,7 +259,7 @@ namespace AST
 		}
 
 		Location begin{ m_line, m_col };
-		m_tokens.Push(m_arena->Alloc<Token>(TokenType::_EOF, begin, begin));
+		m_tokens.Push(m_arena.Alloc<Token>(TokenType::_EOF, begin, begin));
 	}
 
 	void Lexer::Id()
@@ -309,41 +304,41 @@ namespace AST
 		Location end{ m_line, m_col };
 
 		if (*id == "import")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Import, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Import, begin, end));
 		else if (*id == "foreign")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Foreign, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Foreign, begin, end));
 		else if (*id == "if")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::If, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::If, begin, end));
 		else if (*id == "else")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Else, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Else, begin, end));
 		else if (*id == "extern")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Extern, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Extern, begin, end));
 		else if (*id == "var")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Var, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Var, begin, end));
 		else if (*id == "const")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Const, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Const, begin, end));
 		else if (*id == "return")
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Return, begin, end));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Return, begin, end));
 		else if (*id == "true")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::True, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::True, begin, end));
 		else if (*id == "false")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::False, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::False, begin, end));
 		else if (*id == "struct")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::Struct, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::Struct, begin, end));
 		else if (*id == "enum")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::Enum, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::Enum, begin, end));
 		else if (*id == "new")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::New, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::New, begin, end));
 		else if (*id == "while")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::While, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::While, begin, end));
 		else if (*id == "for")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::For, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::For, begin, end));
 		else if (*id == "break")
-            m_tokens.Push(m_arena->Alloc<Token>(TokenType::Break, begin, end));
+            m_tokens.Push(m_arena.Alloc<Token>(TokenType::Break, begin, end));
 		else
 		{
-			Token::TypedValueHolder<String>* value = m_arena->Alloc<Token::TypedValueHolder<String>>(m_arena->Alloc<String>(*id));
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Id, value, begin, end));
+			Token::TypedValueHolder<String>* value = m_arena.Alloc<Token::TypedValueHolder<String>>(m_arena.Alloc<String>(*id));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Id, value, begin, end));
 		}
 	}
 
@@ -415,11 +410,11 @@ namespace AST
 			}
 		}
 
-		Token::TypedValueHolder<String>* value = m_arena->Alloc<Token::TypedValueHolder<String>>(m_arena->Alloc<String>(*id));
+		Token::TypedValueHolder<String>* value = m_arena.Alloc<Token::TypedValueHolder<String>>(m_arena.Alloc<String>(*id));
 
 		Location end(m_line, m_col + 1);
 
-		m_tokens.Push(m_arena->Alloc<Token>(TokenType::String, value, begin, end)); // additional column for closing quote
+		m_tokens.Push(m_arena.Alloc<Token>(TokenType::String, value, begin, end)); // additional column for closing quote
 	}
 
 	void Lexer::Comment()
@@ -489,19 +484,19 @@ namespace AST
 			String digitstr = number->Substr(pos + 1);
 			if (digitstr.Size() <= 7)
 			{
-				Token::TypedValueHolder<float>* value = m_arena->Alloc<Token::TypedValueHolder<float>>(m_arena->Alloc<float>(std::stof(number->c_str())));
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Float, value, begin, end));
+				Token::TypedValueHolder<float>* value = m_arena.Alloc<Token::TypedValueHolder<float>>(m_arena.Alloc<float>(std::stof(number->c_str())));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Float, value, begin, end));
 			}
 			else
 			{
-				Token::TypedValueHolder<double>* value = m_arena->Alloc<Token::TypedValueHolder<double>>(m_arena->Alloc<double>(std::stod(number->c_str())));
-				m_tokens.Push(m_arena->Alloc<Token>(TokenType::Double, value, begin, end));
+				Token::TypedValueHolder<double>* value = m_arena.Alloc<Token::TypedValueHolder<double>>(m_arena.Alloc<double>(std::stod(number->c_str())));
+				m_tokens.Push(m_arena.Alloc<Token>(TokenType::Double, value, begin, end));
 			}
 		}
 		else
 		{
-			Token::TypedValueHolder<int>* value = m_arena->Alloc<Token::TypedValueHolder<int>>(m_arena->Alloc<int>(std::stoi(number->c_str())));
-			m_tokens.Push(m_arena->Alloc<Token>(TokenType::Integer, value, begin, end));
+			Token::TypedValueHolder<int>* value = m_arena.Alloc<Token::TypedValueHolder<int>>(m_arena.Alloc<int>(std::stoi(number->c_str())));
+			m_tokens.Push(m_arena.Alloc<Token>(TokenType::Integer, value, begin, end));
 		}
 	}
 
@@ -510,7 +505,7 @@ namespace AST
 		if (m_index >= m_tokens.Size())
 		{
 			Location loc(m_line, m_col);
-			return m_arena->Alloc<Token>(TokenType::_EOF, loc, loc);
+			return m_arena.Alloc<Token>(TokenType::_EOF, loc, loc);
 		}
 		return m_tokens[m_index];
 	}
@@ -529,7 +524,7 @@ namespace AST
 		if (m_index + 1 >= m_tokens.Size())
 		{
 			Location loc(m_line, m_col);
-			return m_arena->Alloc<Token>(TokenType::_EOF, loc, loc);
+			return m_arena.Alloc<Token>(TokenType::_EOF, loc, loc);
 		}
 		return m_tokens[m_index + 1];
 	}
@@ -539,7 +534,7 @@ namespace AST
 		if (m_index + 1 >= m_tokens.Size())
 		{
 			Location loc(m_line, m_col);
-			return m_arena->Alloc<Token>(TokenType::_EOF, loc, loc);
+			return m_arena.Alloc<Token>(TokenType::_EOF, loc, loc);
 		}
 		return m_tokens[m_index++];
 	}

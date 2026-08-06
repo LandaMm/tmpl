@@ -12,9 +12,47 @@ namespace AST
 		return errorManager;
 	}
 
-	Token* Parser::Current() const noexcept
+	Parser::Parser(Lexer* lexer)
+		: m_root(nullptr)
 	{
-		return m_lexer->GetToken();
+		m_root = m_arena.Alloc<Nodes::ProgramNode>();
+		PushLexer(lexer);
+	}
+
+	Parser::~Parser()
+	{
+		for (auto lexer : m_deadLexers)
+		{
+			delete lexer;
+		}
+	}
+
+	void Parser::PushLexer(Lexer* lexer)
+	{
+		if (m_lexers.Empty()) m_lexers.Push(lexer);
+		else m_lexers.InsertAt(0, { lexer });
+	}
+
+	[[nodiscard]] Lexer* Parser::CurrentLexer()
+	{
+		assert(!m_lexers.Empty());
+		return m_lexers[0];
+	}
+
+	Token* Parser::Current()
+	{
+		auto lexer = CurrentLexer();
+		if (lexer->GetToken()->Is(TokenType::_EOF))
+		{
+			m_lexers.Shift();
+			m_deadLexers.Push(lexer);
+		}
+		return lexer->GetToken();
+	}
+
+	Token* Parser::Peek()
+	{
+		return CurrentLexer()->SeekToken();
 	}
 
 	void Parser::Advance()
@@ -26,7 +64,7 @@ namespace AST
 	{
 		if (Current()->Is(type))
 		{
-			m_lexer->NextToken();
+			CurrentLexer()->NextToken();
 		}
 		else
 		{
@@ -42,28 +80,27 @@ namespace AST
 		}
 	}
 
-	Token* Parser::Peek() const noexcept
-	{
-		return m_lexer->SeekToken();
-	}
-
 	void Parser::Parse()
 	{
-		while (Current()->Not(TokenType::_EOF))
+		while (true)
 		{
-			m_root->AddStatement(Statement());
+			if (Current()->Not(TokenType::_EOF))
+				m_root->AddStatement(Statement());
+			else if (!m_lexers.Empty())
+				continue;
+			else break;
 		}
 	}
 	
 	Node* Parser::CompileTimeStatement()
 	{
-		m_lexer->SaveState();
+		CurrentLexer()->SaveState();
 		
 		Eat(TokenType::Id);
 
 		auto next = Peek();
 
-		m_lexer->RestoreState();
+		CurrentLexer()->RestoreState();
 
 		Node* stmt = nullptr;
 

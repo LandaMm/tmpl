@@ -109,11 +109,11 @@ namespace AST
 
     bool Parser::IsTypeCastAhead()
     {
-        m_lexer->SaveState();
+        CurrentLexer()->SaveState();
 
         if (Current()->Not(TokenType::Id))
         {
-            m_lexer->RestoreState();
+            CurrentLexer()->RestoreState();
             return false;
         }
 
@@ -121,7 +121,7 @@ namespace AST
 
         if (Current()->Not(TokenType::CloseBracket))
         {
-            m_lexer->RestoreState();
+            CurrentLexer()->RestoreState();
             return false;
         }
 
@@ -129,7 +129,7 @@ namespace AST
 
         auto curr = Current()->GetType();
 
-        m_lexer->RestoreState();
+        CurrentLexer()->RestoreState();
 
 		return Current()->OneOf({
 			TokenType::Integer,

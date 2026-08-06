@@ -17,25 +17,22 @@ namespace AST
 	class Parser
 	{
 	public:
-		Parser(Lexer* lexer)
-            : m_lexer(lexer),
-              m_root(nullptr)
-		{
-			m_root = m_arena.Alloc<Nodes::ProgramNode>();
-		}
-		~Parser() {}
+		Parser(Lexer* lexer);
+		~Parser();
 
 	public:
 		void Parse();
 
 	public:
 		inline Node* GetRoot() const { return m_root; }
-        inline String GetFilename() const { return m_lexer->GetFilename(); }
+        inline String GetFilename() { return CurrentLexer()->GetFilename(); }
 
 	private:
 		Prelude::ErrorManager &GetErrorManager();
-		[[nodiscard]] Token* Current() const noexcept;
-		[[nodiscard]] Token* Peek() const noexcept;
+		void PushLexer(Lexer* lexer);
+		[[nodiscard]] Lexer* CurrentLexer();
+		[[nodiscard]] Token* Current();
+		[[nodiscard]] Token* Peek();
 		void Advance();
 		void Eat(TokenType type);
 
@@ -81,7 +78,8 @@ namespace AST
 		ArenaAllocator<> m_arena;
 
 		Nodes::ProgramNode* m_root;
-		Lexer* m_lexer;
+		Array<Lexer*> m_lexers;
+		Array<Lexer*> m_deadLexers;
         std::vector<AST::LocationSpan> m_breaks;
 	};
 }

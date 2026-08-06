@@ -21,15 +21,13 @@ namespace AST
 	class Lexer
 	{
 	public:
-		explicit Lexer(FileReader& reader, String filename, ArenaAllocator<>* allocator);
-		~Lexer() = default;
+		explicit Lexer(FileReader& reader, String filename);
+		~Lexer();
 	public:
 		const Array<Token*>& GetTokens() { return m_tokens; };
 	public:
-		ArenaAllocator<>* Allocator() const noexcept { return m_arena; }
-		void MergeLexer(const Lexer& other);
     public:
-        void SaveState() { m_state = m_arena->Alloc<LexerState>(m_index); }
+        void SaveState() { m_state = m_arena.Alloc<LexerState>(m_index); }
         void RestoreState();
 	public:
 		void Tokenize();
@@ -56,7 +54,7 @@ namespace AST
 		Array<Token*> m_tokens;
 		size_t m_index;
         LexerState* m_state;
-		ArenaAllocator<>* m_arena;
+		ArenaAllocator<> m_arena;
 	};
 }
 
