@@ -5,12 +5,6 @@
 namespace IRGenerate
 {
 
-enum class PointerSize
-{
-	BIT32,
-	BIT64
-};
-
 struct TypeLayout
 {
 	Uint32 size, align;
@@ -22,6 +16,7 @@ enum class TypeClass
 	INTEGER,
 	FLOAT,
 	POINTER,
+	ALIAS,
 	FUNCTION,
 	COUNT_TYPE_CLASSES,
 };
@@ -29,12 +24,14 @@ enum class TypeClass
 class Type
 {
 public:
-	Type(TypeClass typClass)
-		: m_typClass(typClass) { }
+	Type(const String& name, TypeClass typClass)
+		: m_name(name), m_typClass(typClass) { }
 	virtual ~Type() = default;
 public:
+	const String& Name() const noexcept { return m_name; }
 	const TypeClass& TypClass() const noexcept { return m_typClass; }
 private:
+	String m_name;
 	TypeClass m_typClass;
 };
 
@@ -52,16 +49,16 @@ private:
 class IntegerType : public Type, public SizedType
 {
 public:
-	IntegerType(TypeLayout layout)
-		: Type(TypeClass::INTEGER), SizedType(layout) { }
+	IntegerType(const String& name, TypeLayout layout)
+		: Type(name, TypeClass::INTEGER), SizedType(layout) { }
 private:
 };
 
 class FloatType : public Type, public SizedType
 {
 public:
-	FloatType(TypeLayout layout)
-		: Type(TypeClass::FLOAT), SizedType(layout) { }
+	FloatType(const String& name, TypeLayout layout)
+		: Type(name, TypeClass::FLOAT), SizedType(layout) { }
 private:
 	// FloatStandard m_standard = FloatStandard::IEE7...;
 };
@@ -69,8 +66,8 @@ private:
 class FunctionType : public Type
 {
 public:
-	FunctionType()
-		: Type(TypeClass::FUNCTION) { }
+	FunctionType(const String& name)
+		: Type(name, TypeClass::FUNCTION) { }
 private:
 };
 
@@ -78,11 +75,22 @@ class PointerType : public Type
 {
 public:
 	PointerType(const Type* underlyingType)
-		: m_underlyingType(underlyingType), Type(TypeClass::POINTER) { }
+		: m_underlyingType(underlyingType), Type(underlyingType->Name(), TypeClass::POINTER) { }
 public:
 	const Type* UnderlyingType() const noexcept { return m_underlyingType; }
 private:
 	const Type* m_underlyingType;
+};
+
+class AliasType : public Type
+{
+public:
+	AliasType(const String& name, const Type* originType)
+		: m_originType(originType), Type(name, TypeClass::ALIAS) { }
+public:
+	const Type* OriginType() const noexcept { return m_originType; }
+private:
+	const Type* m_originType;
 };
 
 } // namespace IRGenerate
