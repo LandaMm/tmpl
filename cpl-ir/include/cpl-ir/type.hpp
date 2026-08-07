@@ -18,6 +18,7 @@ enum class TypeClass
 	POINTER,
 	ALIAS,
 	FUNCTION,
+	VECTOR,
 	COUNT_TYPE_CLASSES,
 };
 
@@ -66,9 +67,12 @@ private:
 class FunctionType : public Type
 {
 public:
-	FunctionType(const String& name)
-		: Type(name, TypeClass::FUNCTION) { }
+	FunctionType(const String& name, const Type* retType)
+		: m_retType(retType), Type(name, TypeClass::FUNCTION) { }
+public:
+	inline const Type* RetType() const noexcept { return m_retType; }
 private:
+	const Type* m_retType;
 };
 
 class PointerType : public Type
@@ -92,5 +96,19 @@ public:
 private:
 	const Type* m_originType;
 };
+
+class VectorType : public Type
+{
+public:
+	VectorType(const Type* itemType, Uint32 itemCount)
+		: m_itemType(itemType), m_itemCount(itemCount), Type((String("[") + std::to_string(itemCount).c_str() + " x " + itemType->Name() + "]"), TypeClass::ALIAS) {}
+public:
+	inline const Type* ItemType() const noexcept { return m_itemType; }
+	inline Uint32 ItemCount() const noexcept { return m_itemCount; }
+private:
+	Uint32 m_itemCount;
+	const Type* m_itemType;
+};
+
 
 } // namespace IRGenerate
