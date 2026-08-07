@@ -12,6 +12,12 @@
 #include <cpl-ir/instr/call.hpp>
 #include <cpl-ir/ir.h>
 
+void dump_type_name(const IRGenerate::Type* typ)
+{
+	assert(typ);
+	std::cout << typ->Name();
+}
+
 void dump_type(const IRGenerate::Type* typ)
 {
 	assert(typ);
@@ -62,9 +68,22 @@ void dump_type(const IRGenerate::Type* typ)
 	if (typ->TypClass() != TypeClass::ALIAS) std::cout << ']';
 }
 
-void dump_type_name(const IRGenerate::Type* typ)
+void dump_value(const IRGenerate::Value* value)
 {
-	std::cout << typ->Name();
+	using namespace IRGenerate;
+
+	switch (value->Kind())
+	{
+	case ValueKind::GLOBAL:
+		std::cout << "global ";
+		break;
+	case ValueKind::UNKNOWN:
+	default:
+		std::cout << "#unknown_value ";
+		break;
+	}
+
+	dump_type_name(value->Typ());
 }
 
 void dump_symbol(const IRGenerate::Symbol& symbol)
@@ -105,7 +124,17 @@ void dump_instr(const IRGenerate::Instr* instr)
 	case InstrOp::CALL:
 	{
 		auto callInstr = dynamic_cast<const CallInstr*>(instr);
-		std::cout << "call " << callInstr->CallSymbol().Name();
+		dump_type_name(callInstr->RetType());
+		std::cout << " call " << callInstr->CallSymbol().Name() << '(';
+		for (size_t i = 0; i < callInstr->Args().Size(); ++i)
+		{
+			if (i > 0)
+			{
+				std::cout << ", ";
+			}
+			dump_value(callInstr->Args()[i]);
+		}
+		std::cout << ')';
 		break;
 	}
 	case InstrOp::LOAD:
