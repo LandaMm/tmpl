@@ -14,8 +14,9 @@
 
 void dump_type(const IRGenerate::Type* typ)
 {
+	assert(typ);
 	using namespace IRGenerate;
-	std::cout << "[#";
+	if (typ->TypClass() != TypeClass::ALIAS) std::cout << "[#";
 	switch (typ->TypClass())
 	{
 	case TypeClass::INTEGER:
@@ -30,6 +31,18 @@ void dump_type(const IRGenerate::Type* typ)
 	case TypeClass::POINTER:
 		std::cout << "pointer";
 		break;
+	case TypeClass::ALIAS:
+	{
+		if (const AliasType* alias = dynamic_cast<const AliasType*>(typ))
+		{
+			std::cout << alias->OriginType()->Name();
+		}
+		else
+		{
+			std::cout << "#broken_alias";
+		}
+		break;
+	}
 	case TypeClass::UNKNOWN:
 	default:
 		std::cout << "unknown";
@@ -46,7 +59,12 @@ void dump_type(const IRGenerate::Type* typ)
 		dump_type(pointer->UnderlyingType());
 		std::cout << " }";
 	}
-	std::cout << ']';
+	if (typ->TypClass() != TypeClass::ALIAS) std::cout << ']';
+}
+
+void dump_type_name(const IRGenerate::Type* typ)
+{
+	std::cout << typ->Name();
 }
 
 void dump_symbol(const IRGenerate::Symbol& symbol)
@@ -76,7 +94,7 @@ void dump_symbol(const IRGenerate::Symbol& symbol)
 	std::cout << ")";
 	*/
 	std::cout << ": ";
-	dump_type(symbol.ValueType());
+	dump_type_name(symbol.ValueType());
 }
 
 void dump_instr(const IRGenerate::Instr* instr)
@@ -142,10 +160,10 @@ void dump_ir(const IRGenerate::IR* ir)
 			auto& param = value->Params().At(i);
 			if (i > 0) std::cout << ", ";
 			std::cout << param.name << ": ";
-			dump_type(param.typ);
+			dump_type_name(param.typ);
 		}
 		std::cout << ") -> ";
-		dump_type(value->RetType());
+		dump_type_name(value->RetType());
 		if (value->Body()) {
 			std::cout << ":\n";
 			dump_block(value->Body());
