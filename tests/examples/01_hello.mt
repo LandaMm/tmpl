@@ -1,5 +1,6 @@
 #import "std.mt"
 
+errno: int #foreign;
 print :: (message: *char) -> void #foreign;
 
 main :: () -> void {
