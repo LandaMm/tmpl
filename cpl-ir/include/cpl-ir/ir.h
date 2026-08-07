@@ -44,10 +44,10 @@ private:
 	void GenerateVariableDeclaration(Nodes::VariableDeclaration* var);
 	void GenerateTypeDeclaration(Nodes::TypeDeclaration* typ);
 private:
-	Type* ParseType(Nodes::Type* typ);
+	const Type* ParseType(Nodes::Type* typ);
 private:
 	void AddType(const String& name, Type* typ);
-	Type* FindType(const String& name) const noexcept;
+	const Type* FindType(const String& name) const noexcept;
 
 	void AddSymbol(Symbol* symbol);
 	Symbol* FindSymbol(const String& name) const noexcept;

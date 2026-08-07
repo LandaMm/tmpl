@@ -25,9 +25,11 @@ void IR::GenerateIR()
 
 	/////////////////////////////////////
 
-	AddType("i8", m_arena.Alloc<IntegerType>(TypeLayout {1, 1}));
-	AddType("i32", m_arena.Alloc<IntegerType>(TypeLayout {4, 4}));
-	AddType("i64", m_arena.Alloc<IntegerType>(TypeLayout {8, 8}));
+	AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{0, 0}));
+	AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{1, 1}));
+	AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{8, 8}));
+	AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{32, 32}));
+	AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{64, 64}));
 
 	/////////////////////////////////////
 
@@ -105,14 +107,14 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 	assert(fnName->GetType() == NT::Identifier && "Currently only simple names are supported as function name.");
 	auto symbolName = fnName->As<Nodes::IdentifierNode>()->GetName();
 
-	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::FUNCTION, m_arena.Alloc<FunctionType>(), origin, symbolName));
+	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::FUNCTION, m_arena.Alloc<FunctionType>(symbolName), origin, symbolName));
 
 	Array<FunctionParam> params;
 	for (size_t i = 0; i < fn->GetParamsSize(); ++i)
 	{
 		auto param = fn->GetParam(i);
 		auto paramName = param->GetName()->GetName();
-		Type* paramType = ParseType(param->GetType());
+		const Type* paramType = ParseType(param->GetType());
 		params.Emplace(FunctionParam{ paramName, paramType });
 	}
 
@@ -143,7 +145,7 @@ void IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 		origin = SymbolOrigin::FOREIGN;
 	}
 
-	Type* valueType = ParseType(var->GetValueType());
+	const Type* valueType = ParseType(var->GetValueType());
 
 	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::VARIABLE, valueType, origin, *var->GetName()));
 }
@@ -151,18 +153,25 @@ void IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 void IR::GenerateTypeDeclaration(Nodes::TypeDeclaration* typ)
 {
 	String typName = typ->GetTypeName()->GetName();
-	Type* typValue = ParseType(typ->GetTypeValue());
-	AddType(typName, typValue);
+	const Type* typValue = ParseType(typ->GetTypeValue());
+	if (FindType(typName) != nullptr) {
+		// TODO: better error
+		assert(false && "redeclaration of a type");
+	}
+	else
+	{
+		AddType(typName, m_arena.Alloc<AliasType>(typName, typValue));
+	}
 }
 
-Type* IR::ParseType(Nodes::Type* typ)
+const Type* IR::ParseType(Nodes::Type* typ)
 {
 	switch (typ->GetKind())
 	{
 	case Nodes::TypeKind::BASIC:
 	{
 		auto basicType = typ->As<Nodes::BasicType>();
-		Type* typ = FindType(basicType->GetName());
+		const Type* typ = FindType(basicType->GetName());
 		if (!typ)
 		{
 			// TODO: better error
@@ -173,7 +182,7 @@ Type* IR::ParseType(Nodes::Type* typ)
 	case Nodes::TypeKind::POINTER:
 	{
 		auto pointerType = typ->As<Nodes::PointerType>();
-		Type* underlyingType = ParseType(pointerType->GetTargetType());
+		const Type* underlyingType = ParseType(pointerType->GetTargetType());
 		return m_arena.Alloc<PointerType>(underlyingType);
 	}
 	default:
@@ -193,7 +202,7 @@ void IR::AddType(const String& name, Type* typ)
 	m_localTypes.insert({ name, typ });
 }
 
-Type* IR::FindType(const String& name) const noexcept
+const Type* IR::FindType(const String& name) const noexcept
 {
 	if (m_localTypes.find(name) == m_localTypes.end()) return nullptr;
 	return m_localTypes.at(name);
