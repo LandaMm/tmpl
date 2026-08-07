@@ -13,6 +13,7 @@
 #include "type.hpp"
 #include "function.hpp"
 #include "symbol.hpp"
+#include "value.hpp"
 #include "instr.h"
 #include "block.h"
 
@@ -40,6 +41,7 @@ public:
 	const std::map<String, Function*> Functions() const noexcept;
 private:
 	[[nodiscard]] Instr* GenerateInstr(Node* node);
+	[[nodiscard]] const Value* EvaluateNode(Node* node);
 	void GenerateFunction(Nodes::FunctionDeclaration* fn);
 	void GenerateVariableDeclaration(Nodes::VariableDeclaration* var);
 	void GenerateTypeDeclaration(Nodes::TypeDeclaration* typ);
