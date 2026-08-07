@@ -78,8 +78,27 @@ void IR::GenerateIR()
 		{
 			// TODO: better error
 			assert(false && "calling an undefined symbol");
+			return nullptr;
 		}
-		return m_arena.Alloc<CallInstr>(*symbol);
+
+		if (symbol->SymType() != SymbolType::FUNCTION)
+		{
+			// TODO: better error
+			assert(false && "cannot call non-callable symbol");
+			return nullptr;
+		}
+
+		const FunctionType* funcSymbol = dynamic_cast<const FunctionType*>(symbol->ValueType());
+		assert(funcSymbol && "should be the case due to FUNCTION symbol type");
+
+		Array<const Value*> args;
+		for (size_t i = 0; i < callNode->GetArgumentsSize(); ++i)
+		{
+			Node* argNode = callNode->GetArgument(i);
+			args.Push(EvaluateNode(argNode));
+		}
+
+		return m_arena.Alloc<CallInstr>(*symbol, std::move(args), funcSymbol->RetType());
 	}
 	default:
 	{
@@ -91,6 +110,44 @@ void IR::GenerateIR()
 	}
 
 	assert(false && "UNREACHABLE");
+}
+
+[[nodiscard]] const Value* IR::EvaluateNode(Node* node)
+{
+	using NT = AST::NodeType;
+	using LiteralType = Nodes::LiteralType;
+	switch (node->GetType())
+	{
+	case NT::Literal:
+	{
+		
+		auto literal = node->As<Nodes::LiteralNode>();
+
+		switch (literal->GetLiteralType())
+		{
+		case LiteralType::STRING:
+		{
+			const String* str = literal->GetValue<String>();
+			Array<Byte> data(str->Size());
+			data.ResizeUninitialized(str->Size());
+			std::memcpy(data.Data(), str->Data(), sizeof(char) * str->Size());
+			const Type* CharType = FindType("i8");
+			return m_arena.Alloc<GlobalValue>(std::move(data), m_arena.Alloc<VectorType>(CharType, str->Size()));
+		}
+		default:
+			// TODO: better error
+			assert(false && "unsupported literal type for evaluating an IR value");
+			break;
+		}
+	}
+	default:
+		// TODO: better error
+		assert(false && "unsupported node for evaluating an IR value");
+		break;
+	}
+
+	assert(false && "UNREACHABLE");
+	return nullptr;
 }
 
 void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
@@ -107,7 +164,9 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 	assert(fnName->GetType() == NT::Identifier && "Currently only simple names are supported as function name.");
 	auto symbolName = fnName->As<Nodes::IdentifierNode>()->GetName();
 
-	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::FUNCTION, m_arena.Alloc<FunctionType>(symbolName), origin, symbolName));
+	auto retType = ParseType(fn->GetReturnType());
+
+	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::FUNCTION, m_arena.Alloc<FunctionType>(symbolName, retType), origin, symbolName));
 
 	Array<FunctionParam> params;
 	for (size_t i = 0; i < fn->GetParamsSize(); ++i)
@@ -117,8 +176,6 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 		const Type* paramType = ParseType(param->GetType());
 		params.Emplace(FunctionParam{ paramName, paramType });
 	}
-
-	auto retType = ParseType(fn->GetReturnType());
 
 	NamedBlock* block = nullptr;
 	if (origin != SymbolOrigin::FOREIGN)
