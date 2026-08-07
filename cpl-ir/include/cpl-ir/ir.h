@@ -52,7 +52,7 @@ private:
 	const Type* FindType(const String& name) const noexcept;
 
 	void AddSymbol(Symbol* symbol);
-	Symbol* FindSymbol(const String& name) const noexcept;
+	const Symbol* FindSymbol(const String& name) const noexcept;
 private:
 	ArenaAllocator<> m_arena;
 	Nodes::ProgramNode* m_rootNode;

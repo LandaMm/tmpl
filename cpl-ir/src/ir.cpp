@@ -98,7 +98,7 @@ void IR::GenerateIR()
 			args.Push(EvaluateNode(argNode));
 		}
 
-		return m_arena.Alloc<CallInstr>(*symbol, std::move(args), funcSymbol->RetType());
+		return m_arena.Alloc<CallInstr>(symbol, std::move(args), funcSymbol->RetType());
 	}
 	default:
 	{
@@ -270,7 +270,7 @@ void IR::AddSymbol(Symbol* symbol)
 	m_symbols.insert({ symbol->Name(), symbol });
 }
 
-Symbol* IR::FindSymbol(const String &name) const noexcept
+const Symbol* IR::FindSymbol(const String &name) const noexcept
 {
 	if (m_symbols.find(name) == m_symbols.end()) return nullptr;
 	return m_symbols.at(name);

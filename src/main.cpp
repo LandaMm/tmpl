@@ -86,15 +86,15 @@ void dump_value(const IRGenerate::Value* value)
 	dump_type_name(value->Typ());
 }
 
-void dump_symbol(const IRGenerate::Symbol& symbol)
+void dump_symbol(const IRGenerate::Symbol* symbol)
 {
 	using namespace IRGenerate;
 
-	if (symbol.Origin() == SymbolOrigin::FOREIGN)
+	if (symbol->Origin() == SymbolOrigin::FOREIGN)
 	{
 		std::cout << "extrn ";
 	}
-	std::cout << symbol.Name();
+	std::cout << symbol->Name();
 	/*
 	std::cout << " (";
 	switch (symbol.SymType())
@@ -113,7 +113,7 @@ void dump_symbol(const IRGenerate::Symbol& symbol)
 	std::cout << ")";
 	*/
 	std::cout << ": ";
-	dump_type_name(symbol.ValueType());
+	dump_type_name(symbol->ValueType());
 }
 
 void dump_instr(const IRGenerate::Instr* instr)
@@ -125,7 +125,7 @@ void dump_instr(const IRGenerate::Instr* instr)
 	{
 		auto callInstr = dynamic_cast<const CallInstr*>(instr);
 		dump_type_name(callInstr->RetType());
-		std::cout << " call " << callInstr->CallSymbol().Name() << '(';
+		std::cout << " call " << callInstr->CallSymbol()->Name() << '(';
 		for (size_t i = 0; i < callInstr->Args().Size(); ++i)
 		{
 			if (i > 0)
@@ -174,7 +174,7 @@ void dump_ir(const IRGenerate::IR* ir)
 	std::cout << "; Symbols:\n\n";
 	for (auto& [key, value] : ir->Symbols())
 	{
-		dump_symbol(*value);
+		dump_symbol(value);
 		std::cout << '\n';
 	}
 	std::cout << '\n';
