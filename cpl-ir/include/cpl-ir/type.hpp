@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cpl-basics/def.hpp>
+#include <cpl-basics/string.hpp>
 
 namespace IRGenerate
 {
@@ -31,6 +32,13 @@ public:
 public:
 	const String& Name() const noexcept { return m_name; }
 	const TypeClass& TypClass() const noexcept { return m_typClass; }
+public:
+	friend bool operator==(const Type& lhs, const Type& rhs) noexcept;
+
+	virtual bool operator!=(const Type& other) const noexcept
+	{
+		return !operator==(*this, other);
+	}
 private:
 	String m_name;
 	TypeClass m_typClass;
@@ -67,11 +75,13 @@ private:
 class FunctionType : public Type
 {
 public:
-	FunctionType(const String& name, const Type* retType)
-		: m_retType(retType), Type(name, TypeClass::FUNCTION) { }
+	FunctionType(const String& name, Array<const Type*>&& paramTypes, const Type* retType)
+		: m_paramTypes(paramTypes), m_retType(retType), Type(name, TypeClass::FUNCTION) { }
 public:
+	inline const Array<const Type*>& ParamTypes() const noexcept { return m_paramTypes; }
 	inline const Type* RetType() const noexcept { return m_retType; }
 private:
+	Array<const Type*> m_paramTypes;
 	const Type* m_retType;
 };
 
@@ -101,13 +111,31 @@ class VectorType : public Type
 {
 public:
 	VectorType(const Type* itemType, Uint32 itemCount)
-		: m_itemType(itemType), m_itemCount(itemCount), Type((String("[") + std::to_string(itemCount).c_str() + " x " + itemType->Name() + "]"), TypeClass::ALIAS) {}
+		: m_itemType(itemType), m_itemCount(itemCount), Type((String("[") + std::to_string(itemCount).c_str() + " x " + itemType->Name() + "]"), TypeClass::VECTOR) {}
 public:
 	inline const Type* ItemType() const noexcept { return m_itemType; }
 	inline Uint32 ItemCount() const noexcept { return m_itemCount; }
 private:
 	Uint32 m_itemCount;
 	const Type* m_itemType;
+};
+
+class TypeResolver
+{
+public:
+	TypeResolver() = delete;
+public:
+	static const IntegerType* Integer(const Type* typ)
+	{
+		if (typ->TypClass() == TypeClass::INTEGER) return dynamic_cast<const IntegerType*>(typ);
+		if (typ->TypClass() == TypeClass::ALIAS)
+		{
+			const AliasType* alias = dynamic_cast<const AliasType*>(typ);
+			assert(alias);
+			return Integer(alias);
+		}
+		return nullptr;
+	}
 };
 
 
