@@ -3,6 +3,7 @@
 #include <cpl-basics/string.hpp>
 
 #include "instr.h"
+#include "value.hpp"
 
 #include "cplbuild.h"
 
@@ -23,11 +24,15 @@ public:
 public:
 	const Array<Instr*>& Body() const noexcept;
 	void AddInstr(Instr* instr);
+public:
+	inline TempValueID NextTempValueId() noexcept { return m_tempValueCounter++; }
 private:
 	Array<Instr*> m_body;
 	BlockIdType m_id;
 private:
 	static BlockIdType m_counter;
+private: // for TemporalValue
+	TempValueID m_tempValueCounter = 0;
 };
 
 class CPL_EXPORT NamedBlock : public BasicBlock
