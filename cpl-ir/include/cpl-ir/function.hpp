@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cpl-basics/string.hpp"
-#include "cpl-basics/array.hpp"
+#include <cpl-basics/string.hpp>
+#include <cpl-basics/array.hpp>
 
 #include "type.hpp"
 #include "block.h"
