@@ -10,11 +10,16 @@
 #include <cpl-basics/allocator/arena.hpp>
 
 #include <cpl-ir/instr/call.hpp>
+#include <cpl-ir/instr/alloca.hpp>
+#include <cpl-ir/instr/store.hpp>
+#include <cpl-ir/instr/load.hpp>
 #include <cpl-ir/ir.h>
 
 void dump_type_name(const IRGenerate::Type* typ)
 {
+	using namespace IRGenerate;
 	assert(typ);
+	if (typ->TypClass() == TypeClass::POINTER) std::cout << '*';
 	std::cout << typ->Name();
 }
 
@@ -41,7 +46,7 @@ void dump_type(const IRGenerate::Type* typ)
 	{
 		if (const AliasType* alias = dynamic_cast<const AliasType*>(typ))
 		{
-			std::cout << alias->OriginType()->Name();
+			dump_type_name(alias->OriginType());
 		}
 		else
 		{
@@ -68,6 +73,11 @@ void dump_type(const IRGenerate::Type* typ)
 	if (typ->TypClass() != TypeClass::ALIAS) std::cout << ']';
 }
 
+void dump_symbol_name(const IRGenerate::Symbol* symbol)
+{
+	std::cout << '@' << symbol->Name();
+}
+
 void dump_value(const IRGenerate::Value* value)
 {
 	using namespace IRGenerate;
@@ -76,25 +86,61 @@ void dump_value(const IRGenerate::Value* value)
 	{
 	case ValueKind::GLOBAL:
 		std::cout << "global ";
+		dump_type_name(value->Typ());
 		break;
+	case ValueKind::TEMPORAL:
+	{
+		const TemporalValue* temp = dynamic_cast<const TemporalValue*>(value);
+		assert(temp);
+		std::cout << '%' << temp->Id();
+		break;
+	}
+	case ValueKind::LOCAL:
+	{
+		const LocalValue* local = dynamic_cast<const LocalValue*>(value);
+		assert(local);
+		std::cout << '@' << local->Name();
+		break;
+	}
+	case ValueKind::IMMEDIATE:
+	{
+		const ImmediateValue* immediate = dynamic_cast<const ImmediateValue*>(value);
+		assert(immediate);
+		auto integerDescription = TypeResolver::Integer(immediate->Typ());
+		assert(integerDescription);
+		std::cout << '#';
+		auto value = immediate->ImmValue();
+		switch (integerDescription->Layout().size)
+		{
+		case 8:
+			std::cout << *static_cast<const Uint8*>(value);
+			break;
+		case 16:
+			std::cout << *static_cast<const Uint16*>(value);
+			break;
+		case 32:
+			std::cout << *static_cast<const Uint32*>(value);
+			break;
+		case 64:
+			std::cout << *static_cast<const Uint64*>(value);
+			break;
+		default:
+			assert(false && "UNSUPPORTED integer size");
+		}
+		break;
+	}
 	case ValueKind::UNKNOWN:
 	default:
 		std::cout << "#unknown_value ";
 		break;
 	}
-
-	dump_type_name(value->Typ());
 }
 
 void dump_symbol(const IRGenerate::Symbol* symbol)
 {
 	using namespace IRGenerate;
 
-	if (symbol->Origin() == SymbolOrigin::FOREIGN)
-	{
-		std::cout << "extrn ";
-	}
-	std::cout << symbol->Name();
+	dump_symbol_name(symbol);
 	/*
 	std::cout << " (";
 	switch (symbol.SymType())
@@ -113,19 +159,49 @@ void dump_symbol(const IRGenerate::Symbol* symbol)
 	std::cout << ")";
 	*/
 	std::cout << ": ";
-	dump_type_name(symbol->ValueType());
+	if (auto funcType = dynamic_cast<const FunctionType*>(symbol->ValueType()))
+	{
+		std::cout << "(";
+		for (size_t i = 0; i < funcType->ParamTypes().Size(); ++i)
+		{
+			if (i > 0)
+			{
+				std::cout << ", ";
+			}
+			dump_type_name(funcType->ParamTypes()[i]);
+		}
+		std::cout << ") -> ";
+		dump_type_name(funcType->RetType());
+	}
+	else
+	{
+		dump_type_name(symbol->ValueType());
+	}
+
+	if (symbol->Origin() == SymbolOrigin::FOREIGN)
+	{
+		std::cout << " extrn";
+	}
 }
 
 void dump_instr(const IRGenerate::Instr* instr)
 {
 	using namespace IRGenerate;
+	if (instr->Valued())
+	{
+		dump_value(instr->Dest());
+		std::cout << " = ";
+	}
 	switch (instr->Type())
 	{
 	case InstrOp::CALL:
 	{
 		auto callInstr = dynamic_cast<const CallInstr*>(instr);
+		assert(callInstr);
 		dump_type_name(callInstr->RetType());
-		std::cout << " call " << callInstr->CallSymbol()->Name() << '(';
+		std::cout << " call ";
+		dump_symbol_name(callInstr->CallSymbol());
+		std::cout << '(';
 		for (size_t i = 0; i < callInstr->Args().Size(); ++i)
 		{
 			if (i > 0)
@@ -137,9 +213,32 @@ void dump_instr(const IRGenerate::Instr* instr)
 		std::cout << ')';
 		break;
 	}
-	case InstrOp::LOAD:
-		assert(false && "LOAD not implemented yet");
+	case InstrOp::ALLOCA:
+	{
+		auto allocaInstr = dynamic_cast<const AllocaInstr*>(instr);
+		assert(allocaInstr);
+		std::cout << "alloca ";
+		dump_type_name(allocaInstr->Typ());
 		break;
+	}
+	case InstrOp::STORE:
+	{
+		auto storeInstr = dynamic_cast<const StoreInstr*>(instr);
+		assert(storeInstr);
+		dump_type_name(storeInstr->Typ());
+		std::cout << " store ";
+		dump_value(storeInstr->Src());
+		break;
+	}
+	case InstrOp::LOAD:
+	{
+		auto loadInstr = dynamic_cast<const LoadInstr*>(instr);
+		assert(loadInstr);
+		dump_type_name(loadInstr->Typ());
+		std::cout << " load ";
+		dump_value(loadInstr->Src());
+		break;
+	}
 	case InstrOp::NONE:
 	default:
 		std::cout << "#none_instr";
@@ -163,12 +262,15 @@ void dump_ir(const IRGenerate::IR* ir)
     using namespace IRGenerate;
     
     std::cout << "; Types:\n\n";
-    for (auto& [key, value] : ir->Types())
-    {
-        std::cout << key << ": ";
-		dump_type(value);
-		std::cout << '\n';
-    }
+	for (const Scope* scope : ir->Scopes())
+	{
+		for (auto& [key, value] : scope->Types())
+		{
+			std::cout << key << ": ";
+			dump_type(value);
+			std::cout << '\n';
+		}
+	}
 	std::cout << '\n';
 
 	std::cout << "; Symbols:\n\n";
@@ -180,24 +282,27 @@ void dump_ir(const IRGenerate::IR* ir)
 	std::cout << '\n';
 
 	std::cout << "; Functions:\n\n";
-	for (auto& [key, value] : ir->Functions())
+	for (const Scope* scope : ir->Scopes())
 	{
-		std::cout << key << " :: ";
-		std::cout << "(";
-		for (size_t i = 0; i < value->Params().Size(); ++i)
+		for (auto& [key, value] : scope->Functions())
 		{
-			auto& param = value->Params().At(i);
-			if (i > 0) std::cout << ", ";
-			std::cout << param.name << ": ";
-			dump_type_name(param.typ);
+			std::cout << key << " :: ";
+			std::cout << "(";
+			for (size_t i = 0; i < value->Params().Size(); ++i)
+			{
+				auto& param = value->Params().At(i);
+				if (i > 0) std::cout << ", ";
+				std::cout << param.name << ": ";
+				dump_type_name(param.typ);
+			}
+			std::cout << ") -> ";
+			dump_type_name(value->RetType());
+			if (value->Body()) {
+				std::cout << ":\n";
+				dump_block(value->Body());
+			}
+			std::cout << '\n';
 		}
-		std::cout << ") -> ";
-		dump_type_name(value->RetType());
-		if (value->Body()) {
-			std::cout << ":\n";
-			dump_block(value->Body());
-		}
-		std::cout << '\n';
 	}
 	std::cout << '\n';
 
