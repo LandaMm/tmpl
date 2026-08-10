@@ -1,9 +1,9 @@
 #import "std.mt"
 
-errno: int #foreign;
-print :: (message: *char) -> void #foreign;
+print :: (message: *char) -> i32 #foreign;
 
 main :: () -> void {
-	print("Hello, World!");
+	msg := "Hello, World!";
+	print(msg);
 }
 
