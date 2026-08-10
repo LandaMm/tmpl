@@ -1,8 +1,8 @@
 #pragma once
 
 #include<iostream>
-#include "cpl-basics/array.hpp"
-#include "cpl-basics/string.hpp"
+#include <cpl-basics/array.hpp>
+#include <cpl-basics/string.hpp>
 
 namespace Runtime
 {
