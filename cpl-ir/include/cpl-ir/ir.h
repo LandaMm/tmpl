@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <deque>
 
 #include <cpl-basics/allocator/arena.hpp>
 #include <cpl-basics/array.hpp>
@@ -16,6 +17,7 @@
 #include "value.hpp"
 #include "instr.h"
 #include "block.h"
+#include "scope.hpp"
 
 #include "cplbuild.h"
 
@@ -37,28 +39,43 @@ public:
 	void GenerateIR();
 public:
 	const std::map<String, Symbol*> Symbols() const noexcept;
-	const std::map<String, Type*> Types() const noexcept;
-	const std::map<String, Function*> Functions() const noexcept;
+	inline const std::deque<Scope*>& Scopes() const noexcept { return m_scopes; }
 private:
-	[[nodiscard]] Instr* GenerateInstr(Node* node);
-	[[nodiscard]] const Value* EvaluateNode(Node* node);
+	const Value* EvaluateNode(Node* node);
 	void GenerateFunction(Nodes::FunctionDeclaration* fn);
-	void GenerateVariableDeclaration(Nodes::VariableDeclaration* var);
+	const Value* GenerateVariableDeclaration(Nodes::VariableDeclaration* var);
 	void GenerateTypeDeclaration(Nodes::TypeDeclaration* typ);
 private:
 	const Type* ParseType(Nodes::Type* typ);
 private:
-	void AddType(const String& name, Type* typ);
-	const Type* FindType(const String& name) const noexcept;
+	[[nodiscard]] inline Scope* CurrentScope() const noexcept { assert(!m_scopes.empty()); return m_scopes.front(); };
+	void InsertScope(Scope* newScope);
 
 	void AddSymbol(Symbol* symbol);
 	const Symbol* FindSymbol(const String& name) const noexcept;
 private:
+	const LocalValue* FindLocal(const String& name) const noexcept;
+	const Type* FindType(const String& name) const noexcept;
+private:
+	[[nodiscard]] inline BasicBlock* CurrentBlock() const noexcept { return m_blocks.front(); }
+	inline TempValueID BlockNextTempValueId() const noexcept
+	{
+		// TODO: better error
+		assert(CurrentBlock() && "no block is set for retrieving new temp id");
+		return CurrentBlock()->NextTempValueId();
+	}
+	void StartBlock(BasicBlock* block);
+	void PushInstr(Instr* instr);
+	BasicBlock* EndBlock();
+private:
 	ArenaAllocator<> m_arena;
 	Nodes::ProgramNode* m_rootNode;
 	std::map<String, Symbol*> m_symbols;
-	std::map<String, Type*> m_localTypes;
-	std::map<String, Function*> m_functions;
+
+	std::deque<Scope*> m_scopes;
+	std::deque<BasicBlock*> m_blocks;
+
+	TempValueID m_tempValueCounter = 0;
 };
 
 } // namespace IRGenerate
