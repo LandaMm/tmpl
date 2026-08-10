@@ -1,5 +1,7 @@
 #pragma once
 
+#include "value.hpp"
+
 #include "cplbuild.h"
 
 namespace IRGenerate
@@ -9,13 +11,16 @@ enum class InstrOp
 {
 	NONE = 0,
 	CALL,
+	ALLOCA,
+	STORE,
 	LOAD,
+	COUNT_INSTR_OPS,
 };
 
 class CPL_EXPORT Instr
 {
 public:
-	explicit Instr(InstrOp op);
+	explicit Instr(InstrOp op, const Value* dst = nullptr);
 	virtual ~Instr() = default;
 
 	Instr(const Instr&) = default;
@@ -23,9 +28,12 @@ public:
 	Instr(Instr&&) = delete;
 	Instr& operator=(Instr&&) = delete;
 public:
+	inline bool Valued() const noexcept { return m_dst != nullptr; }
+	inline const Value* Dest() const noexcept { return m_dst; }
 	InstrOp Type() const noexcept;
 private:
 	InstrOp m_op;
+	const Value* m_dst;
 };
 
 } // namespace IRGenerate
