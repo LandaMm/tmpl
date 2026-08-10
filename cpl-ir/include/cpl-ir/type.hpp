@@ -136,6 +136,39 @@ public:
 		}
 		return nullptr;
 	}
+
+	static bool Identical(const Type* lhs, const Type* rhs)
+	{
+		if (lhs == rhs) return true;
+
+		// example: *TYPE == [n x TYPE]
+		if (lhs->TypClass() == TypeClass::POINTER && rhs->TypClass() == TypeClass::VECTOR)
+		{
+			auto pointer = dynamic_cast<const PointerType*>(lhs);
+			auto vector = dynamic_cast<const VectorType*>(rhs);
+			return Identical(pointer->UnderlyingType(), vector->ItemType());
+		}
+		// example: [n x TYPE] == *TYPE
+		if (lhs->TypClass() == TypeClass::VECTOR && rhs->TypClass() == TypeClass::POINTER)
+		{
+			auto vector = dynamic_cast<const VectorType*>(lhs);
+			auto pointer = dynamic_cast<const PointerType*>(rhs);
+			return Identical(pointer->UnderlyingType(), vector->ItemType());
+		}
+
+		// CAUTION: should be at the very bottom
+		// example: char == i8 due to char :: i8
+		if (lhs->TypClass() == TypeClass::ALIAS || rhs->TypClass() == TypeClass::ALIAS)
+		{
+			if (auto alias = dynamic_cast<const AliasType*>(lhs))
+				lhs = alias->OriginType();
+			if (auto alias = dynamic_cast<const AliasType*>(rhs))
+				rhs = alias->OriginType();
+			return Identical(lhs, rhs);
+		}
+
+		return false;
+	}
 };
 
 
