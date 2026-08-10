@@ -134,19 +134,24 @@ const Value* IR::EvaluateNode(Node* node)
 		assert(assignmentNode->GetAssignOp() == Nodes::AssignOperator::Declare && "TODO: support other assignments except declarations");
 		assert(assignmentNode->GetAssignee()->GetType() == NT::Identifier && "currently only variable names are supported in an assignment");
 		auto target = assignmentNode->GetAssignee()->As<Nodes::IdentifierNode>();
-		if (FindLocal(target->GetName()))
+		// declaration
 		{
-			// TODO: better error
-			assert(false && "variable redeclaration");
+			if (FindLocal(target->GetName()))
+			{
+				// TODO: better error
+				assert(false && "variable redeclaration");
+			}
+			const Value* value = EvaluateNode(assignmentNode->GetValue());
+			auto storingValue = m_arena.Alloc<LocalValue>(target->GetName(), value->Typ());
+			CurrentScope()->AddLocal(storingValue);
+			PushInstr(m_arena.Alloc<AllocaInstr>(storingValue, value->Typ()));
+			PushInstr(m_arena.Alloc<StoreInstr>(storingValue, value, value->Typ()));
+			return storingValue;
 		}
-		const Value* value = EvaluateNode(assignmentNode->GetValue());
-		auto storingValue = m_arena.Alloc<LocalValue>(target->GetName(), value->Typ());
-		CurrentScope()->AddLocal(storingValue);
-		PushInstr(m_arena.Alloc<AllocaInstr>(storingValue, value->Typ()));
-		PushInstr(m_arena.Alloc<StoreInstr>(storingValue, value, value->Typ()));
 		// TODO: maybe pass evaluated value of the local instead of the local itself?
 		// so it's possible to do something like that: x := y := 5 where x is expected to have a value 5
-		return storingValue;
+		assert(false && "UNREACHABLE");
+		return nullptr;
 	}
 	case NT::FunctionCall:
 	{
@@ -161,21 +166,34 @@ const Value* IR::EvaluateNode(Node* node)
 			return nullptr;
 		}
 
+		const FunctionType* funcSymbol = dynamic_cast<const FunctionType*>(symbol->ValueType());
 		if (symbol->SymType() != SymbolType::FUNCTION)
 		{
 			// TODO: better error
 			assert(false && "cannot call non-callable symbol");
 			return nullptr;
 		}
+		assert(funcSymbol);
 
-		const FunctionType* funcSymbol = dynamic_cast<const FunctionType*>(symbol->ValueType());
-		assert(funcSymbol && "should be the case due to FUNCTION symbol type");
+		if (callNode->GetArgumentsSize() != funcSymbol->ParamTypes().Size())
+		{
+			// TODO: better error
+			assert(false && "argument count mismatch");
+			return nullptr;
+		}
 
 		Array<const Value*> args;
 		for (size_t i = 0; i < callNode->GetArgumentsSize(); ++i)
 		{
-			Node* argNode = callNode->GetArgument(i);
-			args.Push(EvaluateNode(argNode));
+			const Value* argValue = EvaluateNode(callNode->GetArgument(i));
+			const Type* expectedType = funcSymbol->ParamTypes()[i];
+			if (!TypeResolver::Identical(expectedType, argValue->Typ()))
+			{
+				// TODO: better error
+				assert(false && "argument type does not match parameter type");
+				return nullptr;
+			}
+			args.Push(argValue);
 		}
 
 		TemporalValue* dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), funcSymbol->RetType());
@@ -247,32 +265,31 @@ const Value* IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 		// TODO: better error
 		assert(false && "variable redeclaration");
 	}
-	else
+
+	SymbolOrigin origin = SymbolOrigin::LOCAL;
+	if (var->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN)
 	{
-		SymbolOrigin origin = SymbolOrigin::LOCAL;
-		if (var->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN)
-		{
-			origin = SymbolOrigin::FOREIGN;
-		}
-
-		const Type* valueType = ParseType(var->GetValueType());
-
-		AddSymbol(m_arena.Alloc<Symbol>(SymbolType::VARIABLE, valueType, origin, *var->GetName()));
-		CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), valueType));
-		
-		if (var->HasValue())
-		{
-			const Value* value = EvaluateNode(var->GetValue());
-			if (value->Typ()->operator!=(*valueType))
-			{
-				// TODO: better error
-				assert(false && "type mismatch in variable declaration");
-			}
-			return value;
-		}
-
-		// TODO: return ZeroValue or something
+		origin = SymbolOrigin::FOREIGN;
 	}
+
+	const Type* valueType = ParseType(var->GetValueType());
+
+	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::VARIABLE, valueType, origin, *var->GetName()));
+	CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), valueType));
+
+	if (var->HasValue())
+	{
+		const Value* value = EvaluateNode(var->GetValue());
+		if (!TypeResolver::Identical(valueType, value->Typ()))
+		{
+			// TODO: better error
+			assert(false && "type mismatch in variable declaration");
+		}
+		return value;
+	}
+
+	// TODO: return ZeroValue or something
+	return nullptr;
 }
 
 void IR::GenerateTypeDeclaration(Nodes::TypeDeclaration* typ)
@@ -370,7 +387,6 @@ const Type* IR::FindType(const String& name) const noexcept
 
 void IR::AddSymbol(Symbol* symbol)
 {
-	// TODO: introduct Scopes that will hold symbols at least
 	m_symbols.insert({ symbol->Name(), symbol });
 }
 
