@@ -14,14 +14,12 @@ class CPL_EXPORT CallInstr : public Instr
 {
 public:
 	explicit CallInstr(const Value* dest, const Symbol* callSymbol, Array<const Value*>&& args, const IRGenerate::Type* retType)
-		: m_dest(dest), m_callSymbol(callSymbol), m_args(args), m_retType(retType), Instr(InstrOp::CALL) {}
+		: m_callSymbol(callSymbol), m_args(args), m_retType(retType), Instr(InstrOp::CALL, dest) {}
 public:
-	inline const Value* Dest() const noexcept { return m_dest; }
 	inline const Symbol* CallSymbol() const noexcept { return m_callSymbol; }
 	inline const Array<const Value*>& Args() const noexcept { return m_args; }
 	inline const IRGenerate::Type* RetType() const noexcept { return m_retType; }
 private:
-	const Value* m_dest;
 	const Symbol* m_callSymbol;
 	const IRGenerate::Type* m_retType;
 	Array<const Value*> m_args;
