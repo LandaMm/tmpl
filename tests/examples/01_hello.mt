@@ -1,9 +1,7 @@
 #import "std.mt"
 
-print :: (message: *char) -> i32 #foreign;
-
 main :: () -> void {
 	msg := "Hello, World!";
-	print(msg);
+	write(STDOUT_FILENO, msg, strlen(msg));
 }
 
