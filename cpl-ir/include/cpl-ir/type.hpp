@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <cpl-basics/def.hpp>
 #include <cpl-basics/string.hpp>
 
@@ -125,6 +127,11 @@ class TypeResolver
 public:
 	TypeResolver() = delete;
 public:
+	static bool TwoAre(const Type* a, const Type* b, TypeClass ac, TypeClass bc) noexcept
+	{
+		return (a->TypClass() == ac && b->TypClass() == bc) || (a->TypClass() == bc && b->TypClass() == ac);
+	}
+
 	static const IntegerType* Integer(const Type* typ)
 	{
 		if (typ->TypClass() == TypeClass::INTEGER) return dynamic_cast<const IntegerType*>(typ);
@@ -137,9 +144,25 @@ public:
 		return nullptr;
 	}
 
+	// Should not just return bool, but say if type required downgrading/upgrading/alias resolving and etc.
 	static bool Identical(const Type* lhs, const Type* rhs)
 	{
 		if (lhs == rhs) return true;
+ 
+		if (lhs->TypClass() == rhs->TypClass() && lhs->TypClass() == TypeClass::INTEGER)
+		{
+			// assuming that all integer types are sized,
+			// which makes sense.
+			auto lhsSized = dynamic_cast<const SizedType*>(lhs);
+			auto rhsSized = dynamic_cast<const SizedType*>(rhs);
+			assert(lhsSized && rhsSized);
+			if (lhsSized->Layout().size != rhsSized->Layout().size)
+			{
+				// TODO: better error (warning)
+				std::cerr << "[WARNING] possible loss of integer data" << std::endl;
+			}
+			return true;
+		}
 
 		// example: *TYPE == [n x TYPE]
 		if (lhs->TypClass() == TypeClass::POINTER && rhs->TypClass() == TypeClass::VECTOR)
