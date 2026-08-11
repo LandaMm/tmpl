@@ -272,15 +272,16 @@ const Value* IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 		origin = SymbolOrigin::FOREIGN;
 	}
 
-	const Type* valueType = ParseType(var->GetValueType());
+	const Type* expectedType = ParseType(var->GetValueType());
 
-	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::VARIABLE, valueType, origin, *var->GetName()));
-	CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), valueType));
+	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::VARIABLE, expectedType, origin, *var->GetName()));
+	CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), expectedType));
 
 	if (var->HasValue())
 	{
 		const Value* value = EvaluateNode(var->GetValue());
-		if (!TypeResolver::Identical(valueType, value->Typ()))
+		const Type* valueType = value->Typ();
+		if (!TypeResolver::Identical(expectedType, valueType))
 		{
 			// TODO: better error
 			assert(false && "type mismatch in variable declaration");
