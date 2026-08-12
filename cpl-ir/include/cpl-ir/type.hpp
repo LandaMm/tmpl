@@ -77,13 +77,19 @@ private:
 class FunctionType : public Type
 {
 public:
-	FunctionType(const String& name, Array<const Type*>&& paramTypes, const Type* retType)
-		: m_paramTypes(paramTypes), m_retType(retType), Type(name, TypeClass::FUNCTION) { }
+	struct Param
+	{
+		String name;
+		const Type* typ;
+	};
 public:
-	inline const Array<const Type*>& ParamTypes() const noexcept { return m_paramTypes; }
+	FunctionType(const String& name, Array<Param>&& params, const Type* retType)
+		: m_params(params), m_retType(retType), Type(name, TypeClass::FUNCTION) { }
+public:
+	inline const Array<Param>& Params() const noexcept { return m_params; }
 	inline const Type* RetType() const noexcept { return m_retType; }
 private:
-	Array<const Type*> m_paramTypes;
+	Array<Param> m_params;
 	const Type* m_retType;
 };
 

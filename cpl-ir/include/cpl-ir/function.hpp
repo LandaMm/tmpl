@@ -9,27 +9,19 @@
 namespace IRGenerate
 {
 
-struct FunctionParam
-{
-	String name;
-	const Type* typ;
-};
-
 class Function
 {
 public:
-	Function(String name, Array<FunctionParam>&& params, NamedBlock* body, const Type* retType)
-		: m_name(name), m_params(params), m_body(body), m_retType(retType) {}
+	Function(String name, const FunctionType* funcType, NamedBlock* body)
+		: m_name(name), m_funcType(funcType), m_body(body) {}
 public:
-	const String& Name() const noexcept { return m_name; }
-	const Array<FunctionParam>& Params() const noexcept { return m_params; }
-	const NamedBlock* Body() const noexcept { return m_body; }
-	const Type* RetType() const noexcept { return m_retType; }
+	[[nodiscard]] inline const String& Name() const noexcept { return m_name; }
+	[[nodiscard]] inline const NamedBlock* Body() const noexcept { return m_body; }
+	[[nodiscard]] inline const FunctionType* FunctionDescription() const noexcept { return m_funcType; }
 private:
 	String m_name;
 	NamedBlock* m_body;
-	Array<FunctionParam> m_params;
-	const Type* m_retType;
+	const FunctionType* m_funcType;
 };
 
 }

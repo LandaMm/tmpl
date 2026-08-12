@@ -166,16 +166,18 @@ const Value* IR::EvaluateNode(Node* node)
 			return nullptr;
 		}
 
-		const FunctionType* funcSymbol = dynamic_cast<const FunctionType*>(symbol->ValueType());
-		if (symbol->SymType() != SymbolType::FUNCTION)
+		if (symbol->Kind() != SymbolKind::FUNCTION)
 		{
 			// TODO: better error
 			assert(false && "cannot call non-callable symbol");
 			return nullptr;
 		}
+
+		auto funcSymbol = dynamic_cast<const Symbols::Function*>(symbol);
 		assert(funcSymbol);
 
-		if (callNode->GetArgumentsSize() != funcSymbol->ParamTypes().Size())
+		const FunctionType* funcDesc = funcSymbol->FunctionDescription();
+		if (callNode->GetArgumentsSize() != funcDesc->Params().Size())
 		{
 			// TODO: better error
 			assert(false && "argument count mismatch");
@@ -186,7 +188,7 @@ const Value* IR::EvaluateNode(Node* node)
 		for (size_t i = 0; i < callNode->GetArgumentsSize(); ++i)
 		{
 			const Value* argValue = EvaluateNode(callNode->GetArgument(i));
-			const Type* expectedType = funcSymbol->ParamTypes()[i];
+			const Type* expectedType = funcDesc->Params()[i].typ;
 			if (!TypeResolver::Identical(expectedType, argValue->Typ()))
 			{
 				// TODO: better error
@@ -196,8 +198,8 @@ const Value* IR::EvaluateNode(Node* node)
 			args.Push(argValue);
 		}
 
-		TemporalValue* dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), funcSymbol->RetType());
-		PushInstr(m_arena.Alloc<CallInstr>(dst, symbol, std::move(args), funcSymbol->RetType()));
+		TemporalValue* dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), funcDesc->RetType());
+		PushInstr(m_arena.Alloc<CallInstr>(dst, symbol, std::move(args), funcDesc->RetType()));
 		return dst;
 	}
 	default:
@@ -214,11 +216,7 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 {
 	using NT = AST::NodeType;
 
-	SymbolOrigin origin = SymbolOrigin::LOCAL;
-	if (fn->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN)
-	{
-		origin = SymbolOrigin::FOREIGN;
-	}
+	bool external = fn->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN;
 
 	Node* fnName = fn->GetName();
 	assert(fnName->GetType() == NT::Identifier && "Currently only simple names are supported as function name.");
@@ -226,21 +224,20 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 
 	auto retType = ParseType(fn->GetReturnType());
 
-	Array<FunctionParam> params;
-	Array<const Type*> paramTypes;
+	Array<FunctionType::Param> params;
 	for (size_t i = 0; i < fn->GetParamsSize(); ++i)
 	{
 		auto param = fn->GetParam(i);
 		auto paramName = param->GetName()->GetName();
 		const Type* paramType = ParseType(param->GetType());
-		params.Emplace(FunctionParam{ paramName, paramType });
-		paramTypes.Push(paramType);
+		params.Emplace(FunctionType::Param{ paramName, paramType });
 	}
 
-	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::FUNCTION, m_arena.Alloc<FunctionType>(symbolName, std::move(paramTypes), retType), origin, symbolName));
+	const FunctionType* funcType = m_arena.Alloc<FunctionType>(symbolName, std::move(params), retType);
 
-	NamedBlock* block = nullptr;
-	if (origin != SymbolOrigin::FOREIGN)
+	AddSymbol(m_arena.Alloc<Symbols::Function>(symbolName, funcType, external ? SymbolOrigin::FOREIGN : SymbolOrigin::LOCAL));
+
+	if (!external)
 	{
 		StartBlock(m_arena.Alloc<NamedBlock>(symbolName));
 		auto body = fn->GetBody();
@@ -249,12 +246,9 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 			// TODO: we can do expression based thingy like in Rust
 			EvaluateNode(body->GetItem(i));
 		}
-		block = reinterpret_cast<NamedBlock*>(EndBlock());
-	}
+		NamedBlock* block = reinterpret_cast<NamedBlock*>(EndBlock());
 
-	if (origin != SymbolOrigin::FOREIGN)
-	{
-		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, std::move(params), block, retType));
+		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, funcType, block));
 	}
 }
 
@@ -266,16 +260,9 @@ const Value* IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 		assert(false && "variable redeclaration");
 	}
 
-	SymbolOrigin origin = SymbolOrigin::LOCAL;
-	if (var->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN)
-	{
-		origin = SymbolOrigin::FOREIGN;
-	}
-
+	bool external = var->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN;
 	const Type* expectedType = ParseType(var->GetValueType());
-
-	AddSymbol(m_arena.Alloc<Symbol>(SymbolType::VARIABLE, expectedType, origin, *var->GetName()));
-	CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), expectedType));
+	const Value* initialValue = nullptr;
 
 	if (var->HasValue())
 	{
@@ -286,8 +273,15 @@ const Value* IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 			// TODO: better error
 			assert(false && "type mismatch in variable declaration");
 		}
-		return value;
+		initialValue = value;
 	}
+
+	if (external)
+		AddSymbol(m_arena.Alloc<Symbols::ExternalVariable>(*var->GetName(), expectedType));
+	else
+		AddSymbol(m_arena.Alloc<Symbols::LocalVariable>(*var->GetName(), expectedType, initialValue));
+
+	CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), expectedType));
 
 	// TODO: return ZeroValue or something
 	return nullptr;

@@ -159,23 +159,26 @@ void dump_symbol(const IRGenerate::Symbol* symbol)
 	std::cout << ")";
 	*/
 	std::cout << ": ";
-	if (auto funcType = dynamic_cast<const FunctionType*>(symbol->ValueType()))
+	if (auto function = dynamic_cast<const Symbols::Function*>(symbol))
 	{
+		const FunctionType* funcType = function->FunctionDescription();
 		std::cout << "(";
-		for (size_t i = 0; i < funcType->ParamTypes().Size(); ++i)
+		for (size_t i = 0; i < funcType->Params().Size(); ++i)
 		{
+			const auto param = funcType->Params()[i];
 			if (i > 0)
 			{
 				std::cout << ", ";
 			}
-			dump_type_name(funcType->ParamTypes()[i]);
+			std::cout << param.name << ": ";
+			dump_type_name(param.typ);
 		}
 		std::cout << ") -> ";
 		dump_type_name(funcType->RetType());
 	}
 	else
 	{
-		dump_type_name(symbol->ValueType());
+		dump_type_name(symbol->Typ());
 	}
 
 	if (symbol->Origin() == SymbolOrigin::FOREIGN)
@@ -288,15 +291,16 @@ void dump_ir(const IRGenerate::IR* ir)
 		{
 			std::cout << key << " :: ";
 			std::cout << "(";
-			for (size_t i = 0; i < value->Params().Size(); ++i)
+			auto funcDesc = value->FunctionDescription();
+			for (size_t i = 0; i < funcDesc->Params().Size(); ++i)
 			{
-				auto& param = value->Params().At(i);
+				const auto param = funcDesc->Params()[i];
 				if (i > 0) std::cout << ", ";
 				std::cout << param.name << ": ";
 				dump_type_name(param.typ);
 			}
 			std::cout << ") -> ";
-			dump_type_name(value->RetType());
+			dump_type_name(funcDesc->RetType());
 			if (value->Body()) {
 				std::cout << ":\n";
 				dump_block(value->Body());
