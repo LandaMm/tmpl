@@ -31,9 +31,50 @@ void Generator::Generate()
 	WriteLn("\nsection '.data' data readable writeable\n");
 	for (auto& [_, symbol] : m_ir->Symbols())
 	{
-		if (symbol->Origin() == SymbolOrigin::FOREIGN) continue;
-		if (symbol->Kind() != SymbolKind::VARIABLE) continue;
-		WriteLn(std::format("{}: db ...", symbol->Name().c_str()));
+		if (auto localVariable = dynamic_cast<const Symbols::LocalVariable*>(symbol))
+		{
+			Write(symbol->Name() + ": ");
+			
+			auto value = localVariable->InitialValue();
+			auto sizedTyp = dynamic_cast<const SizedType*>(localVariable->Typ());
+			
+			assert(sizedTyp && "only sized types can be locally defined");
+
+			switch (value->Kind())
+			{
+			case ValueKind::IMMEDIATE:
+			{
+				auto imm = value->As<ImmediateValue>();
+				switch (sizedTyp->Layout().size)
+				{
+				case TypeSize::BITS8:
+					Write(std::format("db {}", std::to_string(*reinterpret_cast<const char*>(imm->ImmValue()))));
+					break;
+				case TypeSize::BITS16:
+					Write(std::format("dw {}", std::to_string(*reinterpret_cast<const short*>(imm->ImmValue()))));
+					break;
+				case TypeSize::BITS32:
+					Write(std::format("dd {}", std::to_string(*reinterpret_cast<const int*>(imm->ImmValue()))));
+					break;
+				case TypeSize::BITS64:
+					Write(std::format("dq {}", std::to_string(*reinterpret_cast<const long*>(imm->ImmValue()))));
+					break;
+				case TypeSize::UNKNOWN:
+				default:
+					// TODO: better error
+					assert(false && "unsupported data type size");
+					break;
+				}
+			}
+			break;
+			case ValueKind::UNKNOWN:
+			default:
+				// TODO: better error
+				assert(false && "unsupported value kind for data definition");
+			}
+
+			WriteLn("");
+		}
 	}
 }
 
