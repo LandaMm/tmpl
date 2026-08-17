@@ -27,11 +27,13 @@ void IR::GenerateIR()
 
 	/////////////////////////////////////
 
-	CurrentScope()->AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{0, 0}));
-	CurrentScope()->AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{1, 1}));
-	CurrentScope()->AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{8, 8}));
-	CurrentScope()->AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{32, 32}));
-	CurrentScope()->AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{64, 64}));
+	CurrentScope()->AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{TypeSize::OPAQUE, 0}));
+	// TODO: dedicated type size for i1
+	CurrentScope()->AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{TypeSize::BITS8, 1}));
+	CurrentScope()->AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{TypeSize::BITS8, 8}));
+	CurrentScope()->AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{TypeSize::BITS32, 32}));
+	CurrentScope()->AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{TypeSize::BITS64, 64}));
+	CurrentScope()->AddType("i128", m_arena.Alloc<IntegerType>("i128", TypeLayout{TypeSize::BITS128, 128}));
 
 	/////////////////////////////////////
 

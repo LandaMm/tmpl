@@ -46,7 +46,7 @@ void dump_type(const IRGenerate::Type* typ)
 	}
 	if (const SizedType* sized = dynamic_cast<const SizedType*>(typ))
 	{
-		std::cout << " size = " << sized->Layout().size;
+		std::cout << " size = " << static_cast<Int8>(sized->Layout().size);
 		std::cout << " align = " << sized->Layout().align;
 	}
 	if (const PointerType* pointer = dynamic_cast<const PointerType*>(typ))
@@ -97,16 +97,16 @@ void dump_value(const IRGenerate::Value* value)
 		auto value = immediate->ImmValue();
 		switch (integerDescription->Layout().size)
 		{
-		case 8:
+		case TypeSize::BITS8:
 			std::cout << *static_cast<const Uint8*>(value);
 			break;
-		case 16:
+		case TypeSize::BITS16:
 			std::cout << *static_cast<const Uint16*>(value);
 			break;
-		case 32:
+		case TypeSize::BITS32:
 			std::cout << *static_cast<const Uint32*>(value);
 			break;
-		case 64:
+		case TypeSize::BITS64:
 			std::cout << *static_cast<const Uint64*>(value);
 			break;
 		default:

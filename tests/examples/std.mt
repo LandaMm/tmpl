@@ -3,8 +3,9 @@ int :: i32;
 char :: i8;
 bool :: i1;
 
-STDOUT_FILENO : i8 = 1;
+STDOUT_FILENO : i32 = 1;
+INITIAL_MESSAGE : *char = "Hello, World!";
 
-write :: (fd: i8, buf: *char, count: u32) -> i32 #foreign;
+write :: (fd: i32, buf: *char, count: u32) -> i32 #foreign;
 strlen :: (str: *char) -> i32 #foreign;
 

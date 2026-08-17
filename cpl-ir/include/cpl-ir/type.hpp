@@ -8,9 +8,22 @@
 namespace IRGenerate
 {
 
+enum class TypeSize : Int8
+{
+	UNKNOWN = -1,
+	OPAQUE = 0,
+	BITS8 = 8,
+	BITS16 = 16,
+	BITS32 = 32,
+	BITS64 = 64,
+	BITS128 = 128,
+	COUNT_TYPE_SIZES = 6,
+};
+
 struct TypeLayout
 {
-	Uint32 size, align;
+	TypeSize size;
+	Uint32 align;
 };
 
 enum class TypeClass
