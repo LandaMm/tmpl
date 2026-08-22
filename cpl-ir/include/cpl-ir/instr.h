@@ -27,6 +27,10 @@ public:
 	Instr& operator=(const Instr&) = default;
 	Instr(Instr&&) = delete;
 	Instr& operator=(Instr&&) = delete;
+
+	template<typename T>
+	requires std::derived_from<T, Instr>
+	inline const T* As() const noexcept { return dynamic_cast<const T*>(this); }
 public:
 	inline bool Valued() const noexcept { return m_dst != nullptr; }
 	inline const Value* Dest() const noexcept { return m_dst; }
