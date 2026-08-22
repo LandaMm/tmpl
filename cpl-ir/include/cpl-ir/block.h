@@ -25,7 +25,8 @@ public:
 	const Array<Instr*>& Body() const noexcept;
 	void AddInstr(Instr* instr);
 public:
-	inline TempValueID NextTempValueId() noexcept { return m_tempValueCounter++; }
+	[[nodiscard]] inline TempValueID NextTempValueId() noexcept { return m_tempValueCounter++; }
+	[[nodiscard]] inline BlockIdType Id() const noexcept { return m_id; }
 private:
 	Array<Instr*> m_body;
 	BlockIdType m_id;
