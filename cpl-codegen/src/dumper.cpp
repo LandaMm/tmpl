@@ -93,25 +93,9 @@ void dump_value(const IRGenerate::Value* value)
 		assert(immediate);
 		auto integerDescription = TypeResolver::Integer(immediate->Typ());
 		assert(integerDescription);
-		std::cout << '#';
-		auto value = immediate->ImmValue();
-		switch (integerDescription->Layout().size)
-		{
-		case TypeSize::BITS8:
-			std::cout << *static_cast<const Uint8*>(value);
-			break;
-		case TypeSize::BITS16:
-			std::cout << *static_cast<const Uint16*>(value);
-			break;
-		case TypeSize::BITS32:
-			std::cout << *static_cast<const Uint32*>(value);
-			break;
-		case TypeSize::BITS64:
-			std::cout << *static_cast<const Uint64*>(value);
-			break;
-		default:
-			assert(false && "UNSUPPORTED integer size");
-		}
+		std::cout << "i" << integerDescription->Layout().size << " #";
+		Int64 value = immediate->ImmValue();
+		std::cout << value;
 		break;
 	}
 	case ValueKind::UNKNOWN:
