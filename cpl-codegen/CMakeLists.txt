@@ -13,8 +13,10 @@ project(cpl-codegen)
 add_library(cpl-codegen
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/dumper.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/src/codegen.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/register_allocator.cpp"
 
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-codegen/codegen.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-codegen/register_allocator.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-codegen/dumper.h"
 )
 
