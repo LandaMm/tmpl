@@ -13,7 +13,7 @@ namespace IRGenerate
 class CPL_EXPORT StoreInstr : public Instr
 {
 public:
-	explicit StoreInstr(const Value* dest, const Value* src, const IRGenerate::Type* typ)
+	explicit StoreInstr(const LocalValue* dest, const Value* src, const IRGenerate::Type* typ)
 		: m_src(src), m_typ(typ), Instr(InstrOp::STORE, dest) {}
 public:
 	inline const Value* Src() const noexcept { return m_src; }
