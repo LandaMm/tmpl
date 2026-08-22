@@ -13,8 +13,8 @@ namespace IRGenerate
 class CPL_EXPORT AllocaInstr : public Instr
 {
 public:
-	explicit AllocaInstr(const Value* dest, const IRGenerate::Type* typ)
-		: m_typ(typ), Instr(InstrOp::ALLOCA, dest) {}
+	explicit AllocaInstr(const LocalValue* dest, const IRGenerate::Type* typ)
+		: m_typ(typ), Instr(InstrOp::ALLOCA, dest) { }
 public:
 	inline const IRGenerate::Type* Typ() const noexcept { return m_typ; }
 private:
