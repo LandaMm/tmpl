@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <iostream>
 
 #include <cpl-basics/def.hpp>
@@ -8,22 +9,9 @@
 namespace IRGenerate
 {
 
-enum class TypeSize : Int8
-{
-	UNKNOWN = -1,
-	OPAQUE = 0,
-	BITS8 = 8,
-	BITS16 = 16,
-	BITS32 = 32,
-	BITS64 = 64,
-	BITS128 = 128,
-	COUNT_TYPE_SIZES = 6,
-};
-
 struct TypeLayout
 {
-	TypeSize size;
-	Uint32 align;
+	Uint32 size, align;
 };
 
 enum class TypeClass
@@ -45,6 +33,10 @@ public:
 		: m_name(name), m_typClass(typClass) { }
 	virtual ~Type() = default;
 public:
+	template<typename T>
+	requires std::derived_from<T, Type>
+	const T* As() const noexcept { return dynamic_cast<const T*>(this); }
+
 	const String& Name() const noexcept { return m_name; }
 	const TypeClass& TypClass() const noexcept { return m_typClass; }
 public:
@@ -210,6 +202,26 @@ public:
 		}
 
 		return false;
+	}
+
+	static TypeLayout ResolveTypeSize(const Type* typ) noexcept
+	{
+		if (typ->TypClass() == TypeClass::POINTER)
+			return ResolveTypeSize(typ->As<PointerType>()->UnderlyingType());
+
+		if (typ->TypClass() == TypeClass::ALIAS)
+			return ResolveTypeSize(typ->As<AliasType>()->OriginType());
+
+		if (typ->TypClass() == TypeClass::VECTOR)
+		{
+			const VectorType* vectorTyp = typ->As<VectorType>();
+			TypeLayout itemLayout = ResolveTypeSize(vectorTyp->ItemType());
+			itemLayout.size *= vectorTyp->ItemCount();
+			itemLayout.align *= vectorTyp->ItemCount();
+			return itemLayout;
+		}
+
+		return dynamic_cast<const SizedType*>(typ)->Layout();
 	}
 };
 
