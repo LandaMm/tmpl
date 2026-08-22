@@ -9,6 +9,8 @@
 #include <cpl-parser/error.h>
 #include <cpl-basics/allocator/arena.hpp>
 
+#include <cpl-codegen/dumper.h>
+
 #include <cpl-codegen/codegen.h>
 
 int main(int argc, char **argv)
@@ -42,9 +44,10 @@ int main(int argc, char **argv)
     auto compiler = new IRGenerate::IR(root);
 
     compiler->GenerateIR();
+    dump_ir(compiler);
 
     {
-        FileStreamWriter outputFile("output.asm");
+        FileStreamWriter outputFile("out/output.s");
         auto generator = new Codegen::Generator(&outputFile, compiler);
         generator->Generate();
     }
