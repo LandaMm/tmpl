@@ -36,9 +36,12 @@ public:
 	requires std::derived_from<T, Value>
 	inline T* As() noexcept { return static_cast<T*>(this); }
 
+	// CAUTION: don't change the implementation of this method
+	// to ensure no nullptr, instead ensure it outside of the method,
+	// as it can break some functionality.
 	template<typename T>
 	requires std::derived_from<T, Value>
-	inline const T* As() const noexcept { return static_cast<const T*>(this); }
+	inline const T* As() const noexcept { return dynamic_cast<const T*>(this); }
 private:
 	ValueKind m_kind;
 	const Type* m_typ;
@@ -69,12 +72,12 @@ private:
 class ImmediateValue : public Value
 {
 public:
-	ImmediateValue(void* immValue, const Type* typ)
+	ImmediateValue(Int64 immValue, const Type* typ)
 		: m_value(immValue), Value(ValueKind::IMMEDIATE, typ) { }
 public:
-	[[nodiscard]] inline const void* ImmValue() const noexcept { return m_value; }
+	[[nodiscard]] inline const Int64 ImmValue() const noexcept { return m_value; }
 private:
-	void* m_value;
+	Int64 m_value;
 };
 
 using TempValueID = Uint32;
