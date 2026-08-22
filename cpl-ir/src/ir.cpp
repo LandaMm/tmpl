@@ -27,13 +27,13 @@ void IR::GenerateIR()
 
 	/////////////////////////////////////
 
-	CurrentScope()->AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{TypeSize::OPAQUE, 0}));
+	CurrentScope()->AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{0, 1}));
 	// TODO: dedicated type size for i1
-	CurrentScope()->AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{TypeSize::BITS8, 1}));
-	CurrentScope()->AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{TypeSize::BITS8, 8}));
-	CurrentScope()->AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{TypeSize::BITS32, 32}));
-	CurrentScope()->AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{TypeSize::BITS64, 64}));
-	CurrentScope()->AddType("i128", m_arena.Alloc<IntegerType>("i128", TypeLayout{TypeSize::BITS128, 128}));
+	CurrentScope()->AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{1, 1}));
+	CurrentScope()->AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{8, 8}));
+	CurrentScope()->AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{32, 32}));
+	CurrentScope()->AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{64, 64}));
+	CurrentScope()->AddType("i128", m_arena.Alloc<IntegerType>("i128", TypeLayout{128, 128}));
 
 	/////////////////////////////////////
 
@@ -99,7 +99,7 @@ const Value* IR::EvaluateNode(Node* node)
 			// TODO: support more than 32-bits
 			const Type* IntType = FindType("i32");
 			assert(IntType);
-			return m_arena.Alloc<ImmediateValue>(m_arena.Alloc<int>(*value), IntType);
+			return m_arena.Alloc<ImmediateValue>(*value, IntType);
 		}
 		default:
 			// TODO: better error
