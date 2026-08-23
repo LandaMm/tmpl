@@ -16,18 +16,43 @@ const Reg BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value, con
 {
 	using namespace IRGenerate;
 
-	Reg targetRegister = regName.has_value() ? GetSpecificReg(regName.value()) : GetAnyReg();
+	Reg targetRegister = regName.has_value() ? GetSpecificReg(regName.value(), value) : GetAnyReg(value);
 
 	RegDestination destination = RegDestination{ targetRegister };
-	if (!ValueIsStored(value)) StoreOrUpdateValue(value, destination);
-	assert(ValueIsStored(value));
-	Slot& slot = GetSlotByKey(GetSlotKey(value));
-	if (std::holds_alternative<StackSlot>(slot.storage))
+
+	switch (value->Kind())
 	{
-		StoreOrUpdateValue(value, destination);
+	case ValueKind::GLOBAL:
+	{
+		assert(false && "NOT IMPLEMENTED");
+	}
+	break;
+	// TODO: ValueKind::LOCAL
+	case ValueKind::IMMEDIATE:
+	case ValueKind::TEMPORAL:
+	{
+		if (!ValueIsStored(value)) StoreOrUpdateValue(value, destination);
+		assert(ValueIsStored(value));
+		Slot& slot = GetSlotByKey(GetSlotKey(value));
+		if (std::holds_alternative<StackSlot>(slot.storage))
+		{
+			StoreOrUpdateValue(value, destination);
+		}
+		else if (std::get<Reg>(slot.storage).name != destination.reg.name)
+		{
+			StoreOrUpdateValue(value, destination);
+		}
+
+		return std::get<Reg>(GetSlotByKey(GetSlotKey(value)).storage);
+	}
+	break;
+	case ValueKind::UNKNOWN:
+	default:
+		assert(false && "Not supported/handled value for loading into the register");
 	}
 
-	return std::get<Reg>(GetSlotByKey(GetSlotKey(value)).storage);
+	assert(false && "SHOULD BE UNREACHABLE");
+	return {};
 }
 
 String BasicSlotAllocator::GetSlotKey(const IRGenerate::Value* value)
@@ -51,27 +76,30 @@ Reg BasicSlotAllocator::SpillReg(const String& regName)
 {
 	for (auto& [key, slot] : m_slots)
 	{
-		if (std::holds_alternative<Reg>(slot.storage))
+		if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == regName)
 		{
 			Reg moveReg = std::get<Reg>(slot.storage);
-			if (moveReg.name == regName)
-			{
-				StackSlot newSlot = GetNewStackSlotFromSize(moveReg.size);
-				m_handler.SpillHandler().operator()(moveReg, newSlot);
-				slot = Slot{ newSlot, slot.value };
-				// add register to freeRegs
-				for (Uint8 i = 0; i < m_regs.Size(); ++i)
-				{
-					if (m_regs[i].name == moveReg.name)
-					{
-						m_freeRegs.Push(i);
-					}
-				}
 
-				return moveReg;
+			StackSlot newSlot = GetNewStackSlotFromSize(moveReg.size);
+			m_handler.SpillHandler().operator()(moveReg, newSlot);
+
+			InsertValueSlot(slot.value, newSlot, true);
+
+			// add register to freeRegs
+			for (Uint8 i = 0; i < m_regs.Size(); ++i)
+			{
+				if (m_regs[i].name == moveReg.name)
+				{
+					m_freeRegs.Push(i);
+				}
 			}
+
+			return moveReg;
 		}
 	}
+
+	assert(false && "SHOULD BE UNREACHABLE");
+	return {};
 }
 
 void BasicSlotAllocator::InsertValueSlot(const IRGenerate::Value* value, std::variant<Reg, StackSlot> slotStorage, bool rewrite)
@@ -119,11 +147,30 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 				auto& slot = GetSlotByKey(GetSlotKey(value));
 				if (std::holds_alternative<Reg>(slot.storage))
 				{
-					return; // slot
+					if (std::get<Reg>(slot.storage).name == dest.reg.name)
+					{
+						return;
+					}
+
+					// the value IS in the register but not in the right one
+
+					// move from register to the register
+					m_handler.MoveHandler().operator()(slot.storage, dest.reg);
+					FreeReg(std::get<Reg>(slot.storage));
+					InsertValueSlot(value, dest.reg);
 				}
-				// here temp is already stored but as stack
+				else
+				{
+					// 'unspill' (moving from stack into the register
+					m_handler.MoveHandler().operator()(slot.storage, dest.reg);
+					// here temp is already stored but as stack
+					InsertValueSlot(value, dest.reg, true);
+				}
 			}
-			InsertValueSlot(value, dest.reg, true);
+			else
+			{
+				InsertValueSlot(value, dest.reg);
+			}
 		}
 		else if constexpr (std::is_same_v<T, StackDestination>)
 		{
@@ -152,12 +199,60 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 	return GetSlotByKey(GetSlotKey(value));
 }
 
-Reg BasicSlotAllocator::GetAnyReg(std::optional<const IRGenerate::Value*> targetValue)
+void BasicSlotAllocator::FreeReg(const Reg& reg)
 {
+	for (auto& [key, slot] : m_slots)
+	{
+		if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == reg.name)
+		{
+			DeleteValueSlot(key);
+			break;
+		}
+	}
+}
+
+void BasicSlotAllocator::DeleteValueSlot(const String& slotKey)
+{
+	if (m_slots.find(slotKey) == m_slots.end()) return;
+	auto slot = m_slots[slotKey];
+
+	if (std::holds_alternative<Reg>(slot.storage))
+	{
+		m_handler.FreeRegHandler().operator()(std::get<Reg>(slot.storage));
+		for (size_t i = 0; i < m_regs.Size(); ++i)
+		{
+			if (m_regs[i].name == std::get<Reg>(slot.storage).name)
+			{
+				m_freeRegs.Push(i);
+			}
+		}
+	}
+
+	m_slots.erase(slotKey);
+}
+
+Reg BasicSlotAllocator::GetAnyReg(const IRGenerate::Value* targetValue)
+{
+	using namespace IRGenerate;
+
+	auto sizedType = TypeResolver::ResolveTypeSize(targetValue->Typ());
+
 	if (!m_freeRegs.Empty())
 	{
 		// TODO: Allocation Strategy
-		return m_regs[m_freeRegs[0]];
+		for (size_t i = 0; i < m_freeRegs.Size(); ++i)
+		{
+			auto reg = m_regs[m_freeRegs[i]];
+			if (reg.size == sizedType.size) {
+				Array<Uint8> newFreeRegs;
+				for (Uint8 j : m_freeRegs)
+				{
+					if (j != m_freeRegs[i]) newFreeRegs.Push(j);
+				}
+				m_freeRegs = newFreeRegs;
+				return reg;
+			}
+		}
 	}
 	// Search for slots with register taken
 	for (auto& [key, slot] : m_slots)
@@ -167,26 +262,38 @@ Reg BasicSlotAllocator::GetAnyReg(std::optional<const IRGenerate::Value*> target
 			return SpillReg(std::get<Reg>(slot.storage).name);
 		}
 	}
+
+	assert(false && "SHOULD BE UNREACHABLE");
+	return {};
 }
 
-Reg BasicSlotAllocator::GetSpecificReg(const String& regName, std::optional<const IRGenerate::Value*> targetValue)
+Reg BasicSlotAllocator::GetSpecificReg(const String& regName, const IRGenerate::Value* targetValue)
 {
-	Uint8* index = std::find_if(m_freeRegs.begin(), m_freeRegs.end(), [regName, this](Uint8 index) { return m_regs[index].name == regName; });
-	if (index)
+	if (ValueIsStored(targetValue))
 	{
-		return m_regs[*index];
+		auto &slot = GetSlotByKey(GetSlotKey(targetValue));
+		if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == regName) return std::get<Reg>(slot.storage);
 	}
-	else
+
+	for (Uint8 index : m_freeRegs)
 	{
-		for (auto& [key, slot] : m_slots)
+		if (m_regs[index].name == regName)
 		{
-			if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == regName)
-			{
-				return SpillReg(regName);
-			}
+			return m_regs[index];
 		}
 	}
+
+	// Register is occupied, search for value holding it and spill
+	for (auto& [key, slot] : m_slots)
+	{
+		if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == regName)
+		{
+			return SpillReg(regName);
+		}
+	}
+
 	assert(false && "SHOULD BE UNREACHABLE");
+	return {};
 }
 
 bool BasicSlotAllocator::ValueIsStored(const IRGenerate::Value* value)
@@ -229,7 +336,8 @@ StackSlot BasicSlotAllocator::GetNewStackSlotFromValue(const IRGenerate::Value* 
 
 StackSlot BasicSlotAllocator::GetNewStackSlotFromSize(Uint32 size)
 {
-	StackSlot slot = { m_nextOffset + size / 8, size / 8 };
+	m_nextOffset += size / 8;
+	StackSlot slot = { m_nextOffset, size / 8 };
 	m_handler.NewStackSlotHandler().operator()(slot);
 	return slot;
 }
