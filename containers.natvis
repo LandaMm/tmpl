@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <!-- ========================================================= -->
+    <!-- Array<Item, SizeT>                                        -->
+    <!-- ========================================================= -->
+
+    <Type Name="Array&lt;*,*&gt;">
+        <DisplayString>{{ size={m_size}, capacity={m_capacity} }}</DisplayString>
+
+        <Expand>
+            <Item Name="[size]">m_size</Item>
+            <Item Name="[capacity]">m_capacity</Item>
+
+            <ArrayItems>
+                <Size>m_size</Size>
+                <ValuePointer>m_data</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+
+    <!-- ========================================================= -->
+    <!-- BasicString<SizeT>                                        -->
+    <!-- ========================================================= -->
+
+    <Type Name="BasicString&lt;*&gt;">
+
+        <!-- Empty string -->
+        <DisplayString Condition="m_data.m_size == 0">""</DisplayString>
+
+        <!--
+            BasicString isn't null terminated, so explicitly tell
+            the debugger how many characters there are.
+        -->
+        <DisplayString Condition="m_data.m_size != 0">
+            {m_data.m_data,[m_data.m_size] s8}
+        </DisplayString>
+
+        <StringView Condition="m_data.m_size != 0">
+            m_data.m_data,[m_data.m_size] s8b
+        </StringView>
+
+        <Expand>
+            <Item Name="[size]">m_data.m_size</Item>
+            <Item Name="[capacity]">m_data.m_capacity</Item>
+
+            <ArrayItems>
+                <Size>m_data.m_size</Size>
+                <ValuePointer>m_data.m_data</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+</AutoVisualizer>
