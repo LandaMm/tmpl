@@ -385,6 +385,9 @@ namespace AST
                     case '"':
                         id->Extend('"');
                         break;
+                    case '0':
+                        id->Extend('\0');
+                        break;
                     default:
                     {
                         Prelude::ErrorManager& errManager = Prelude::ErrorManager::getInstance();
