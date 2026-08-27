@@ -6,17 +6,66 @@
 namespace Codegen
 {
 
-BasicSlotAllocator::BasicSlotAllocator(std::initializer_list<Reg> availableRegisters, AllocatorHandler handler)
-	: m_regs(availableRegisters), m_handler(handler)
+RegisterDistributor::RegisterDistributor(std::initializer_list<Reg> availableRegisters)
+	: m_regs(availableRegisters)
 {
 	for (Uint8 i = 0; i < m_regs.Size(); ++i) m_freeRegs.Push(i);
 }
 
-const Reg BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value, const std::optional<String>& regName)
+void RegisterDistributor::FreeReg(const Reg& reg)
+{
+	for (Uint8 i = 0; i < m_regs.Size(); ++i)
+	{
+		if (m_regs[i].name == reg.name)
+		{
+			m_freeRegs.Push(i);
+		}
+	}
+}
+
+void RegisterDistributor::TakeFreeReg(const Reg& reg)
+{
+	Array<Uint8> newFreeRegs;
+	for (Uint8 regIndex : m_freeRegs)
+	{
+		if (m_regs[regIndex].name != reg.name) newFreeRegs.Push(regIndex);
+	}
+	m_freeRegs = newFreeRegs;
+}
+
+std::optional<Reg> RegisterDistributor::GetFreeRegForType(const IRGenerate::Type* typ)
 {
 	using namespace IRGenerate;
 
-	Reg targetRegister = regName.has_value() ? GetSpecificReg(regName.value(), value) : GetAnyReg(value);
+	// TODO: Allocation Strategy
+	for (size_t i = 0; i < m_freeRegs.Size(); ++i)
+	{
+		auto reg = m_regs[m_freeRegs[i]];
+		if (RegSupportsType(reg, typ)) {
+			TakeFreeReg(reg);
+			return reg;
+		}
+	}
+
+	return std::nullopt;
+}
+
+bool RegisterDistributor::RegSupportsType(const Reg& reg, const IRGenerate::Type* typ)
+{
+	auto typeSize = IRGenerate::TypeResolver::ResolveTypeSize(typ);
+	return reg.size == typeSize.size;
+}
+
+BasicSlotAllocator::BasicSlotAllocator(RegisterDistributor* regDistro, AllocatorHandler* handler)
+	: m_regDistro(regDistro), m_handler(handler)
+{
+}
+
+const Reg BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value)
+{
+	using namespace IRGenerate;
+
+	Reg targetRegister = GetAnyReg(value);
 
 	RegDestination destination = RegDestination{ targetRegister };
 
@@ -81,18 +130,12 @@ Reg BasicSlotAllocator::SpillReg(const String& regName)
 			Reg moveReg = std::get<Reg>(slot.storage);
 
 			StackSlot newSlot = GetNewStackSlotFromSize(moveReg.size);
-			m_handler.SpillHandler().operator()(moveReg, newSlot);
+			m_handler->OnSpill(moveReg, newSlot);
 
 			InsertValueSlot(slot.value, newSlot, true);
 
 			// add register to freeRegs
-			for (Uint8 i = 0; i < m_regs.Size(); ++i)
-			{
-				if (m_regs[i].name == moveReg.name)
-				{
-					m_freeRegs.Push(i);
-				}
-			}
+			m_regDistro->FreeReg(moveReg);
 
 			return moveReg;
 		}
@@ -110,7 +153,7 @@ void BasicSlotAllocator::InsertValueSlot(const IRGenerate::Value* value, std::va
 		switch (value->Kind())
 		{
 		case ValueKind::IMMEDIATE:
-			m_handler.ImmediateStoreHandler().operator()(slotStorage, value->As<ImmediateValue>());
+			m_handler->OnImmediateStore(slotStorage, value->As<ImmediateValue>());
 			break;
 		}
 	}
@@ -129,10 +172,10 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 		if constexpr (std::is_same_v<T, AnyDestination>)
 		{
 			if (ValueIsStored(value)) return; // GetSlotByKey(GetSlotKey(value))
-			if (!m_freeRegs.Empty())
+			auto freeReg = m_regDistro->GetFreeRegForType(value->Typ());
+			if (freeReg)
 			{
-				InsertValueSlot(value, m_regs[m_freeRegs[0]]);
-				m_freeRegs.Shift();
+				InsertValueSlot(value, freeReg.value());
 			}
 			else
 			{
@@ -155,14 +198,14 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 					// the value IS in the register but not in the right one
 
 					// move from register to the register
-					m_handler.MoveHandler().operator()(slot.storage, dest.reg);
+					m_handler->OnMove(slot.storage, dest.reg);
 					FreeReg(std::get<Reg>(slot.storage));
 					InsertValueSlot(value, dest.reg);
 				}
 				else
 				{
 					// 'unspill' (moving from stack into the register
-					m_handler.MoveHandler().operator()(slot.storage, dest.reg);
+					m_handler->OnMove(slot.storage, dest.reg);
 					// here temp is already stored but as stack
 					InsertValueSlot(value, dest.reg, true);
 				}
@@ -218,14 +261,8 @@ void BasicSlotAllocator::DeleteValueSlot(const String& slotKey)
 
 	if (std::holds_alternative<Reg>(slot.storage))
 	{
-		m_handler.FreeRegHandler().operator()(std::get<Reg>(slot.storage));
-		for (size_t i = 0; i < m_regs.Size(); ++i)
-		{
-			if (m_regs[i].name == std::get<Reg>(slot.storage).name)
-			{
-				m_freeRegs.Push(i);
-			}
-		}
+		m_handler->OnFreeReg(std::get<Reg>(slot.storage));
+		m_regDistro->FreeReg(std::get<Reg>(slot.storage));
 	}
 
 	m_slots.erase(slotKey);
@@ -235,29 +272,16 @@ Reg BasicSlotAllocator::GetAnyReg(const IRGenerate::Value* targetValue)
 {
 	using namespace IRGenerate;
 
-	auto sizedType = TypeResolver::ResolveTypeSize(targetValue->Typ());
-
-	if (!m_freeRegs.Empty())
+	auto freeReg = m_regDistro->GetFreeRegForType(targetValue->Typ());
+	if (freeReg)
 	{
-		// TODO: Allocation Strategy
-		for (size_t i = 0; i < m_freeRegs.Size(); ++i)
-		{
-			auto reg = m_regs[m_freeRegs[i]];
-			if (reg.size == sizedType.size) {
-				Array<Uint8> newFreeRegs;
-				for (Uint8 j : m_freeRegs)
-				{
-					if (j != m_freeRegs[i]) newFreeRegs.Push(j);
-				}
-				m_freeRegs = newFreeRegs;
-				return reg;
-			}
-		}
+		return freeReg.value();
 	}
+
 	// Search for slots with register taken
 	for (auto& [key, slot] : m_slots)
 	{
-		if (std::holds_alternative<Reg>(slot.storage))
+		if (std::holds_alternative<Reg>(slot.storage) && m_regDistro->RegSupportsType(std::get<Reg>(slot.storage), targetValue->Typ()))
 		{
 			return SpillReg(std::get<Reg>(slot.storage).name);
 		}
@@ -267,6 +291,7 @@ Reg BasicSlotAllocator::GetAnyReg(const IRGenerate::Value* targetValue)
 	return {};
 }
 
+/*
 Reg BasicSlotAllocator::GetSpecificReg(const String& regName, const IRGenerate::Value* targetValue)
 {
 	if (ValueIsStored(targetValue))
@@ -275,26 +300,17 @@ Reg BasicSlotAllocator::GetSpecificReg(const String& regName, const IRGenerate::
 		if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == regName) return std::get<Reg>(slot.storage);
 	}
 
-	for (Uint8 index : m_freeRegs)
+	auto reg = m_regDistro->GetFreeRegForType(targe;
+	if (reg.has_value())
 	{
-		if (m_regs[index].name == regName)
-		{
-			return m_regs[index];
-		}
+		m_regDistro->TakeFreeReg(reg.value());
+		return reg.value();
 	}
 
 	// Register is occupied, search for value holding it and spill
-	for (auto& [key, slot] : m_slots)
-	{
-		if (std::holds_alternative<Reg>(slot.storage) && std::get<Reg>(slot.storage).name == regName)
-		{
-			return SpillReg(regName);
-		}
-	}
-
-	assert(false && "SHOULD BE UNREACHABLE");
-	return {};
+	return SpillReg(regName);
 }
+*/
 
 bool BasicSlotAllocator::ValueIsStored(const IRGenerate::Value* value)
 {
@@ -338,7 +354,7 @@ StackSlot BasicSlotAllocator::GetNewStackSlotFromSize(Uint32 size)
 {
 	m_nextOffset += size / 8;
 	StackSlot slot = { m_nextOffset, size / 8 };
-	m_handler.NewStackSlotHandler().operator()(slot);
+	m_handler->OnNewStackSlot(slot);
 	return slot;
 }
 

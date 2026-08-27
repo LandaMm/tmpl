@@ -6,25 +6,35 @@
 namespace Codegen
 {
 
-Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
-		: m_ir(ir), m_output(output)
+class GeneratorAllocatorHandler : public AllocatorHandler
 {
-	using namespace IRGenerate;
-	AllocatorHandler handler;
-	handler.OnNewStackSlot([this](const StackSlot& slot) {
+public:
+	GeneratorAllocatorHandler(FileStreamWriter* output) : m_output(output) { }
+private:
+	void Write(const String& what)
+	{
+		m_output->Write(what);
+	}
+
+	void WriteLn(const String& what)
+	{
+		m_output->Write(what + "\n");
+	}
+public:
+	void OnNewStackSlot(const StackSlot& slot) override {
 		WriteLn("\t;; new stack slot");
 		WriteLn(std::format("\tsub rsp, {}", slot.size));
-	});
-	handler.OnSpill([this](const Reg& from, const StackSlot& to) {
+	}
+	void OnSpill(const Reg& from, const StackSlot& to) override {
 		WriteLn("\t;; register spill");
 		WriteLn(std::format("\tmov [rbp-{}], {}", to.offset, from.name.c_str()));
 		WriteLn(std::format("\txor {}, {}", from.name.c_str(), from.name.c_str()));
-	});
-	handler.OnFreeReg([this](const Reg& reg) {
+	}
+	void OnFreeReg(const Reg& reg) override {
 		WriteLn(std::format("\t;; free {} reg", reg.name.c_str()));
 		WriteLn(std::format("\txor {}, {}", reg.name.c_str(), reg.name.c_str()));
-	});
-	handler.OnMove([this](const std::variant<Reg, StackSlot>& from, const std::variant<Reg, StackSlot>& to) {
+	}
+	void OnMove(const std::variant<Reg, StackSlot>& from, const std::variant<Reg, StackSlot>& to) override {
 		WriteLn("\t;; moving");
 		Write("\tmov ");
 		if (std::holds_alternative<Reg>(to))
@@ -45,8 +55,8 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 			Write(std::format("[rbp-{}]", std::get<StackSlot>(from).offset));
 		}
 		WriteLn("");
-	});
-	handler.OnImmediateStore([this](const std::variant<Reg, StackSlot>& to, const ImmediateValue* value) {
+	}
+	void OnImmediateStore(const std::variant<Reg, StackSlot>& to, const IRGenerate::ImmediateValue* value) override {
 		WriteLn("\t;; immediate store");
 		if (std::holds_alternative<Reg>(to))
 		{
@@ -58,9 +68,18 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 			auto& stack = std::get<StackSlot>(to);
 			WriteLn(std::format("\tmov [rbp-{}], {}", stack.offset, value->ImmValue()));
 		}
-	});
+	}
+private:
+	FileStreamWriter* m_output;
+};
 
-	m_allocator = new BasicSlotAllocator({
+Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
+		: m_ir(ir), m_output(output)
+{
+	using namespace IRGenerate;
+
+	GeneratorAllocatorHandler* handler = new GeneratorAllocatorHandler(m_output);
+	RegisterDistributor* distributor = new RegisterDistributor({
 		Reg{"al", 8},
 		Reg{"ax", 16},
 		Reg{"eax", 32},
@@ -85,7 +104,9 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 		Reg{"r8w", 16},
 		Reg{"r8d", 32},
 		Reg{"r8", 64},
-	}, handler);
+	});
+
+	m_allocator = new BasicSlotAllocator(distributor, handler);
 }
 
 void Generator::Generate()
@@ -164,13 +185,15 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 		{
 			auto call = instr->As<CallInstr>();
 			assert(call->Args().Size() <= 4 && "only up to 4 arguments are supported for function call");
-			Array<String> parameterRegs = { "ecx", "edx", "r8d", "r9d" };
+			// Array<String> parameterRegs = { "ecx", "edx", "r8d", "r9d" };
+			Array<String> parameterRegs = { "rcx", "edx", "r8d", "r9d" };
 			Array<Reg> argRegs;
 			WriteLn("\t;; funcall");
 			WriteLn("\t;; arguments");
 			for (size_t i = 0; i < call->Args().Size(); ++i)
 			{
-				argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i], parameterRegs[i]));
+				// FIXME: load arguments into specific registers following the calling convention
+				argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i]));
 			}
 
 			WriteLn("\t;; call");
@@ -193,6 +216,35 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			Reg dstReg = m_allocator->LoadValueInReg(load->Dest());
 			WriteLn("\t;; load");
 			WriteLn(std::format("\tmov {}, [rbp-{}]", dstReg.name.c_str(), srcSlot.offset));
+		}
+		break;
+	case InstrOp::PTR:
+		{
+			auto ptr = instr->As<PtrInstr>();
+			WriteLn("\t;; ptr");
+			const Value* src = ptr->Src();
+			Reg dstReg = m_allocator->LoadValueInReg(ptr->Dest());
+			switch (src->Kind())
+			{
+			case ValueKind::GLOBAL:
+			{
+				auto global = src->As<GlobalValue>();
+				WriteLn(std::format("\tlea {}, [rel {}]", dstReg.name.c_str(), global->Name().c_str()));
+			}
+			break;
+			case ValueKind::LOCAL:
+			{
+				auto local = src->As<LocalValue>();
+				StackSlot slot = m_allocator->GetLocal(local);
+				WriteLn(std::format("\tlea {}, [rbp-{}]", dstReg.name.c_str(), slot.offset));
+			}
+			break;
+			case ValueKind::UNKNOWN:
+			default:
+				// TODO: better error
+				assert(false && "unsupported value kind for address loading");
+				break;
+			}
 		}
 		break;
 	case InstrOp::NONE:
@@ -234,7 +286,8 @@ void Generator::GenerateData()
 			case ValueKind::GLOBAL:
 			{
 				auto global = value->As<GlobalValue>();
-				WriteLn("");
+				WriteLn(std::format("equ {}", global->Name().c_str()));
+				/**
 				const Array<Byte>& data = global->Data();
 				for (size_t i = 0; i < data.Size() - step + 1; i+=step)
 				{
@@ -247,6 +300,7 @@ void Generator::GenerateData()
 					}
 					WriteLn("");
 				}
+				*/
 			}
 			break;
 			case ValueKind::UNKNOWN:
@@ -256,6 +310,18 @@ void Generator::GenerateData()
 			}
 
 			WriteLn("");
+		}
+	}
+
+	for (auto& [_, stringLiteral] : m_ir->StringLiterals())
+	{
+		Write(std::format("@str.{}: db ", stringLiteral.id));
+
+		for (size_t i = 0; i < stringLiteral.data.Size(); ++i)
+		{
+			char byte = stringLiteral.data.Data()[i];
+			if (i > 0) Write(", ");
+			Write(std::format("{:#04x}", byte));
 		}
 	}
 }

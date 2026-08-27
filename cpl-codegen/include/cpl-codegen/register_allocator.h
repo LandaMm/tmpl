@@ -50,55 +50,36 @@ class BasicSlotAllocator;
 
 class AllocatorHandler
 {
-	using NewStackSlotFn = std::function<void(const StackSlot&)>;
-	using SpillFn = std::function<void(const Reg&, const StackSlot&)>;
-	using MoveFn = std::function<void(const std::variant<Reg, StackSlot>&, const std::variant<Reg, StackSlot>&)>;
-	using ImmediateStoreFn = std::function<void(const std::variant<Reg, StackSlot>&, const IRGenerate::ImmediateValue*)>;
-	using FreeRegFn = std::function<void(const Reg&)>;
 public:
-	AllocatorHandler() = default;
 	virtual ~AllocatorHandler() = default;
 public:
-	void OnNewStackSlot(NewStackSlotFn handler)
-	{
-		m_newStackSlotHandler = handler;
-	}
-	void OnSpill(SpillFn handler)
-	{
-		m_spillHandler = handler;
-	}
-	void OnImmediateStore(ImmediateStoreFn handler)
-	{
-		m_immediateStoreHandler = handler;
-	}
-	void OnMove(MoveFn handler)
-	{
-		m_moveRegHandler = handler;
-	}
-	void OnFreeReg(FreeRegFn handler)
-	{
-		m_freeRegHandler = handler;
-	}
-private:
-	friend class BasicSlotAllocator;
-	[[nodiscard]] inline const NewStackSlotFn& NewStackSlotHandler() const noexcept { return m_newStackSlotHandler; }
-	[[nodiscard]] inline const SpillFn& SpillHandler() const noexcept { return m_spillHandler; }
-	[[nodiscard]] inline const MoveFn& MoveHandler() const noexcept { return m_moveRegHandler; }
-	[[nodiscard]] inline const ImmediateStoreFn& ImmediateStoreHandler() const noexcept { return m_immediateStoreHandler; }
-	[[nodiscard]] inline const FreeRegFn& FreeRegHandler() const noexcept { return m_freeRegHandler; }
+	virtual void OnNewStackSlot(const StackSlot&) = 0;
+	virtual void OnSpill(const Reg&, const StackSlot&) = 0;
+	virtual void OnImmediateStore(const std::variant<Reg, StackSlot>&, const IRGenerate::ImmediateValue*) = 0;
+	virtual void OnMove(const std::variant<Reg, StackSlot>&, const std::variant<Reg, StackSlot>&) = 0;
+	virtual void OnFreeReg(const Reg&) = 0;
+};
 
+class RegisterDistributor
+{
+public:
+	RegisterDistributor(std::initializer_list<Reg> availableRegisters);
+public:
+	void FreeReg(const Reg& reg);
+	// automatically 'takes' the register if any was found
+	std::optional<Reg> GetFreeRegForType(const IRGenerate::Type* typ);
+	bool RegSupportsType(const Reg& reg, const IRGenerate::Type* typ);
+private:	
+	void TakeFreeReg(const Reg& reg);
 private:
-	NewStackSlotFn m_newStackSlotHandler;
-	SpillFn m_spillHandler;
-	ImmediateStoreFn m_immediateStoreHandler;
-	MoveFn m_moveRegHandler;
-	FreeRegFn m_freeRegHandler;
+	Array<Reg> m_regs;
+	Array<Uint8> m_freeRegs;
 };
 
 class BasicSlotAllocator
 {
 public:
-	BasicSlotAllocator(std::initializer_list<Reg> availableRegisters, AllocatorHandler handler);
+	BasicSlotAllocator(RegisterDistributor* regDistro, AllocatorHandler* handler);
 	virtual ~BasicSlotAllocator() = default;
 
 public: // LocalValue
@@ -106,7 +87,7 @@ public: // LocalValue
 	const StackSlot GetLocal(const IRGenerate::LocalValue* local);
 
 public:
-	const Reg LoadValueInReg(const IRGenerate::Value* value, const std::optional<String>& regName = std::nullopt);
+	const Reg LoadValueInReg(const IRGenerate::Value* value);
 	const Slot& StoreOrUpdateValue(const IRGenerate::Value* value, StoreDestination dest = AnyDestination{});
 	void FreeReg(const Reg& reg);
 
@@ -125,9 +106,8 @@ private:
 	void DeleteValueSlot(const String& slotKey);
 
 private:
-	AllocatorHandler m_handler;
-	Array<Reg> m_regs;
-	Array<Uint8> m_freeRegs;
+	RegisterDistributor* m_regDistro = nullptr;
+	AllocatorHandler* m_handler = nullptr;
 
 	std::map<String, Slot> m_slots;
 
