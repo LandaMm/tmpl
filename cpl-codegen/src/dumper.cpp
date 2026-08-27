@@ -211,6 +211,15 @@ void dump_instr(const IRGenerate::Instr* instr)
 		dump_value(loadInstr->Src());
 		break;
 	}
+	case InstrOp::PTR:
+	{
+		auto ptrInstr = dynamic_cast<const PtrInstr*>(instr);
+		assert(ptrInstr);
+		dump_type_name(ptrInstr->Typ());
+		std::cout << " ptr ";
+		dump_value(ptrInstr->Src());
+		break;
+	}
 	case InstrOp::NONE:
 	default:
 		std::cout << "#none_instr";

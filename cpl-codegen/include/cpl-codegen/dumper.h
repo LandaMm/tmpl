@@ -4,6 +4,7 @@
 #include <cpl-ir/instr/alloca.hpp>
 #include <cpl-ir/instr/store.hpp>
 #include <cpl-ir/instr/load.hpp>
+#include <cpl-ir/instr/ptr.hpp>
 #include <cpl-ir/ir.h>
 
 void dump_type_name(const IRGenerate::Type* typ);
