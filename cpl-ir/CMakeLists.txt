@@ -22,11 +22,13 @@ add_library(cpl-ir
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/value.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/function.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/scope.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/string.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/call.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/alloca.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/store.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/load.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/ptr.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/block.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/ir.h"
 )

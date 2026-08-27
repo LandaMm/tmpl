@@ -14,6 +14,9 @@ struct TypeLayout
 	Uint32 size, align;
 };
 
+// TODO: FIXME: pointer size depending on the target system arch
+constexpr TypeLayout POINTER_SIZE = {64, 64};
+
 enum class TypeClass
 {
 	UNKNOWN = 0,
@@ -162,17 +165,20 @@ public:
  
 		if (lhs->TypClass() == rhs->TypClass() && lhs->TypClass() == TypeClass::INTEGER)
 		{
-			// assuming that all integer types are sized,
-			// which makes sense.
-			auto lhsSized = dynamic_cast<const SizedType*>(lhs);
-			auto rhsSized = dynamic_cast<const SizedType*>(rhs);
-			assert(lhsSized && rhsSized);
-			if (lhsSized->Layout().size != rhsSized->Layout().size)
+			auto lhsLayout = ResolveTypeSize(lhs);
+			auto rhsLayout = ResolveTypeSize(rhs);
+			if (lhsLayout.size != rhsLayout.size)
 			{
 				// TODO: better error (warning)
 				std::cerr << "[WARNING] possible loss of integer data" << std::endl;
 			}
 			return true;
+		}
+
+		// example: *TYPE == *TYPE
+		if (lhs->TypClass() == rhs->TypClass() && lhs->TypClass() == TypeClass::POINTER)
+		{
+			return Identical(lhs->As<PointerType>()->UnderlyingType(), rhs->As<PointerType>()->UnderlyingType());
 		}
 
 		// example: *TYPE == [n x TYPE]
@@ -207,7 +213,7 @@ public:
 	static TypeLayout ResolveTypeSize(const Type* typ) noexcept
 	{
 		if (typ->TypClass() == TypeClass::POINTER)
-			return ResolveTypeSize(typ->As<PointerType>()->UnderlyingType());
+			return POINTER_SIZE;
 
 		if (typ->TypClass() == TypeClass::ALIAS)
 			return ResolveTypeSize(typ->As<AliasType>()->OriginType());

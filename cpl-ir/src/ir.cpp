@@ -1,5 +1,6 @@
 #include "cpl-ir/ir.h"
 
+#include <format>
 #include <iostream>
 
 #include <cpl-parser/node/function.hpp>
@@ -10,6 +11,7 @@
 #include "cpl-ir/instr/alloca.hpp"
 #include "cpl-ir/instr/store.hpp"
 #include "cpl-ir/instr/load.hpp"
+#include "cpl-ir/instr/ptr.hpp"
 
 namespace IRGenerate
 {
@@ -17,7 +19,9 @@ namespace IRGenerate
 IR::IR(Nodes::ProgramNode* root)
 	: m_rootNode(root) { }
 
-const std::map<String, Symbol*> IR::Symbols() const noexcept { return m_symbols; }
+const std::map<String, Symbol*>& IR::Symbols() const noexcept { return m_symbols; }
+
+const std::map<String, StringLiteral>& IR::StringLiterals() const noexcept { return m_stringLiterals; }
 
 void IR::GenerateIR()
 {
@@ -36,6 +40,8 @@ void IR::GenerateIR()
 	CurrentScope()->AddType("i128", m_arena.Alloc<IntegerType>("i128", TypeLayout{128, 128}));
 
 	/////////////////////////////////////
+
+	StartBlock(m_arena.Alloc<BasicBlock>());
 
 	for (size_t i = 0; i < m_rootNode->Size(); ++i)
 	{
@@ -66,6 +72,8 @@ void IR::GenerateIR()
 		}
 	}
 
+	EndBlock();
+
 	// Safe Guarding
 	// 1. Make sure no pending block exists
 	assert(m_blocks.empty());
@@ -86,12 +94,12 @@ const Value* IR::EvaluateNode(Node* node)
 		case LiteralType::STRING:
 		{
 			const String* str = literal->GetValue<String>();
-			Array<Byte> data(str->Size());
-			data.ResizeUninitialized(str->Size());
-			std::memcpy(data.Data(), str->Data(), sizeof(char) * str->Size());
-			const Type* CharType = FindType("i8");
-			assert(CharType);
-			return m_arena.Alloc<GlobalValue>(std::move(data), m_arena.Alloc<VectorType>(CharType, str->Size()));
+			// TODO: think of better way of finding and resolving item type of string
+			const Type* charType = FindType("i8");
+			const Type* ptrType = m_arena.Alloc<PointerType>(charType);
+			auto dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), ptrType);
+			PushInstr(m_arena.Alloc<PtrInstr>(dst, m_arena.Alloc<GlobalValue>(CreateStringLiteral(*str), ptrType), ptrType));
+			return dst;
 		}
 		case LiteralType::INT:
 		{
@@ -334,6 +342,17 @@ const Type* IR::ParseType(Nodes::Type* typ)
 
 	assert(false && "UNREACHABLE");
 	return nullptr;
+}
+
+String IR::CreateStringLiteral(const String& str)
+{
+	if (m_stringLiterals.find(str) != m_stringLiterals.end()) return std::format("@str.{}", m_stringLiterals.at(str).id);
+
+	StringLiteralId stringId = m_stringCounter++;
+
+	m_stringLiterals.insert({ str, StringLiteral{str, stringId} });
+
+	return std::format("@str.{}", stringId);
 }
 
 void IR::StartBlock(BasicBlock* block)

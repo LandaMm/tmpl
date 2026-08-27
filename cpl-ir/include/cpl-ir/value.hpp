@@ -10,8 +10,8 @@ namespace IRGenerate
 enum class ValueKind
 {
 	UNKNOWN = 0,
-	GLOBAL,
 	LOCAL,
+	GLOBAL,
 	TEMPORAL,
 	IMMEDIATE,
 	COUNT_VALUE_TYPES,
@@ -47,22 +47,22 @@ private:
 	const Type* m_typ;
 };
 
-class GlobalValue : public Value
-{
-public:
-	GlobalValue(Array<Byte>&& data, const Type* typ)
-		: m_data(data), Value(ValueKind::GLOBAL, typ) { }
-public:
-	inline const Array<Byte>& Data() const noexcept { return m_data; }
-private:
-	Array<Byte> m_data;
-};
-
 class LocalValue : public Value
 {
 public:
 	LocalValue(const String& name, const Type* typ)
 		: m_name(name), Value(ValueKind::LOCAL, typ) {}
+public:
+	inline const String& Name() const noexcept { return m_name; }
+private:
+	String m_name;
+};
+
+class GlobalValue : public Value
+{
+public:
+	GlobalValue(const String& name, const Type* typ)
+		: m_name(name), Value(ValueKind::GLOBAL, typ) {}
 public:
 	inline const String& Name() const noexcept { return m_name; }
 private:

@@ -14,6 +14,7 @@ enum class InstrOp
 	ALLOCA,
 	STORE,
 	LOAD,
+	PTR,
 	COUNT_INSTR_OPS,
 };
 

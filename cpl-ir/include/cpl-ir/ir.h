@@ -18,6 +18,7 @@
 #include "instr.h"
 #include "block.h"
 #include "scope.hpp"
+#include "string.hpp"
 
 #include "cplbuild.h"
 
@@ -38,7 +39,8 @@ public:
 public:
 	void GenerateIR();
 public:
-	const std::map<String, Symbol*> Symbols() const noexcept;
+	const std::map<String, Symbol*>& Symbols() const noexcept;
+	const std::map<String, StringLiteral>& StringLiterals() const noexcept;
 	inline const std::deque<Scope*>& Scopes() const noexcept { return m_scopes; }
 private:
 	const Value* EvaluateNode(Node* node);
@@ -47,6 +49,7 @@ private:
 	void GenerateTypeDeclaration(Nodes::TypeDeclaration* typ);
 private:
 	const Type* ParseType(Nodes::Type* typ);
+	String CreateStringLiteral(const String& str);
 private:
 	[[nodiscard]] inline Scope* CurrentScope() const noexcept { assert(!m_scopes.empty()); return m_scopes.front(); };
 	void InsertScope(Scope* newScope);
@@ -57,7 +60,11 @@ private:
 	const LocalValue* FindLocal(const String& name) const noexcept;
 	const Type* FindType(const String& name) const noexcept;
 private:
-	[[nodiscard]] inline BasicBlock* CurrentBlock() const noexcept { return m_blocks.front(); }
+	[[nodiscard]] inline BasicBlock* CurrentBlock() const noexcept {
+		if (m_blocks.empty())
+			return nullptr;
+		return m_blocks.front();
+	}
 	inline TempValueID BlockNextTempValueId() const noexcept
 	{
 		// TODO: better error
@@ -70,12 +77,15 @@ private:
 private:
 	ArenaAllocator<> m_arena;
 	Nodes::ProgramNode* m_rootNode;
+
 	std::map<String, Symbol*> m_symbols;
+	std::map<String, StringLiteral> m_stringLiterals;
 
 	std::deque<Scope*> m_scopes;
 	std::deque<BasicBlock*> m_blocks;
 
 	TempValueID m_tempValueCounter = 0;
+	StringLiteralId m_stringCounter = 0;
 };
 
 } // namespace IRGenerate
