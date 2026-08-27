@@ -52,6 +52,9 @@ int main(int argc, char **argv)
         generator->Generate();
     }
 
+	system("nasm -f win64 -g out/output.s -o out/output.obj");
+	system("gcc -o out/output.exe out/output.obj");
+
     delete parser;
 
     // std::string procName = cliRunner.GetProcedureName();
