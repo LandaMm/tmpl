@@ -3,7 +3,9 @@ int :: i32;
 char :: i8;
 bool :: i1;
 
+STDIN_FILENO : i32 = 0;
 STDOUT_FILENO : i32 = 1;
+STDERR_FILENO : i32 = 2;
 
 write :: (fd: i32, buf: *char, count: u32) -> i32 #foreign;
 strlen :: (str: *char) -> i32 #foreign;

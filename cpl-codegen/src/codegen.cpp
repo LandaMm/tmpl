@@ -25,30 +25,30 @@ public:
 		WriteLn("\t;; new stack slot");
 		WriteLn(std::format("\tsub rsp, {}", slot.size));
 	}
-	void OnSpill(const Reg& from, const StackSlot& to) override {
+	void OnSpill(const RegSlot& from, const StackSlot& to) override {
 		WriteLn("\t;; register spill");
 		WriteLn(std::format("\tmov [rbp-{}], {}", to.offset, from.name.c_str()));
 		WriteLn(std::format("\txor {}, {}", from.name.c_str(), from.name.c_str()));
 	}
-	void OnFreeReg(const Reg& reg) override {
+	void OnFreeReg(const RegSlot& reg) override {
 		WriteLn(std::format("\t;; free {} reg", reg.name.c_str()));
 		WriteLn(std::format("\txor {}, {}", reg.name.c_str(), reg.name.c_str()));
 	}
-	void OnMove(const std::variant<Reg, StackSlot>& from, const std::variant<Reg, StackSlot>& to) override {
+	void OnMove(const std::variant<RegSlot, StackSlot>& from, const std::variant<RegSlot, StackSlot>& to) override {
 		WriteLn("\t;; moving");
 		Write("\tmov ");
-		if (std::holds_alternative<Reg>(to))
+		if (std::holds_alternative<RegSlot>(to))
 		{
-			Write(std::get<Reg>(to).name.c_str());
+			Write(std::get<RegSlot>(to).name.c_str());
 		}
 		else
 		{
 			Write(std::format("[rbp-{}]", std::get<StackSlot>(to).offset));
 		}
 		Write(", ");
-		if (std::holds_alternative<Reg>(from))
+		if (std::holds_alternative<RegSlot>(from))
 		{
-			Write(std::get<Reg>(from).name.c_str());
+			Write(std::get<RegSlot>(from).name.c_str());
 		}
 		else
 		{
@@ -56,11 +56,11 @@ public:
 		}
 		WriteLn("");
 	}
-	void OnImmediateStore(const std::variant<Reg, StackSlot>& to, const IRGenerate::ImmediateValue* value) override {
+	void OnImmediateStore(const std::variant<RegSlot, StackSlot>& to, const IRGenerate::ImmediateValue* value) override {
 		WriteLn("\t;; immediate store");
-		if (std::holds_alternative<Reg>(to))
+		if (std::holds_alternative<RegSlot>(to))
 		{
-			auto& reg = std::get<Reg>(to);
+			auto& reg = std::get<RegSlot>(to);
 			WriteLn(std::format("\tmov {}, {}", reg.name.c_str(), value->ImmValue()));
 		}
 		else // StackSlot
@@ -80,30 +80,55 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 
 	GeneratorAllocatorHandler* handler = new GeneratorAllocatorHandler(m_output);
 	RegisterDistributor* distributor = new RegisterDistributor({
-		Reg{"al", 8},
-		Reg{"ax", 16},
-		Reg{"eax", 32},
-		Reg{"rax", 64},
+		RegGroup{
+			"RAX",
+			{
+				Reg{"al", 8},
+				Reg{"ax", 16},
+				Reg{"eax", 32},
+				Reg{"rax", 64},
+			}
+		},
 
-		Reg{"cl", 8},
-		Reg{"cx", 16},
-		Reg{"ecx", 32},
-		Reg{"rcx", 64},
+		RegGroup{
+			"RCX",
+			{
+				Reg{"cl", 8},
+				Reg{"cx", 16},
+				Reg{"ecx", 32},
+				Reg{"rcx", 64},
+			}
+		},
 
-		Reg{"dh", 8},
-		Reg{"dx", 16},
-		Reg{"edx", 32},
-		Reg{"rdx", 64},
+		RegGroup{
+			"RDX",
+			{
+				Reg{"dh", 8},
+				Reg{"dx", 16},
+				Reg{"edx", 32},
+				Reg{"rdx", 64},
+			}
+		},
 
-		Reg{"r9b", 8},
-		Reg{"r9w", 16},
-		Reg{"r9d", 32},
-		Reg{"r9", 64},
+		RegGroup{
+			"R9",
+			{
+				Reg{"r9b", 8},
+				Reg{"r9w", 16},
+				Reg{"r9d", 32},
+				Reg{"r9", 64},
+			}
+		},
 
-		Reg{"r8b", 8},
-		Reg{"r8w", 16},
-		Reg{"r8d", 32},
-		Reg{"r8", 64},
+		RegGroup{
+			"R8",
+			{
+				Reg{"r8b", 8},
+				Reg{"r8w", 16},
+				Reg{"r8d", 32},
+				Reg{"r8", 64},
+			}
+		},
 	});
 
 	m_allocator = new BasicSlotAllocator(distributor, handler);
@@ -133,6 +158,34 @@ void Generator::Generate()
 		WriteLn(std::format("{}:", function->Name().c_str()));
 		WriteLn("\tpush rbp");
 		WriteLn("\tmov rbp, rsp");
+
+		m_allocator->ResetState();
+
+		// Stack-Alignment (16 bytes for Windows)
+		{
+			// return address + old stack frame (8 + 8) = 16 % 16 = 0
+			Uint32 bytesAllocated = 0;
+			for (const auto& instr : function->Body()->Body())
+			{
+				if (const AllocaInstr* alloca = instr->As<AllocaInstr>())
+				{
+					auto typeSize = TypeResolver::ResolveTypeSize(alloca->Typ());
+					bytesAllocated += typeSize.size / 8;
+				}
+				/*
+				else if (const CallInstr* call = instr->As<CallInstr>())
+				{
+					auto typeSize = TypeResolver::ResolveTypeSize(call->RetType());
+					bytesAllocated += typeSize.size / 8;
+				}
+				*/
+			}
+			Uint32 additionalBytes = bytesAllocated < 16 ? 16 - bytesAllocated : bytesAllocated % 16;
+			if (additionalBytes > 0)
+			{
+				m_allocator->GetNewStackSlotFromSize(additionalBytes * 8);
+			}
+		}
 
 		GenerateBasicBlock(function->Body());
 
@@ -175,7 +228,8 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			const LocalValue* dest = store->Dest()->As<LocalValue>();
 			assert(dest);
 			const StackSlot& slot = m_allocator->GetLocal(dest);
-			const Reg& src = m_allocator->LoadValueInReg(store->Src());
+			const RegSlot& src = m_allocator->LoadValueInReg(store->Src());
+			if (src.groupName.Empty()) assert(false);
 			WriteLn("\t;; store");
 			WriteLn(std::format("\tmov [rbp-{}], {}", slot.offset, src.name.c_str()));
 			m_allocator->FreeReg(src);
@@ -186,18 +240,23 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto call = instr->As<CallInstr>();
 			assert(call->Args().Size() <= 4 && "only up to 4 arguments are supported for function call");
 			// Array<String> parameterRegs = { "ecx", "edx", "r8d", "r9d" };
-			Array<String> parameterRegs = { "rcx", "edx", "r8d", "r9d" };
-			Array<Reg> argRegs;
+			Array<String> parameterRegs = { "RCX", "RDX", "R8", "R9" };
+			Array<RegSlot> argRegs;
 			WriteLn("\t;; funcall");
 			WriteLn("\t;; arguments");
+			// Windows 4 x 8-byte shadow space
 			for (size_t i = 0; i < call->Args().Size(); ++i)
 			{
-				// FIXME: load arguments into specific registers following the calling convention
-				argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i]));
+				argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i], parameterRegs[i]));
 			}
+
+			m_allocator->GetNewStackSlotFromSize(32 * 8);
 
 			WriteLn("\t;; call");
 			WriteLn(std::format("\tcall {}", call->CallSymbol()->Name().c_str()));
+
+			m_allocator->SetExplicitOffset(m_allocator->GetStackOffset() - 32);
+			WriteLn("\tadd rsp, 32");
 
 			// free argument registers
 			for (auto &reg : argRegs)
@@ -213,7 +272,7 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto src = load->Src()->As<LocalValue>();
 			assert(src);
 			StackSlot srcSlot = m_allocator->GetLocal(src);
-			Reg dstReg = m_allocator->LoadValueInReg(load->Dest());
+			RegSlot dstReg = m_allocator->LoadValueInReg(load->Dest());
 			WriteLn("\t;; load");
 			WriteLn(std::format("\tmov {}, [rbp-{}]", dstReg.name.c_str(), srcSlot.offset));
 		}
@@ -223,7 +282,7 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto ptr = instr->As<PtrInstr>();
 			WriteLn("\t;; ptr");
 			const Value* src = ptr->Src();
-			Reg dstReg = m_allocator->LoadValueInReg(ptr->Dest());
+			RegSlot dstReg = m_allocator->LoadValueInReg(ptr->Dest());
 			switch (src->Kind())
 			{
 			case ValueKind::GLOBAL:
@@ -323,6 +382,8 @@ void Generator::GenerateData()
 			if (i > 0) Write(", ");
 			Write(std::format("{:#04x}", byte));
 		}
+
+		WriteLn("");
 	}
 }
 

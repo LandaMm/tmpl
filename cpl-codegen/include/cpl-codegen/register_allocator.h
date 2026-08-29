@@ -19,6 +19,15 @@ struct Reg
 	Uint32 size = 0;
 };
 
+struct RegSlot : public Reg
+{
+	String groupName;
+	
+	RegSlot(Reg reg, const String& group)
+		: Reg(reg), groupName(group) {}
+	RegSlot() = default;
+};
+
 struct StackSlot
 {
 	Uint32 offset;
@@ -27,7 +36,7 @@ struct StackSlot
 
 struct Slot
 {
-	std::variant<Reg, StackSlot> storage;
+	std::variant<RegSlot, StackSlot> storage;
 	const IRGenerate::Value* value;
 };
 
@@ -36,7 +45,7 @@ struct AnyDestination {};
 
 struct RegDestination
 {
-	Reg reg;
+	RegSlot reg;
 };
 
 struct StackDestination
@@ -54,26 +63,37 @@ public:
 	virtual ~AllocatorHandler() = default;
 public:
 	virtual void OnNewStackSlot(const StackSlot&) = 0;
-	virtual void OnSpill(const Reg&, const StackSlot&) = 0;
-	virtual void OnImmediateStore(const std::variant<Reg, StackSlot>&, const IRGenerate::ImmediateValue*) = 0;
-	virtual void OnMove(const std::variant<Reg, StackSlot>&, const std::variant<Reg, StackSlot>&) = 0;
-	virtual void OnFreeReg(const Reg&) = 0;
+	virtual void OnSpill(const RegSlot&, const StackSlot&) = 0;
+	virtual void OnImmediateStore(const std::variant<RegSlot, StackSlot>&, const IRGenerate::ImmediateValue*) = 0;
+	virtual void OnMove(const std::variant<RegSlot, StackSlot>&, const std::variant<RegSlot, StackSlot>&) = 0;
+	virtual void OnFreeReg(const RegSlot&) = 0;
+};
+
+struct RegGroup
+{
+	String name;
+	Array<Reg> regs;
 };
 
 class RegisterDistributor
 {
 public:
-	RegisterDistributor(std::initializer_list<Reg> availableRegisters);
+	RegisterDistributor(std::initializer_list<RegGroup> availableRegisters);
 public:
-	void FreeReg(const Reg& reg);
+	void ResetState();
+public:
+	void FreeReg(const RegSlot& reg);
 	// automatically 'takes' the register if any was found
-	std::optional<Reg> GetFreeRegForType(const IRGenerate::Type* typ);
-	bool RegSupportsType(const Reg& reg, const IRGenerate::Type* typ);
+	std::optional<RegSlot> GetFreeRegForType(const IRGenerate::Type* typ);
+	std::optional<RegSlot> GetSpecificFreeRegForType(const String& groupName, const IRGenerate::Type* typ);
+	bool RegSupportingType(const Reg& reg, const IRGenerate::Type* typ);
 private:	
-	void TakeFreeReg(const Reg& reg);
+	std::optional<Reg> RegSupportingType(const RegGroup& group, const IRGenerate::Type* typ);
+	void TakeFreeRegGroup(const RegGroup& group);
 private:
-	Array<Reg> m_regs;
-	Array<Uint8> m_freeRegs;
+	// Array<Reg> m_regs;
+	std::map<String, RegGroup> m_regGroups;
+	Array<String> m_freeRegs;
 };
 
 class BasicSlotAllocator
@@ -82,27 +102,33 @@ public:
 	BasicSlotAllocator(RegisterDistributor* regDistro, AllocatorHandler* handler);
 	virtual ~BasicSlotAllocator() = default;
 
+public:
+	void ResetState();
+	void SetExplicitOffset(Uint32 offset);
+	inline Uint32 GetStackOffset() const noexcept { return m_nextOffset; }
+
 public: // LocalValue
 	const StackSlot& StoreLocal(const IRGenerate::LocalValue* local);
 	const StackSlot GetLocal(const IRGenerate::LocalValue* local);
 
 public:
-	const Reg LoadValueInReg(const IRGenerate::Value* value);
+	const RegSlot LoadValueInReg(const IRGenerate::Value* value, std::optional<String> regGroup = std::nullopt);
 	const Slot& StoreOrUpdateValue(const IRGenerate::Value* value, StoreDestination dest = AnyDestination{});
-	void FreeReg(const Reg& reg);
+	void FreeReg(const RegSlot& reg);
+
+	StackSlot GetNewStackSlotFromSize(Uint32 size);
 
 private:
 	StackSlot GetNewStackSlotFromValue(const IRGenerate::Value* value);
-	StackSlot GetNewStackSlotFromSize(Uint32 size);
-	Reg GetAnyReg(const IRGenerate::Value* targetValue);
-	Reg GetSpecificReg(const String& regName, const IRGenerate::Value* targetValue);
-	Reg SpillReg(const String& regName);
+	RegSlot GetAnyReg(const IRGenerate::Value* targetValue);
+	RegSlot GetSpecificRegGroup(const String& groupName, const IRGenerate::Value* targetValue);
+	RegSlot SpillRegGroup(const String& groupName);
 
 private:
 	String GetSlotKey(const IRGenerate::Value* value);
 	bool ValueIsStored(const IRGenerate::Value* value);
 	Slot& GetSlotByKey(String slotKey);
-	void InsertValueSlot(const IRGenerate::Value* value, std::variant<Reg, StackSlot> slotStorage, bool rewrite = false);
+	void InsertValueSlot(const IRGenerate::Value* value, std::variant<RegSlot, StackSlot> slotStorage, bool rewrite = false);
 	void DeleteValueSlot(const String& slotKey);
 
 private:

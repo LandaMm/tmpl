@@ -1,7 +1,11 @@
 puts :: (buf: *char) -> void #foreign;
+printf :: (fmt: *char, arg: i32) -> void #foreign;
+time :: (t_loc: i32) -> i32 #foreign;
+getchar :: () -> i32 #foreign;
 
 main :: () -> void {
-	t := "Hello, World!\n\0";
-	puts(t);
+	ch := getchar();
+	printf("you pressed '%c'\n\0", ch);
+	exit(69);
 }
 

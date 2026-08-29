@@ -47,12 +47,12 @@ int main(int argc, char **argv)
     dump_ir(compiler);
 
     {
-        FileStreamWriter outputFile("out/output.s");
+        FileStreamWriter outputFile("out/output.asm");
         auto generator = new Codegen::Generator(&outputFile, compiler);
         generator->Generate();
     }
 
-	system("nasm -f win64 -g out/output.s -o out/output.obj");
+	system("nasm -f win64 -g out/output.asm -o out/output.obj");
 	system("gcc -o out/output.exe out/output.obj");
 
     delete parser;
