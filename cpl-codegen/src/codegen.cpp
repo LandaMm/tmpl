@@ -196,6 +196,15 @@ void Generator::Generate()
 
 		m_allocator->ResetState();
 
+		assert(function->Params().Size() <= 4 && "only 4 function parameters are supported for now");
+		Array<String> parameterRegs = { "RCX", "RDX", "R8", "R9" };
+		for (size_t i = 0; i < function->Params().Size(); ++i)
+		{
+			const FunctionParam* param = function->Params()[i];
+			assert(!param->initialValue.has_value() && "initial values are not supported yet.");
+			m_allocator->LoadValueInReg(param->destination, parameterRegs[i]);
+		}
+
 		// Stack-Alignment (16 bytes for Windows)
 #if 0
 		{

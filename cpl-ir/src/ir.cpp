@@ -257,22 +257,29 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 
 	auto retType = ParseType(fn->GetReturnType());
 
-	Array<FunctionType::Param> params;
+	Array<FunctionType::Param> paramTypes;
+	Array<FunctionParam*> fnParams;
 	for (size_t i = 0; i < fn->GetParamsSize(); ++i)
 	{
 		auto param = fn->GetParam(i);
 		auto paramName = param->GetName()->GetName();
 		const Type* paramType = ParseType(param->GetType());
-		params.Emplace(FunctionType::Param{ paramName, paramType });
+		paramTypes.Emplace(FunctionType::Param{ paramName, paramType });
+		fnParams.Emplace(m_arena.Alloc<FunctionParam>(m_arena.Alloc<LocalValue>(paramName, paramType), std::nullopt));
 	}
 
-	const FunctionType* funcType = m_arena.Alloc<FunctionType>(symbolName, std::move(params), retType);
+	const FunctionType* funcType = m_arena.Alloc<FunctionType>(symbolName, std::move(paramTypes), retType);
 
 	CurrentScope()->AddSymbol(m_arena.Alloc<Symbols::Function>(symbolName, funcType, external ? SymbolOrigin::FOREIGN : SymbolOrigin::LOCAL));
 
 	if (!external)
 	{
 		Scope* fnScope = m_arena.Alloc<Scope>();
+
+		for (const auto& fnParam : fnParams)
+		{
+			fnScope->AddLocal(fnParam->destination);
+		}
 
 		InsertScope(fnScope);
 
@@ -287,7 +294,7 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 
 		assert(fnScope == EndScope() && "ENCOUNTERED AN UNEXPECTED SCOPE");
 
-		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, funcType, block, fnScope));
+		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, std::move(fnParams), funcType, block, fnScope));
 	}
 }
 

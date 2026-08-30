@@ -103,7 +103,6 @@ void BasicSlotAllocator::ResetState()
 	m_regDistro->ResetState();
 
 	m_slots.clear();
-	m_locals_.clear();
 	m_nextOffset = 0;
 }
 

@@ -24,6 +24,8 @@ private:
 	void GenerateBasicBlock(const IRGenerate::BasicBlock* block);
 	void GenerateInstr(const IRGenerate::Instr* instr);
 private:
+	ArenaAllocator<> m_arena;
+
 	const IRGenerate::IR* m_ir;
 	FileStreamWriter* m_output;
 

@@ -109,12 +109,6 @@ public:
 	void SetExplicitOffset(Uint32 offset);
 	inline Uint32 GetStackOffset() const noexcept { return m_nextOffset; }
 
-public: // LocalValue
-#if 0
-	const StackSlot& StoreLocal(const IRGenerate::LocalValue* local);
-	const StackSlot GetLocal(const IRGenerate::LocalValue* local);
-#endif
-
 public:
 	const RegSlot LoadValueInReg(const IRGenerate::Value* value, std::optional<String> regGroup = std::nullopt);
 	const Slot& StoreOrUpdateValue(const IRGenerate::Value* value, StoreDestination dest = AnyDestination{});
@@ -142,7 +136,6 @@ private:
 
 	std::map<String, Slot> m_slots;
 
-	std::map<String, StackSlot> m_locals_;
 	Uint32 m_nextOffset = 0;
 };
 
