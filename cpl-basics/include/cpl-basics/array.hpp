@@ -253,6 +253,12 @@ public:
 		m_capacity = newCapacity;
 	}
 
+	void Clear() noexcept
+	{
+		DestroyItems(m_data, m_size);
+		m_size = 0;
+	}
+
 	void Shift()
 	{
 		assert(m_size > 0);

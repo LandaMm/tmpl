@@ -28,6 +28,7 @@ private:
 	FileStreamWriter* m_output;
 
 	BasicSlotAllocator* m_allocator;
+	AllocatorHandler* m_handler;
 };
 
 } // namespace Codegen

@@ -17,12 +17,18 @@ RegisterDistributor::RegisterDistributor(std::initializer_list<RegGroup> availab
 
 void RegisterDistributor::ResetState()
 {
+	m_freeRegs.Clear();
 	for (auto& [groupName, _] : m_regGroups) m_freeRegs.Push(groupName);
 }
 
 void RegisterDistributor::FreeReg(const RegSlot& reg)
 {
 	m_freeRegs.Push(reg.groupName);
+}
+
+const RegGroup& RegisterDistributor::GetGroupByName(const String& groupName)
+{
+	return m_regGroups.at(groupName);
 }
 
 void RegisterDistributor::TakeFreeRegGroup(const RegGroup& group)
@@ -97,7 +103,7 @@ void BasicSlotAllocator::ResetState()
 	m_regDistro->ResetState();
 
 	m_slots.clear();
-	m_locals.clear();
+	m_locals_.clear();
 	m_nextOffset = 0;
 }
 
@@ -121,9 +127,9 @@ const RegSlot BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value,
 		assert(false && "NOT IMPLEMENTED");
 	}
 	break;
-	// TODO: ValueKind::LOCAL
 	case ValueKind::IMMEDIATE:
 	case ValueKind::TEMPORAL:
+	case ValueKind::LOCAL:
 	{
 		if (!ValueIsStored(value)) StoreOrUpdateValue(value, destination);
 		assert(ValueIsStored(value));
@@ -132,7 +138,7 @@ const RegSlot BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value,
 		{
 			StoreOrUpdateValue(value, destination);
 		}
-		else if (std::get<RegSlot>(slot.storage).name != destination.reg.name)
+		else if (std::get<RegSlot>(slot.storage).name != destination.reg.name || std::get<RegSlot>(slot.storage).groupName != targetRegister.groupName)
 		{
 			StoreOrUpdateValue(value, destination);
 		}
@@ -159,6 +165,10 @@ String BasicSlotAllocator::GetSlotKey(const IRGenerate::Value* value)
 		return std::format("%{}", value->As<TemporalValue>()->Id());
 	case ValueKind::IMMEDIATE:
 		return std::format("imm{}", value->As<ImmediateValue>()->ImmValue());
+	case ValueKind::LOCAL:
+		return std::format("loc'{}'", value->As<LocalValue>()->Name().c_str());
+	case ValueKind::GLOBAL:
+		return std::format("global'{}'", value->As<GlobalValue>()->Name().c_str());
 	case ValueKind::UNKNOWN:
 	default:
 		assert(false && "unsupported value kind for slot key");
@@ -166,7 +176,7 @@ String BasicSlotAllocator::GetSlotKey(const IRGenerate::Value* value)
 	}
 }
 
-RegSlot BasicSlotAllocator::SpillRegGroup(const String& groupName)
+void BasicSlotAllocator::SpillRegGroup(const String& groupName)
 {
 	for (auto& [key, slot] : m_slots)
 	{
@@ -181,13 +191,8 @@ RegSlot BasicSlotAllocator::SpillRegGroup(const String& groupName)
 
 			// add register to freeRegs
 			m_regDistro->FreeReg(moveReg);
-
-			return moveReg;
 		}
 	}
-
-	assert(false && "SHOULD BE UNREACHABLE");
-	return {};
 }
 
 void BasicSlotAllocator::InsertValueSlot(const IRGenerate::Value* value, std::variant<RegSlot, StackSlot> slotStorage, bool rewrite)
@@ -199,6 +204,9 @@ void BasicSlotAllocator::InsertValueSlot(const IRGenerate::Value* value, std::va
 		{
 		case ValueKind::IMMEDIATE:
 			m_handler->OnImmediateStore(slotStorage, value->As<ImmediateValue>());
+			break;
+		case ValueKind::GLOBAL:
+			m_handler->OnGlobalLoad(slotStorage, value->As<GlobalValue>());
 			break;
 		}
 	}
@@ -317,6 +325,15 @@ RegSlot BasicSlotAllocator::GetAnyReg(const IRGenerate::Value* targetValue)
 {
 	using namespace IRGenerate;
 
+	if (ValueIsStored(targetValue))
+	{
+		const Slot& slot = GetSlotByKey(GetSlotKey(targetValue));
+		if (std::holds_alternative<RegSlot>(slot.storage) && m_regDistro->RegSupportingType(std::get<RegSlot>(slot.storage), targetValue->Typ()))
+		{
+			return std::get<RegSlot>(slot.storage);
+		}
+	}
+
 	auto freeReg = m_regDistro->GetFreeRegForType(targetValue->Typ());
 	if (freeReg)
 	{
@@ -326,9 +343,15 @@ RegSlot BasicSlotAllocator::GetAnyReg(const IRGenerate::Value* targetValue)
 	// Search for slots with register taken
 	for (auto& [key, slot] : m_slots)
 	{
-		if (std::holds_alternative<RegSlot>(slot.storage) && m_regDistro->RegSupportingType(static_cast<Reg>(std::get<RegSlot>(slot.storage)), targetValue->Typ()))
+		if (std::holds_alternative<RegSlot>(slot.storage))
 		{
-			return SpillRegGroup(std::get<RegSlot>(slot.storage).groupName);
+			const String& groupName = std::get<RegSlot>(slot.storage).groupName;
+			std::optional<Reg> supportedReg = m_regDistro->RegSupportingType(m_regDistro->GetGroupByName(groupName), targetValue->Typ());
+			if (supportedReg.has_value())
+			{
+				SpillRegGroup(std::get<RegSlot>(slot.storage).groupName);
+				return RegSlot(supportedReg.value(), groupName);
+			}
 		}
 	}
 
@@ -344,14 +367,19 @@ RegSlot BasicSlotAllocator::GetSpecificRegGroup(const String& groupName, const I
 		if (std::holds_alternative<RegSlot>(slot.storage) && std::get<RegSlot>(slot.storage).groupName == groupName) return std::get<RegSlot>(slot.storage);
 	}
 
-	auto reg = m_regDistro->GetSpecificFreeRegForType(groupName, targetValue->Typ());
+	std::optional<RegSlot> reg = m_regDistro->GetSpecificFreeRegForType(groupName, targetValue->Typ());
 	if (reg.has_value())
 	{
 		return reg.value();
 	}
 
 	// Register is occupied, search for value holding it and spill
-	return SpillRegGroup(groupName);
+	SpillRegGroup(groupName);
+
+	reg = m_regDistro->GetSpecificFreeRegForType(groupName, targetValue->Typ());
+	assert(reg.has_value() && "SHOULD BE FREE AND AVAILABLE AFTER SPILLING");
+
+	return reg.value();
 }
 
 bool BasicSlotAllocator::ValueIsStored(const IRGenerate::Value* value)
@@ -364,6 +392,7 @@ Slot& BasicSlotAllocator::GetSlotByKey(String slotKey)
 	return m_slots.at(slotKey);
 }
 
+#if 0
 const StackSlot BasicSlotAllocator::GetLocal(const IRGenerate::LocalValue* local)
 {
 	if (m_locals.find(local->Name()) == m_locals.end())
@@ -385,6 +414,7 @@ const StackSlot& BasicSlotAllocator::StoreLocal(const IRGenerate::LocalValue* lo
 	m_locals[local->Name()] = GetNewStackSlotFromValue(local);
 	return m_locals.at(local->Name());
 }
+#endif
 
 StackSlot BasicSlotAllocator::GetNewStackSlotFromValue(const IRGenerate::Value* value)
 {

@@ -39,7 +39,9 @@ public:
 public:
 	void GenerateIR();
 public:
+#if 0
 	const std::map<String, Symbol*>& Symbols() const noexcept;
+#endif
 	const std::map<String, StringLiteral>& StringLiterals() const noexcept;
 	inline const std::deque<Scope*>& Scopes() const noexcept { return m_scopes; }
 private:
@@ -53,11 +55,15 @@ private:
 private:
 	[[nodiscard]] inline Scope* CurrentScope() const noexcept { assert(!m_scopes.empty()); return m_scopes.front(); };
 	void InsertScope(Scope* newScope);
+	Scope* EndScope();
 
+#if 0
 	void AddSymbol(Symbol* symbol);
 	const Symbol* FindSymbol(const String& name) const noexcept;
+#endif
 private:
 	const LocalValue* FindLocal(const String& name) const noexcept;
+	const Symbol* FindSymbol(const String& name) const noexcept;
 	const Type* FindType(const String& name) const noexcept;
 private:
 	[[nodiscard]] inline BasicBlock* CurrentBlock() const noexcept {
@@ -78,7 +84,9 @@ private:
 	ArenaAllocator<> m_arena;
 	Nodes::ProgramNode* m_rootNode;
 
+#if 0
 	std::map<String, Symbol*> m_symbols;
+#endif
 	std::map<String, StringLiteral> m_stringLiterals;
 
 	std::deque<Scope*> m_scopes;

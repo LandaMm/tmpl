@@ -19,7 +19,9 @@ namespace IRGenerate
 IR::IR(Nodes::ProgramNode* root)
 	: m_rootNode(root) { }
 
+#if 0
 const std::map<String, Symbol*>& IR::Symbols() const noexcept { return m_symbols; }
+#endif
 
 const std::map<String, StringLiteral>& IR::StringLiterals() const noexcept { return m_stringLiterals; }
 
@@ -27,7 +29,8 @@ void IR::GenerateIR()
 {
 	using NT = AST::NodeType;
 
-	InsertScope(m_arena.Alloc<Scope>());
+	Scope* globalScope = m_arena.Alloc<Scope>();
+	InsertScope(globalScope);
 
 	/////////////////////////////////////
 
@@ -122,16 +125,36 @@ const Value* IR::EvaluateNode(Node* node)
 	{
 		auto id = node->As<Nodes::IdentifierNode>();
 
-		if (!FindLocal(id->GetName()))
+		const LocalValue* local = FindLocal(id->GetName());
+		const Symbol* symbol = FindSymbol(id->GetName());
+		if (!local && !symbol)
 		{
 			// TODO: better error
-			assert(false && "referencing undefined variable");
+			assert(false && "referencing undefined variable/function");
 		}
 
-		const LocalValue* local = FindLocal(id->GetName());
-		auto dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), local->Typ());
-		PushInstr(m_arena.Alloc<LoadInstr>(dst, local, local->Typ()));
-		return dst;
+		if (local)
+		{
+			auto dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), local->Typ());
+			PushInstr(m_arena.Alloc<LoadInstr>(dst, local, local->Typ()));
+			return dst;
+		}
+		else if (symbol)
+		{
+			if (auto localVariable = dynamic_cast<const Symbols::LocalVariable*>(symbol))
+			{
+				auto dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), localVariable->Typ());
+				PushInstr(m_arena.Alloc<LoadInstr>(dst, m_arena.Alloc<GlobalValue>(localVariable->Name(), localVariable->Typ()), localVariable->Typ()));
+				return dst;
+			}
+			else
+			{
+				assert(false && "unsupported symbol kind for loading");
+			}
+		}
+
+		assert(false && "UNREACHABLE");
+		break;
 	}
 	case NT::VarDecl:
 	{
@@ -159,7 +182,7 @@ const Value* IR::EvaluateNode(Node* node)
 			return storingValue;
 		}
 		// TODO: maybe pass evaluated value of the local instead of the local itself?
-		// so it's possible to do something like that: x := y := 5 where x is expected to have a value 5
+		// so it's possible to do something like that: x := y := 5 where x is expected to have a value 5 directly and not through accessing variable a
 		assert(false && "UNREACHABLE");
 		return nullptr;
 	}
@@ -245,10 +268,14 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 
 	const FunctionType* funcType = m_arena.Alloc<FunctionType>(symbolName, std::move(params), retType);
 
-	AddSymbol(m_arena.Alloc<Symbols::Function>(symbolName, funcType, external ? SymbolOrigin::FOREIGN : SymbolOrigin::LOCAL));
+	CurrentScope()->AddSymbol(m_arena.Alloc<Symbols::Function>(symbolName, funcType, external ? SymbolOrigin::FOREIGN : SymbolOrigin::LOCAL));
 
 	if (!external)
 	{
+		Scope* fnScope = m_arena.Alloc<Scope>();
+
+		InsertScope(fnScope);
+
 		StartBlock(m_arena.Alloc<NamedBlock>(symbolName));
 		auto body = fn->GetBody();
 		for (size_t i = 0; i < body->GetSize(); ++i)
@@ -258,7 +285,9 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 		}
 		NamedBlock* block = reinterpret_cast<NamedBlock*>(EndBlock());
 
-		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, funcType, block));
+		assert(fnScope == EndScope() && "ENCOUNTERED AN UNEXPECTED SCOPE");
+
+		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, funcType, block, fnScope));
 	}
 }
 
@@ -287,14 +316,13 @@ const Value* IR::GenerateVariableDeclaration(Nodes::VariableDeclaration* var)
 	}
 
 	if (external)
-		AddSymbol(m_arena.Alloc<Symbols::ExternalVariable>(*var->GetName(), expectedType));
+		CurrentScope()->AddSymbol(m_arena.Alloc<Symbols::ExternalVariable>(*var->GetName(), expectedType));
 	else
-		AddSymbol(m_arena.Alloc<Symbols::LocalVariable>(*var->GetName(), expectedType, initialValue));
+		CurrentScope()->AddSymbol(m_arena.Alloc<Symbols::LocalVariable>(*var->GetName(), expectedType, initialValue));
 
-	CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), expectedType));
+	// CurrentScope()->AddLocal(m_arena.Alloc<LocalValue>(*var->GetName(), expectedType));
 
-	// TODO: return ZeroValue or something
-	return nullptr;
+	return m_arena.Alloc<GlobalValue>(*var->GetName(), expectedType);
 }
 
 void IR::GenerateTypeDeclaration(Nodes::TypeDeclaration* typ)
@@ -381,6 +409,23 @@ void IR::InsertScope(Scope* newScope)
 	m_scopes.push_front(newScope);
 }
 
+Scope* IR::EndScope()
+{
+	Scope* scope = m_scopes.front();
+	m_scopes.pop_front();
+	return scope;
+}
+
+const Symbol* IR::FindSymbol(const String& name) const noexcept
+{
+	for (const Scope* scope : m_scopes)
+	{
+		auto result = scope->FindSymbol(name);
+		if (result != nullptr) return result;
+	}
+	return nullptr;
+}
+
 const LocalValue* IR::FindLocal(const String& name) const noexcept
 {
 	for (const Scope* scope : m_scopes)
@@ -401,6 +446,7 @@ const Type* IR::FindType(const String& name) const noexcept
 	return nullptr;
 }
 
+#if 0
 void IR::AddSymbol(Symbol* symbol)
 {
 	m_symbols.insert({ symbol->Name(), symbol });
@@ -411,6 +457,7 @@ const Symbol* IR::FindSymbol(const String &name) const noexcept
 	if (m_symbols.find(name) == m_symbols.end()) return nullptr;
 	return m_symbols.at(name);
 }
+#endif
 
 } // namespace IRGenerate
 

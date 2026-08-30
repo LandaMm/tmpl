@@ -1,90 +1,94 @@
 #include "cpl-codegen/dumper.h"
 
-void dump_type_name(const IRGenerate::Type* typ)
+void dump_type_name(const IRGenerate::Type* typ, FileStreamWriter* stream)
 {
 	using namespace IRGenerate;
 	assert(typ);
-	if (typ->TypClass() == TypeClass::POINTER) std::cout << '*';
-	std::cout << typ->Name();
+	if (typ->TypClass() == TypeClass::POINTER) stream->Write(String("*"));
+	stream->Write(String(typ->Name()));
 }
 
-void dump_type(const IRGenerate::Type* typ)
+void dump_type(const IRGenerate::Type* typ, FileStreamWriter* stream)
 {
 	assert(typ);
 	using namespace IRGenerate;
-	if (typ->TypClass() != TypeClass::ALIAS) std::cout << "[#";
+	if (typ->TypClass() != TypeClass::ALIAS) stream->Write(String("[#"));
 	switch (typ->TypClass())
 	{
 	case TypeClass::INTEGER:
-		std::cout << "integer";
+		stream->Write(String("integer"));
 		break;
 	case TypeClass::FLOAT:
-		std::cout << "float";
+		stream->Write(String("float"));
 		break;
 	case TypeClass::FUNCTION:
-		std::cout << "function";
+		stream->Write(String("function"));
 		break;
 	case TypeClass::POINTER:
-		std::cout << "pointer";
+		stream->Write(String("pointer"));
 		break;
 	case TypeClass::ALIAS:
 	{
 		if (const AliasType* alias = dynamic_cast<const AliasType*>(typ))
 		{
-			dump_type_name(alias->OriginType());
+			dump_type_name(alias->OriginType(), stream);
 		}
 		else
 		{
-			std::cout << "#broken_alias";
+			stream->Write(String("#broken_alias"));
 		}
 		break;
 	}
 	case TypeClass::UNKNOWN:
 	default:
-		std::cout << "unknown";
+		stream->Write(String("unknown"));
 		break;
 	}
 	if (const SizedType* sized = dynamic_cast<const SizedType*>(typ))
 	{
-		std::cout << " size = " << static_cast<Int8>(sized->Layout().size);
-		std::cout << " align = " << sized->Layout().align;
+		stream->Write(String(" size = ") + String(std::to_string(sized->Layout().size)));
+		stream->Write(String(" align = ") + String(std::to_string(sized->Layout().align)));
 	}
 	if (const PointerType* pointer = dynamic_cast<const PointerType*>(typ))
 	{
-		std::cout << " -> { ";
-		dump_type(pointer->UnderlyingType());
-		std::cout << " }";
+		stream->Write(String(" -> { "));
+		dump_type(pointer->UnderlyingType(), stream);
+		stream->Write(String(" }"));
 	}
-	if (typ->TypClass() != TypeClass::ALIAS) std::cout << ']';
+	if (typ->TypClass() != TypeClass::ALIAS) stream->Write(String("]"));
 }
 
-void dump_symbol_name(const IRGenerate::Symbol* symbol)
+void dump_symbol_name(const IRGenerate::Symbol* symbol, FileStreamWriter* stream)
 {
-	std::cout << '@' << symbol->Name();
+	stream->Write(String("@") + String(symbol->Name()));
 }
 
-void dump_value(const IRGenerate::Value* value)
+void dump_value(const IRGenerate::Value* value, FileStreamWriter* stream)
 {
 	using namespace IRGenerate;
 
 	switch (value->Kind())
 	{
 	case ValueKind::GLOBAL:
-		std::cout << "global ";
-		dump_type_name(value->Typ());
-		break;
+	{
+		stream->Write(String("global "));
+		dump_type_name(value->Typ(), stream);
+		auto global = value->As<GlobalValue>();
+		stream->Write(String(" ") + global->Name());
+	}
+	break;
 	case ValueKind::TEMPORAL:
 	{
 		const TemporalValue* temp = dynamic_cast<const TemporalValue*>(value);
 		assert(temp);
-		std::cout << '%' << temp->Id();
+		stream->Write(String("%") + String(std::to_string(temp->Id())));
 		break;
 	}
 	case ValueKind::LOCAL:
 	{
 		const LocalValue* local = dynamic_cast<const LocalValue*>(value);
 		assert(local);
-		std::cout << '@' << local->Name();
+		stream->Write(String("@") + String(local->Name()));
 		break;
 	}
 	case ValueKind::IMMEDIATE:
@@ -93,76 +97,83 @@ void dump_value(const IRGenerate::Value* value)
 		assert(immediate);
 		auto integerDescription = TypeResolver::Integer(immediate->Typ());
 		assert(integerDescription);
-		std::cout << "i" << integerDescription->Layout().size << " #";
+		stream->Write(
+			String("i") +
+			String(std::to_string(integerDescription->Layout().size)) +
+			String(" #")
+		);
 		Int64 value = immediate->ImmValue();
-		std::cout << value;
+		stream->Write(String(std::to_string(value)));
 		break;
 	}
 	case ValueKind::UNKNOWN:
 	default:
-		std::cout << "#unknown_value ";
+		stream->Write(String("#unknown_value "));
 		break;
 	}
+
 }
 
-void dump_symbol(const IRGenerate::Symbol* symbol)
+void dump_symbol(const IRGenerate::Symbol* symbol, FileStreamWriter* stream)
 {
 	using namespace IRGenerate;
 
-	dump_symbol_name(symbol);
+	dump_symbol_name(symbol, stream);
+
 	/*
-	std::cout << " (";
+	stream->Write(String(" ("));
 	switch (symbol.SymType())
 	{
 	case SymbolType::VARIABLE:
-		std::cout << "variable";
+		stream->Write(String("variable"));
 		break;
 	case SymbolType::FUNCTION:
-		std::cout << "function";
+		stream->Write(String("function"));
 		break;
 	case SymbolType::UNKNOWN:
 	default:
-		std::cout << "unknown";
+		stream->Write(String("unknown"));
 		break;
 	}
-	std::cout << ")";
+	stream->Write(String(")"));
 	*/
-	std::cout << ": ";
+
+	stream->Write(String(": "));
 	if (auto function = dynamic_cast<const Symbols::Function*>(symbol))
 	{
 		const FunctionType* funcType = function->FunctionDescription();
-		std::cout << "(";
+		stream->Write(String("("));
 		for (size_t i = 0; i < funcType->Params().Size(); ++i)
 		{
 			const auto param = funcType->Params()[i];
 			if (i > 0)
 			{
-				std::cout << ", ";
+				stream->Write(String(", "));
 			}
-			std::cout << param.name << ": ";
-			dump_type_name(param.typ);
+			stream->Write(String(param.name) + String(": "));
+			dump_type_name(param.typ, stream);
 		}
-		std::cout << ") -> ";
-		dump_type_name(funcType->RetType());
+		stream->Write(String(") -> "));
+		dump_type_name(funcType->RetType(), stream);
 	}
 	else
 	{
-		dump_type_name(symbol->Typ());
+		dump_type_name(symbol->Typ(), stream);
 	}
 
 	if (symbol->Origin() == SymbolOrigin::FOREIGN)
 	{
-		std::cout << " extrn";
+		stream->Write(String(" extrn"));
 	}
 }
 
-void dump_instr(const IRGenerate::Instr* instr)
+void dump_instr(const IRGenerate::Instr* instr, FileStreamWriter* stream)
 {
 	using namespace IRGenerate;
 	if (instr->Valued())
 	{
-		dump_value(instr->Dest());
-		std::cout << " = ";
+		dump_value(instr->Dest(), stream);
+		stream->Write(String(" = "));
 	}
 	switch (instr->Type())
 	{
@@ -170,123 +181,139 @@ void dump_instr(const IRGenerate::Instr* instr)
 	{
 		auto callInstr = dynamic_cast<const CallInstr*>(instr);
 		assert(callInstr);
-		dump_type_name(callInstr->RetType());
-		std::cout << " call ";
-		dump_symbol_name(callInstr->CallSymbol());
-		std::cout << '(';
+		dump_type_name(callInstr->RetType(), stream);
+		stream->Write(String(" call "));
+		dump_symbol_name(callInstr->CallSymbol(), stream);
+		stream->Write(String("("));
 		for (size_t i = 0; i < callInstr->Args().Size(); ++i)
 		{
 			if (i > 0)
 			{
-				std::cout << ", ";
+				stream->Write(String(", "));
 			}
-			dump_value(callInstr->Args()[i]);
+			dump_value(callInstr->Args()[i], stream);
 		}
-		std::cout << ')';
+		stream->Write(String(")"));
 		break;
 	}
 	case InstrOp::ALLOCA:
 	{
 		auto allocaInstr = dynamic_cast<const AllocaInstr*>(instr);
 		assert(allocaInstr);
-		std::cout << "alloca ";
-		dump_type_name(allocaInstr->Typ());
+		stream->Write(String("alloca "));
+		dump_type_name(allocaInstr->Typ(), stream);
 		break;
 	}
 	case InstrOp::STORE:
 	{
 		auto storeInstr = dynamic_cast<const StoreInstr*>(instr);
 		assert(storeInstr);
-		dump_type_name(storeInstr->Typ());
-		std::cout << " store ";
-		dump_value(storeInstr->Src());
+		dump_type_name(storeInstr->Typ(), stream);
+		stream->Write(String(" store "));
+		dump_value(storeInstr->Src(), stream);
 		break;
 	}
 	case InstrOp::LOAD:
 	{
 		auto loadInstr = dynamic_cast<const LoadInstr*>(instr);
 		assert(loadInstr);
-		dump_type_name(loadInstr->Typ());
-		std::cout << " load ";
-		dump_value(loadInstr->Src());
+		dump_type_name(loadInstr->Typ(), stream);
+		stream->Write(String(" load "));
+		dump_value(loadInstr->Src(), stream);
 		break;
 	}
 	case InstrOp::PTR:
 	{
 		auto ptrInstr = dynamic_cast<const PtrInstr*>(instr);
 		assert(ptrInstr);
-		dump_type_name(ptrInstr->Typ());
-		std::cout << " ptr ";
-		dump_value(ptrInstr->Src());
+		dump_type_name(ptrInstr->Typ(), stream);
+		stream->Write(String(" ptr "));
+		dump_value(ptrInstr->Src(), stream);
 		break;
 	}
 	case InstrOp::NONE:
 	default:
-		std::cout << "#none_instr";
+		stream->Write(String("#none_instr"));
 		break;
 	}
 }
 
-void dump_block(const IRGenerate::BasicBlock* block)
+void dump_block(const IRGenerate::BasicBlock* block, FileStreamWriter* stream)
 {
 	assert(block);
 	for (auto& instr : block->Body())
 	{
-		std::cout << "  ";
-		dump_instr(instr);
-		std::cout << '\n';
+		stream->Write(String("  "));
+		dump_instr(instr, stream);
+		stream->Write(String("\n"));
 	}
 }
 
-void dump_ir(const IRGenerate::IR* ir)
+void dump_ir(const IRGenerate::IR* ir, FileStreamWriter* stream)
 {
-    using namespace IRGenerate;
-    
-    std::cout << "; Types:\n\n";
+	using namespace IRGenerate;
+
+	stream->Write(String("; Types:\n\n"));
+
 	for (const Scope* scope : ir->Scopes())
 	{
 		for (auto& [key, value] : scope->Types())
 		{
-			std::cout << key << ": ";
-			dump_type(value);
-			std::cout << '\n';
+			stream->Write(String(key) + String(": "));
+			dump_type(value, stream);
+			stream->Write(String("\n"));
 		}
 	}
-	std::cout << '\n';
 
-	std::cout << "; Symbols:\n\n";
-	for (auto& [key, value] : ir->Symbols())
+	stream->Write(String("\n"));
+
+	stream->Write(String("; Symbols:\n\n"));
+
+	for (const Scope* scope : ir->Scopes())
 	{
-		dump_symbol(value);
-		std::cout << '\n';
+		for (auto& [key, value] : scope->Symbols())
+		{
+			dump_symbol(value, stream);
+			stream->Write(String("\n"));
+		}
 	}
-	std::cout << '\n';
 
-	std::cout << "; Functions:\n\n";
+	stream->Write(String("\n"));
+
+	stream->Write(String("; Functions:\n\n"));
+
 	for (const Scope* scope : ir->Scopes())
 	{
 		for (auto& [key, value] : scope->Functions())
 		{
-			std::cout << key << " :: ";
-			std::cout << "(";
+			stream->Write(String(key) + String(" :: "));
+			stream->Write(String("("));
+
 			auto funcDesc = value->FunctionDescription();
+
 			for (size_t i = 0; i < funcDesc->Params().Size(); ++i)
 			{
 				const auto param = funcDesc->Params()[i];
-				if (i > 0) std::cout << ", ";
-				std::cout << param.name << ": ";
-				dump_type_name(param.typ);
+
+				if (i > 0)
+					stream->Write(String(", "));
+
+				stream->Write(String(param.name) + String(": "));
+				dump_type_name(param.typ, stream);
 			}
-			std::cout << ") -> ";
-			dump_type_name(funcDesc->RetType());
-			if (value->Body()) {
-				std::cout << ":\n";
-				dump_block(value->Body());
+
+			stream->Write(String(") -> "));
+			dump_type_name(funcDesc->RetType(), stream);
+
+			if (value->Body())
+			{
+				stream->Write(String(":\n"));
+				dump_block(value->Body(), stream);
 			}
-			std::cout << '\n';
+
+			stream->Write(String("\n"));
 		}
 	}
-	std::cout << '\n';
 
+	stream->Write(String("\n"));
 }
-

@@ -47,7 +47,7 @@ namespace Symbols
 class LocalVariable : public Symbol
 {
 public:
-	explicit LocalVariable(const String& name, const Type* typ, const Value* initialValue = nullptr)
+	explicit LocalVariable(const String& name, const Type* typ, const Value* initialValue)
 		: m_initialValue(initialValue), Symbol(SymbolKind::VARIABLE, typ, SymbolOrigin::LOCAL, name)
 	{ }
 public:

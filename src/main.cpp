@@ -43,8 +43,11 @@ int main(int argc, char **argv)
 
     auto compiler = new IRGenerate::IR(root);
 
-    compiler->GenerateIR();
-    dump_ir(compiler);
+    {
+		FileStreamWriter irOut("out/output.ir");
+		compiler->GenerateIR();
+		dump_ir(compiler, &irOut);
+    }
 
     {
         FileStreamWriter outputFile("out/output.asm");

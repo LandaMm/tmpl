@@ -3,10 +3,31 @@ int :: i32;
 char :: i8;
 bool :: i1;
 
-STDIN_FILENO : i32 = 0;
-STDOUT_FILENO : i32 = 1;
-STDERR_FILENO : i32 = 2;
+FILE :: i32;
 
-write :: (fd: i32, buf: *char, count: u32) -> i32 #foreign;
+RAND_MAX: i8 = 257;
+
 strlen :: (str: *char) -> i32 #foreign;
+exit :: (code: i32) -> void #foreign;
+
+malloc :: (size: u32) -> *char #foreign;
+free :: (ptr: *char) -> void #foreign;
+
+fopen :: (path: *char, mode: *char) -> *FILE #foreign;
+fread :: (ptr: *char, size: i32, n: i32, stream: *FILE) -> i32 #foreign;
+fclose :: (stream: *FILE) -> i32 #foreign;
+
+strcat :: (s1: *char, s2: *char) -> *char #foreign;
+strcpy :: (dst: *char, src: *char) -> *char #foreign;
+
+rand :: () -> i32 #foreign;
+srand :: (seed: i32) -> void #foreign;
+
+time :: (tloc: i32) -> i32 #foreign;
+
+puts :: (s: *char) -> i32 #foreign;
+printf :: (fmt: *char, arg: i32) -> void #foreign;
+fprintf :: (stream: *FILE, fmt: *char, arg: *FILE) -> void #foreign;
+
+__acrt_iob_func :: (fd: i32) -> *FILE #foreign;
 

@@ -31,7 +31,7 @@ namespace AST
 		{
 			char ch = m_code[m_pos];
 
-			if (isalpha(ch))
+			if (isalpha(ch) || ch == '_')
 			{
 				Id();
 				continue;

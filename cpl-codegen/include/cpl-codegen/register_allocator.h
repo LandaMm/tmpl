@@ -62,11 +62,12 @@ class AllocatorHandler
 public:
 	virtual ~AllocatorHandler() = default;
 public:
-	virtual void OnNewStackSlot(const StackSlot&) = 0;
-	virtual void OnSpill(const RegSlot&, const StackSlot&) = 0;
-	virtual void OnImmediateStore(const std::variant<RegSlot, StackSlot>&, const IRGenerate::ImmediateValue*) = 0;
-	virtual void OnMove(const std::variant<RegSlot, StackSlot>&, const std::variant<RegSlot, StackSlot>&) = 0;
-	virtual void OnFreeReg(const RegSlot&) = 0;
+	virtual void OnNewStackSlot(const StackSlot& slot) = 0;
+	virtual void OnSpill(const RegSlot& from, const StackSlot& to) = 0;
+	virtual void OnImmediateStore(const std::variant<RegSlot, StackSlot>& slot, const IRGenerate::ImmediateValue* value) = 0;
+	virtual void OnGlobalLoad(const std::variant<RegSlot, StackSlot>& slot, const IRGenerate::GlobalValue* value) = 0;
+	virtual void OnMove(const std::variant<RegSlot, StackSlot>& from, const std::variant<RegSlot, StackSlot>& to) = 0;
+	virtual void OnFreeReg(const RegSlot& reg) = 0;
 };
 
 struct RegGroup
@@ -82,13 +83,14 @@ public:
 public:
 	void ResetState();
 public:
+	const RegGroup& GetGroupByName(const String& groupName);
 	void FreeReg(const RegSlot& reg);
 	// automatically 'takes' the register if any was found
 	std::optional<RegSlot> GetFreeRegForType(const IRGenerate::Type* typ);
 	std::optional<RegSlot> GetSpecificFreeRegForType(const String& groupName, const IRGenerate::Type* typ);
 	bool RegSupportingType(const Reg& reg, const IRGenerate::Type* typ);
-private:	
 	std::optional<Reg> RegSupportingType(const RegGroup& group, const IRGenerate::Type* typ);
+private:	
 	void TakeFreeRegGroup(const RegGroup& group);
 private:
 	// Array<Reg> m_regs;
@@ -108,8 +110,10 @@ public:
 	inline Uint32 GetStackOffset() const noexcept { return m_nextOffset; }
 
 public: // LocalValue
+#if 0
 	const StackSlot& StoreLocal(const IRGenerate::LocalValue* local);
 	const StackSlot GetLocal(const IRGenerate::LocalValue* local);
+#endif
 
 public:
 	const RegSlot LoadValueInReg(const IRGenerate::Value* value, std::optional<String> regGroup = std::nullopt);
@@ -118,11 +122,12 @@ public:
 
 	StackSlot GetNewStackSlotFromSize(Uint32 size);
 
+	void SpillRegGroup(const String& groupName);
+
 private:
 	StackSlot GetNewStackSlotFromValue(const IRGenerate::Value* value);
 	RegSlot GetAnyReg(const IRGenerate::Value* targetValue);
 	RegSlot GetSpecificRegGroup(const String& groupName, const IRGenerate::Value* targetValue);
-	RegSlot SpillRegGroup(const String& groupName);
 
 private:
 	String GetSlotKey(const IRGenerate::Value* value);
@@ -137,7 +142,7 @@ private:
 
 	std::map<String, Slot> m_slots;
 
-	std::map<String, StackSlot> m_locals;
+	std::map<String, StackSlot> m_locals_;
 	Uint32 m_nextOffset = 0;
 };
 

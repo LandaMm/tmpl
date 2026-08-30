@@ -34,9 +34,40 @@ public:
 		WriteLn(std::format("\t;; free {} reg", reg.name.c_str()));
 		WriteLn(std::format("\txor {}, {}", reg.name.c_str(), reg.name.c_str()));
 	}
+	void OnGlobalLoad(const std::variant<RegSlot, StackSlot>& slot, const IRGenerate::GlobalValue* value) override
+	{
+		WriteLn("\t;; global load");
+		Write("\tmov ");
+		if (std::holds_alternative<RegSlot>(slot))
+		{
+			Write(std::get<RegSlot>(slot).name.c_str());
+		}
+		else
+		{
+			Write(std::format("[rbp-{}]", std::get<StackSlot>(slot).offset));
+		}
+		WriteLn(std::format(", [rel {}]", value->Name().c_str()));
+	}
 	void OnMove(const std::variant<RegSlot, StackSlot>& from, const std::variant<RegSlot, StackSlot>& to) override {
 		WriteLn("\t;; moving");
-		Write("\tmov ");
+		if (std::holds_alternative<RegSlot>(from) && std::holds_alternative<RegSlot>(to))
+		{
+			auto fromReg = std::get<RegSlot>(from);
+			auto toReg = std::get<RegSlot>(to);
+			if (fromReg.size < toReg.size)
+			{
+				Write("\tmovzx");
+			}
+			else
+			{
+				Write("\tmov");
+			}
+		}
+		else
+		{
+			Write("\tmov");
+		}
+		Write(" ");
 		if (std::holds_alternative<RegSlot>(to))
 		{
 			Write(std::get<RegSlot>(to).name.c_str());
@@ -78,7 +109,8 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 {
 	using namespace IRGenerate;
 
-	GeneratorAllocatorHandler* handler = new GeneratorAllocatorHandler(m_output);
+	m_handler = new GeneratorAllocatorHandler(m_output);
+
 	RegisterDistributor* distributor = new RegisterDistributor({
 		RegGroup{
 			"RAX",
@@ -103,7 +135,7 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 		RegGroup{
 			"RDX",
 			{
-				Reg{"dh", 8},
+				Reg{"dl", 8},
 				Reg{"dx", 16},
 				Reg{"edx", 32},
 				Reg{"rdx", 64},
@@ -131,7 +163,7 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 		},
 	});
 
-	m_allocator = new BasicSlotAllocator(distributor, handler);
+	m_allocator = new BasicSlotAllocator(distributor, m_handler);
 }
 
 void Generator::Generate()
@@ -139,15 +171,18 @@ void Generator::Generate()
     using namespace IRGenerate;
     
 	WriteLn("; Symbols:\n");
-	for (auto& [_, symbol] : m_ir->Symbols())
+	for (const Scope* scope : m_ir->Scopes())
 	{
-		if (symbol->Origin() != SymbolOrigin::FOREIGN)
+		for (auto& [_, symbol] : scope->Symbols())
 		{
-			WriteLn(std::format("global {}", symbol->Name().c_str()));
-		}
-		else
-		{
-			WriteLn(std::format("extern {}", symbol->Name().c_str()));
+			if (symbol->Origin() != SymbolOrigin::FOREIGN)
+			{
+				WriteLn(std::format("global {}", symbol->Name().c_str()));
+			}
+			else
+			{
+				WriteLn(std::format("extern {}", symbol->Name().c_str()));
+			}
 		}
 	}
 
@@ -162,6 +197,7 @@ void Generator::Generate()
 		m_allocator->ResetState();
 
 		// Stack-Alignment (16 bytes for Windows)
+#if 0
 		{
 			// return address + old stack frame (8 + 8) = 16 % 16 = 0
 			Uint32 bytesAllocated = 0;
@@ -186,6 +222,7 @@ void Generator::Generate()
 				m_allocator->GetNewStackSlotFromSize(additionalBytes * 8);
 			}
 		}
+#endif
 
 		GenerateBasicBlock(function->Body());
 
@@ -203,8 +240,10 @@ void Generator::GenerateBasicBlock(const IRGenerate::BasicBlock* block)
 	WriteLn(std::format(".L{}:", block->Id()));
 	for (auto instr : block->Body())
 	{
+		Write("\t;; ");
+		dump_instr(instr, m_output);
+		WriteLn("");
 		GenerateInstr(instr);
-		// WriteLn(std::format("\t{}", static_cast<int>(instr->Type())));
 	}
 }
 
@@ -219,7 +258,19 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto alloc = instr->As<AllocaInstr>();
 			const LocalValue* dest = alloc->Dest()->As<LocalValue>();
 			assert(dest);
-			m_allocator->StoreLocal(dest);
+
+			const Slot& slot = m_allocator->StoreOrUpdateValue(dest);
+
+			// TODO: repetitive code
+			{
+				Write("\t;; ");
+				dump_value(dest, m_output);
+				if (std::holds_alternative<RegSlot>(slot.storage))
+					WriteLn(std::format(" -> {}", std::get<RegSlot>(slot.storage).name.c_str()));
+				else // StackSlot
+					WriteLn(std::format(" -> [rbp-{}]", std::get<StackSlot>(slot.storage).offset));
+			}
+			// m_allocator->StoreLocal(dest);
 		}
 		break;
 	case InstrOp::STORE:
@@ -227,11 +278,11 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto store = instr->As<StoreInstr>();
 			const LocalValue* dest = store->Dest()->As<LocalValue>();
 			assert(dest);
-			const StackSlot& slot = m_allocator->GetLocal(dest);
+			const RegSlot& slot = m_allocator->LoadValueInReg(dest);
 			const RegSlot& src = m_allocator->LoadValueInReg(store->Src());
 			if (src.groupName.Empty()) assert(false);
 			WriteLn("\t;; store");
-			WriteLn(std::format("\tmov [rbp-{}], {}", slot.offset, src.name.c_str()));
+			WriteLn(std::format("\tmov {}, {}", slot.name.c_str(), src.name.c_str()));
 			m_allocator->FreeReg(src);
 		}
 		break;
@@ -240,6 +291,11 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto call = instr->As<CallInstr>();
 			assert(call->Args().Size() <= 4 && "only up to 4 arguments are supported for function call");
 			// Array<String> parameterRegs = { "ecx", "edx", "r8d", "r9d" };
+			Array<String> callerSaveRegs = { "RAX", "RCX", "RDX", "R8", "R9", "R10", "R11" };
+			for (const auto& callerSaveReg : callerSaveRegs)
+			{
+				m_allocator->SpillRegGroup(callerSaveReg);
+			}
 			Array<String> parameterRegs = { "RCX", "RDX", "R8", "R9" };
 			Array<RegSlot> argRegs;
 			WriteLn("\t;; funcall");
@@ -250,13 +306,21 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 				argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i], parameterRegs[i]));
 			}
 
-			m_allocator->GetNewStackSlotFromSize(32 * 8);
+			RegSlot result = m_allocator->LoadValueInReg(call->Dest(), "RAX");
+
+			// 16-byte alignment
+			Uint32 currentOffset = m_allocator->GetStackOffset();
+			Uint32 remainingBytes = (16 - (currentOffset % 16)) % 16;
+
+			// 32-byte shadow space on Windows
+			m_allocator->GetNewStackSlotFromSize((32 + remainingBytes) * 8);
 
 			WriteLn("\t;; call");
 			WriteLn(std::format("\tcall {}", call->CallSymbol()->Name().c_str()));
 
-			m_allocator->SetExplicitOffset(m_allocator->GetStackOffset() - 32);
-			WriteLn("\tadd rsp, 32");
+			// remove 32-byte shadow space on Windows
+			m_allocator->SetExplicitOffset(m_allocator->GetStackOffset() - 32 - remainingBytes);
+			WriteLn(std::format("\tadd rsp, {}", 32 + remainingBytes));
 
 			// free argument registers
 			for (auto &reg : argRegs)
@@ -268,13 +332,26 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 	case InstrOp::LOAD:
 		{
 			auto load = instr->As<LoadInstr>();
-			assert(load->Src()->Kind() == ValueKind::LOCAL);
-			auto src = load->Src()->As<LocalValue>();
-			assert(src);
-			StackSlot srcSlot = m_allocator->GetLocal(src);
-			RegSlot dstReg = m_allocator->LoadValueInReg(load->Dest());
 			WriteLn("\t;; load");
-			WriteLn(std::format("\tmov {}, [rbp-{}]", dstReg.name.c_str(), srcSlot.offset));
+			const Slot& srcSlot = m_allocator->StoreOrUpdateValue(load->Src());
+			const RegSlot& dstReg = m_allocator->LoadValueInReg(load->Dest());
+			// TODO: repetitive code
+			{
+				Write("\t;; ");
+				dump_value(load->Src(), m_output);
+				if (std::holds_alternative<RegSlot>(srcSlot.storage))
+					WriteLn(std::format(" -> {}", std::get<RegSlot>(srcSlot.storage).name.c_str()));
+				else // StackSlot
+					WriteLn(std::format(" -> [rbp-{}]", std::get<StackSlot>(srcSlot.storage).offset));
+			}
+			// TODO: repetitive code
+			{
+				Write("\t;; ");
+				dump_value(load->Dest(), m_output);
+				WriteLn(std::format(" -> {}", dstReg.name.c_str()));
+			}
+			// WriteLn(std::format("\tmov {}, {}", dstReg.name.c_str(), srcSlot.name.c_str()));
+			m_handler->OnMove(srcSlot.storage, dstReg);
 		}
 		break;
 	case InstrOp::PTR:
@@ -294,8 +371,9 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			case ValueKind::LOCAL:
 			{
 				auto local = src->As<LocalValue>();
-				StackSlot slot = m_allocator->GetLocal(local);
-				WriteLn(std::format("\tlea {}, [rbp-{}]", dstReg.name.c_str(), slot.offset));
+				const Slot& slot = m_allocator->StoreOrUpdateValue(local, StackDestination{std::nullopt});
+				assert(std::holds_alternative<StackSlot>(slot.storage) && "SHOULD BE STORED ON THE STACK");
+				WriteLn(std::format("\tlea {}, [rbp-{}]", dstReg.name.c_str(), std::get<StackSlot>(slot.storage).offset));
 			}
 			break;
 			case ValueKind::UNKNOWN:
@@ -319,56 +397,60 @@ void Generator::GenerateData()
 	using namespace IRGenerate;
 
 	WriteLn("\nsection '.data' writeable\n");
-	for (auto& [_, symbol] : m_ir->Symbols())
+	for (const Scope* scope : m_ir->Scopes())
 	{
-		if (auto localVariable = dynamic_cast<const Symbols::LocalVariable*>(symbol))
+		for (auto& [_, symbol] : scope->Symbols())
 		{
-			Write(symbol->Name() + ": ");
-			
-			auto value = localVariable->InitialValue();
-
-			IRGenerate::TypeLayout layout = IRGenerate::TypeResolver::ResolveTypeSize(localVariable->Typ());
-
-			int step = 1;
-
-			step = layout.size / 8;
-
-			switch (value->Kind())
+			if (auto localVariable = dynamic_cast<const Symbols::LocalVariable*>(symbol))
 			{
-			case ValueKind::IMMEDIATE:
-			{
-				auto imm = value->As<ImmediateValue>();
+				Write(symbol->Name() + ": ");
 
-				Write(std::format("db {}", std::to_string(imm->ImmValue())));
-			}
-			break;
-			case ValueKind::GLOBAL:
-			{
-				auto global = value->As<GlobalValue>();
-				WriteLn(std::format("equ {}", global->Name().c_str()));
-				/**
-				const Array<Byte>& data = global->Data();
-				for (size_t i = 0; i < data.Size() - step + 1; i+=step)
+				auto value = localVariable->InitialValue();
+
+				IRGenerate::TypeLayout layout = IRGenerate::TypeResolver::ResolveTypeSize(localVariable->Typ());
+
+				int step = 1;
+
+				step = layout.size / 8;
+
+				switch (value->Kind())
 				{
-					Write("\tdb ");
-					const Byte* row = data.Data() + i;
-					for (size_t j = 0; j < step; ++j)
-					{
-						if (j > 0) Write(" ");
-						Write(std::format("{:#04x}", row[j]));
-					}
-					WriteLn("");
-				}
-				*/
-			}
-			break;
-			case ValueKind::UNKNOWN:
-			default:
-				// TODO: better error
-				assert(false && "unsupported value kind for data definition");
-			}
+				case ValueKind::IMMEDIATE:
+				{
+					auto imm = value->As<ImmediateValue>();
 
-			WriteLn("");
+					Write(std::format("db ", std::to_string(imm->ImmValue())));
+					Write(std::format("{:#04x}", imm->ImmValue()));
+				}
+				break;
+				case ValueKind::GLOBAL:
+				{
+					auto global = value->As<GlobalValue>();
+					WriteLn(std::format("equ {}", global->Name().c_str()));
+					/**
+					const Array<Byte>& data = global->Data();
+					for (size_t i = 0; i < data.Size() - step + 1; i+=step)
+					{
+						Write("\tdb ");
+						const Byte* row = data.Data() + i;
+						for (size_t j = 0; j < step; ++j)
+						{
+							if (j > 0) Write(" ");
+							Write(std::format("{:#04x}", row[j]));
+						}
+						WriteLn("");
+					}
+					*/
+				}
+				break;
+				case ValueKind::UNKNOWN:
+				default:
+					// TODO: better error
+					assert(false && "unsupported value kind for data definition");
+				}
+
+				WriteLn("");
+			}
 		}
 	}
 
