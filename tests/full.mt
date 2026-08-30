@@ -5,7 +5,9 @@
 
 main :: (argc: int, argv: **char) -> void {
 	printf("argc = %d\n\0", argc);
+	printf("converting string '+420' results in %d\n\0", strtol("+420", argv, 10));
 	e02_hello();
-	e03_malloc();
+	path := "CMakeLists.txt\0";
+	e03_malloc(path, 500);
 	exit(argc);
 }

@@ -7,7 +7,6 @@ FILE :: i32;
 
 RAND_MAX: i8 = 257;
 
-strlen :: (str: *char) -> i32 #foreign;
 exit :: (code: i32) -> void #foreign;
 
 malloc :: (size: u32) -> *char #foreign;
@@ -17,6 +16,8 @@ fopen :: (path: *char, mode: *char) -> *FILE #foreign;
 fread :: (ptr: *char, size: i32, n: i32, stream: *FILE) -> i32 #foreign;
 fclose :: (stream: *FILE) -> i32 #foreign;
 
+strlen :: (str: *char) -> i32 #foreign;
+strtol :: (str: *char, endptr: **char, base: i32) -> i32 #foreign;
 strcat :: (s1: *char, s2: *char) -> *char #foreign;
 strcpy :: (dst: *char, src: *char) -> *char #foreign;
 

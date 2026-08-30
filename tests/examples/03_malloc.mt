@@ -1,9 +1,8 @@
 
-e03_malloc :: () -> void {
+e03_malloc :: (path: *char, len: i32) -> void {
 	stdout := __acrt_iob_func(1);
 	fprintf(stdout, "example of reading a file %p\n\0", stdout);
-	buf := malloc(1024);
-	path := "CMakeLists.txt\0";
+	buf := malloc(len);
 
 	srand(time(0));
 	printf("RAND_MAX = %d\n\0", RAND_MAX);
@@ -19,7 +18,7 @@ e03_malloc :: () -> void {
 	file := fopen(path, "r\0");
 	puts("File has been read\0");
 	fprintf(stdout, "fopen() returned %p\n\0", file);
-	n := fread(buf, 1, 1024, file);
+	n := fread(buf, 1, len, file);
 	printf("Read %d bytes from '\0", n);
 	puts(path);
 	fclose(file);
