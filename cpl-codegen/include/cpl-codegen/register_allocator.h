@@ -129,8 +129,9 @@ public:
 
 	void ResetState();
 public:
-	StackSlot GetNewStackSlotFromSize(MemSize size);
-	StackSlot GetNewStackSlotFromValue(const IRGenerate::Value* value);
+	StackSlot GetStackSlotForSize(MemSize size);
+	StackSlot AllocateStackSlotForSize(MemSize size);
+	StackSlot GetStackSlotForValue(const IRGenerate::Value* value);
 
 	std::optional<StackSlot> Align(Uint32 bytes);
 	void ReleaseStackSlot(const StackList::iterator& slot);

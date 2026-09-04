@@ -113,7 +113,7 @@ std::optional<StackSlot> StackDistributor::Align(Uint32 bytes)
 	// Allocate remaining bytes
 	MemSize alignment = GetStackOffset() % MemSize::FromBytes(bytes);
 	if (alignment != MemSize::FromBits(0))
-		return GetNewStackSlotFromSize(alignment);
+		return AllocateStackSlotForSize(alignment);
 
 	return std::nullopt;
 }
@@ -143,13 +143,13 @@ std::list<StackSlot>::iterator StackDistributor::FindStackSlot(const StackSlot& 
 	return m_stack.end();
 }
 
-StackSlot StackDistributor::GetNewStackSlotFromValue(const IRGenerate::Value* value)
+StackSlot StackDistributor::GetStackSlotForValue(const IRGenerate::Value* value)
 {
 	IRGenerate::TypeLayout layout = IRGenerate::TypeResolver::ResolveTypeSize(value->Typ());
-	return GetNewStackSlotFromSize(layout.size);
+	return GetStackSlotForSize(layout.size);
 }
 
-StackSlot StackDistributor::GetNewStackSlotFromSize(MemSize size)
+StackSlot StackDistributor::GetStackSlotForSize(MemSize size)
 {
 	assert(size != MemSize::FromBits(0));
 	for (auto it = m_stack.begin(); it != m_stack.end(); ++it)
@@ -160,7 +160,11 @@ StackSlot StackDistributor::GetNewStackSlotFromSize(MemSize size)
 			return *it;
 		}
 	}
+	return AllocateStackSlotForSize(size);
+}
 
+StackSlot StackDistributor::AllocateStackSlotForSize(MemSize size)
+{
 	m_nextOffset += size;
 	StackSlot slot(m_nextOffset, size, true);
 	m_handler->OnNewStackSlot(slot);
@@ -252,7 +256,7 @@ std::optional<StackSlot> BasicSlotAllocator::AlignStack(Uint32 bytes)
 
 StackSlot BasicSlotAllocator::AllocateTempStackSlot(MemSize size)
 {
-	return m_stackDistro->GetNewStackSlotFromSize(size);
+	return m_stackDistro->GetStackSlotForSize(size);
 }
 
 void BasicSlotAllocator::ReleaseTempStackSlot(const StackSlot& tempSlot)
@@ -268,7 +272,7 @@ void BasicSlotAllocator::SpillRegGroup(const String& groupName)
 		{
 			RegSlot moveReg = std::get<RegSlot>(slot.storage);
 
-			StackSlot newSlot = m_stackDistro->GetNewStackSlotFromSize(moveReg.size);
+			StackSlot newSlot = m_stackDistro->GetStackSlotForSize(moveReg.size);
 			m_handler->OnSpill(moveReg, newSlot);
 
 			InsertValueSlot(slot.value, newSlot, true);
@@ -317,7 +321,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 			}
 			else
 			{
-				InsertValueSlot(value, m_stackDistro->GetNewStackSlotFromValue(value));
+				InsertValueSlot(value, m_stackDistro->GetStackSlotForValue(value));
 			}
 		}
 		else if constexpr (std::is_same_v<T, RegDestination>)
@@ -344,6 +348,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 				{
 					// 'unspill' (moving from stack into the register)
 					m_handler->OnMove(slot.storage, dest.reg);
+					m_stackDistro->ReleaseStackSlot(m_stackDistro->FindStackSlot(std::get<StackSlot>(slot.storage)));
 					// here temp is already stored but as stack
 					InsertValueSlot(value, dest.reg, true);
 				}
@@ -368,7 +373,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 			}
 			else
 			{
-				InsertValueSlot(value, m_stackDistro->GetNewStackSlotFromValue(value));
+				InsertValueSlot(value, m_stackDistro->GetStackSlotForValue(value));
 			}
 		}
 		else

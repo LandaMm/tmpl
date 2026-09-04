@@ -344,6 +344,10 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 				}
 			}
 
+			if (call->CallSymbol()->Name() == "exit")
+			{
+				WriteLn("\t;; gotcha!");
+			}
 			const auto alignment = m_allocator->AlignStack(16);
 			// 32-byte shadow space on Windows
 			const auto& shadowSpace = m_allocator->AllocateTempStackSlot(MemSize::FromBits(32) * 8);
