@@ -1,5 +1,5 @@
 
-e03_malloc :: (path: *char, len: i32) -> void {
+e03_readfile :: (path: *char, len: i32) -> void {
 	stdout := __acrt_iob_func(1);
 	fprintf(stdout, "example of reading a file %p\n\0", stdout);
 	buf := malloc(len);
@@ -19,7 +19,7 @@ e03_malloc :: (path: *char, len: i32) -> void {
 	puts("File has been read\0");
 	fprintf(stdout, "fopen() returned %p\n\0", file);
 	n := fread(buf, 1, len, file);
-	printf("Read %d bytes from '\0", n);
+	printf("Read %d bytes from path = \0", n);
 	puts(path);
 	fclose(file);
 	puts("Content:\0");

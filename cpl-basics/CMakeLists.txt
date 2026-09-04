@@ -14,7 +14,9 @@ add_library(cpl-basics INTERFACE
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/def.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/array.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/string.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/memsize.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/file.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/linkedlist.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-basics/allocator/arena.hpp"
 )
 

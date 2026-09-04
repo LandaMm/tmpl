@@ -2,6 +2,8 @@
 #include <cassert>
 #include <memory>
 
+#include <cpl-basics/linkedlist.hpp>
+
 #include <cpl-parser/lexer.h>
 #include <cpl-parser/parser.h>
 #include <cpl-parser/node/program.hpp>

@@ -10,6 +10,7 @@ RAND_MAX: i8 = 257;
 exit :: (code: i32) -> void #foreign;
 
 malloc :: (size: u32) -> *char #foreign;
+realloc :: (ptr: *char, size: i32) -> *char #foreign;
 free :: (ptr: *char) -> void #foreign;
 
 fopen :: (path: *char, mode: *char) -> *FILE #foreign;

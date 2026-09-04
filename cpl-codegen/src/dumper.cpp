@@ -46,8 +46,8 @@ void dump_type(const IRGenerate::Type* typ, FileStreamWriter* stream)
 	}
 	if (const SizedType* sized = dynamic_cast<const SizedType*>(typ))
 	{
-		stream->Write(String(" size = ") + String(std::to_string(sized->Layout().size)));
-		stream->Write(String(" align = ") + String(std::to_string(sized->Layout().align)));
+		stream->Write(String(" size = ") + sized->Layout().size.ToString());
+		stream->Write(String(" align = ") + sized->Layout().align.ToString());
 	}
 	if (const PointerType* pointer = dynamic_cast<const PointerType*>(typ))
 	{
@@ -99,7 +99,7 @@ void dump_value(const IRGenerate::Value* value, FileStreamWriter* stream)
 		assert(integerDescription);
 		stream->Write(
 			String("i") +
-			String(std::to_string(integerDescription->Layout().size)) +
+			integerDescription->Layout().size.ToString() +
 			String(" #")
 		);
 		Int64 value = immediate->ImmValue();
@@ -229,6 +229,67 @@ void dump_instr(const IRGenerate::Instr* instr, FileStreamWriter* stream)
 		dump_type_name(ptrInstr->Typ(), stream);
 		stream->Write(String(" ptr "));
 		dump_value(ptrInstr->Src(), stream);
+		break;
+	}
+	case InstrOp::ADD:
+	{
+		auto addInstr = dynamic_cast<const AddInstr*>(instr);
+		assert(addInstr);
+		dump_type_name(addInstr->Dest()->Typ(), stream);
+		stream->Write(String(" add "));
+		dump_value(addInstr->Left(), stream);
+		stream->Write(String(", "));
+		dump_value(addInstr->Right(), stream);
+		break;
+	}
+	case InstrOp::SUB:
+	{
+		auto subInstr = dynamic_cast<const SubInstr*>(instr);
+		assert(subInstr);
+		dump_type_name(subInstr->Dest()->Typ(), stream);
+		stream->Write(String(" sub "));
+		dump_value(subInstr->Left(), stream);
+		stream->Write(String(", "));
+		dump_value(subInstr->Right(), stream);
+		break;
+	}
+	case InstrOp::MUL:
+	{
+		auto mulInstr = dynamic_cast<const MulInstr*>(instr);
+		assert(mulInstr);
+		dump_type_name(mulInstr->Dest()->Typ(), stream);
+		stream->Write(String(" mul "));
+		dump_value(mulInstr->Left(), stream);
+		stream->Write(String(", "));
+		dump_value(mulInstr->Right(), stream);
+		break;
+	}
+	case InstrOp::DIV:
+	{
+		auto divInstr = dynamic_cast<const DivInstr*>(instr);
+		assert(divInstr);
+		dump_type_name(divInstr->Dest()->Typ(), stream);
+		stream->Write(String(" div "));
+		dump_value(divInstr->Left(), stream);
+		stream->Write(String(", "));
+		dump_value(divInstr->Right(), stream);
+		break;
+	}
+	case InstrOp::NEG:
+	{
+		auto negInstr = dynamic_cast<const NegInstr*>(instr);
+		assert(negInstr);
+		dump_type_name(negInstr->Dest()->Typ(), stream);
+		stream->Write(String(" neg "));
+		dump_value(negInstr->Target(), stream);
+		break;
+	}
+	case InstrOp::RET:
+	{
+		auto retInstr = dynamic_cast<const RetInstr*>(instr);
+		assert(retInstr);
+		stream->Write(String("ret "));
+		dump_type_name(retInstr->RetValue()->Typ(), stream);
 		break;
 	}
 	case InstrOp::NONE:

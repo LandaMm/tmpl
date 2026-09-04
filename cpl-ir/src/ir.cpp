@@ -6,12 +6,16 @@
 #include <cpl-parser/node/function.hpp>
 #include <cpl-parser/node/identifier.hpp>
 #include <cpl-parser/node/assign.hpp>
+#include <cpl-parser/node/unary.hpp>
+#include <cpl-parser/node/return.hpp>
 
 #include "cpl-ir/instr/call.hpp"
 #include "cpl-ir/instr/alloca.hpp"
 #include "cpl-ir/instr/store.hpp"
 #include "cpl-ir/instr/load.hpp"
 #include "cpl-ir/instr/ptr.hpp"
+#include "cpl-ir/instr/arithmetic.hpp"
+#include "cpl-ir/instr/return.hpp"
 
 namespace IRGenerate
 {
@@ -34,13 +38,13 @@ void IR::GenerateIR()
 
 	/////////////////////////////////////
 
-	CurrentScope()->AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{0, 1}));
+	CurrentScope()->AddType("void", m_arena.Alloc<IntegerType>("void", TypeLayout{ {}, {} }));
 	// TODO: dedicated type size for i1
-	CurrentScope()->AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{1, 1}));
-	CurrentScope()->AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{8, 8}));
-	CurrentScope()->AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{32, 32}));
-	CurrentScope()->AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{64, 64}));
-	CurrentScope()->AddType("i128", m_arena.Alloc<IntegerType>("i128", TypeLayout{128, 128}));
+	CurrentScope()->AddType("i1", m_arena.Alloc<IntegerType>("i1", TypeLayout{MemSize::FromBits(1), MemSize::FromBits(1)}));
+	CurrentScope()->AddType("i8", m_arena.Alloc<IntegerType>("i8", TypeLayout{MemSize::FromBits(8), MemSize::FromBits(8)}));
+	CurrentScope()->AddType("i32", m_arena.Alloc<IntegerType>("i32", TypeLayout{MemSize::FromBits(32), MemSize::FromBits(32)}));
+	CurrentScope()->AddType("i64", m_arena.Alloc<IntegerType>("i64", TypeLayout{MemSize::FromBits(64), MemSize::FromBits(64)}));
+	CurrentScope()->AddType("i128", m_arena.Alloc<IntegerType>("i128", TypeLayout{MemSize::FromBits(128), MemSize::FromBits(128)}));
 
 	/////////////////////////////////////
 
@@ -112,6 +116,14 @@ const Value* IR::EvaluateNode(Node* node)
 			assert(IntType);
 			return m_arena.Alloc<ImmediateValue>(*value, IntType);
 		}
+		case LiteralType::BOOL:
+		{
+			const bool* value = literal->GetValue<bool>();
+			// TODO: support more than 32-bits
+			const Type* BoolType = FindType("i8");
+			assert(BoolType);
+			return m_arena.Alloc<ImmediateValue>(static_cast<Int64>(*value), BoolType);
+		}
 		default:
 			// TODO: better error
 			assert(false && "unsupported literal type for evaluating an IR value");
@@ -121,6 +133,39 @@ const Value* IR::EvaluateNode(Node* node)
 		assert(false && "UNREACHABLE");
 		break;
 	}
+	case NT::Unary:
+	{
+		auto unary = node->As<Nodes::UnaryNode>();
+		
+		const Value* target = EvaluateNode(unary->GetTarget());
+		auto dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), target->Typ());
+
+		using UOp = Nodes::UnaryOperator;
+		switch (unary->GetOperator())
+		{
+		case UOp::Negative:
+			PushInstr(m_arena.Alloc<NegInstr>(dst, target));
+			break;
+		default:
+			// TODO: better error
+			assert(false && "unsupported unary operator");
+			break;
+		}
+
+		return dst;
+	}
+	break;
+	case NT::Return:
+	{
+		auto retNode = node->As<Nodes::ReturnNode>();
+
+		const Value* retValue = EvaluateNode(retNode->GetValue());
+
+		PushInstr(m_arena.Alloc<RetInstr>(retValue));
+
+		return retValue;
+	}
+	break;
 	case NT::Identifier:
 	{
 		auto id = node->As<Nodes::IdentifierNode>();
@@ -235,10 +280,50 @@ const Value* IR::EvaluateNode(Node* node)
 		PushInstr(m_arena.Alloc<CallInstr>(dst, symbol, std::move(args), funcDesc->RetType()));
 		return dst;
 	}
+	case NT::Expression:
+		return EvaluateExpression(node->As<Nodes::ExpressionNode>());
 	default:
 		// TODO: better error
 		assert(false && "unsupported node for evaluating an IR value");
 		break;
+	}
+
+	assert(false && "UNREACHABLE");
+	return nullptr;
+}
+
+const Value* IR::EvaluateExpression(Nodes::ExpressionNode* expr)
+{
+	const Value* left = EvaluateNode(expr->GetLeft());
+	const Value* right = EvaluateNode(expr->GetRight());
+
+	if (!TypeResolver::Identical(left->Typ(), right->Typ()))
+	{
+		// TODO: better error
+		assert(false && "left and right sides of an expression differ in type");
+		return nullptr;
+	}
+
+	TemporalValue* dst = m_arena.Alloc<TemporalValue>(BlockNextTempValueId(), left->Typ());
+
+	switch (expr->GetOperator().GetType())
+	{
+	case OperatorType::PLUS:
+		PushInstr(m_arena.Alloc<AddInstr>(dst, left, right));
+		return dst;
+	case OperatorType::MINUS:
+		PushInstr(m_arena.Alloc<SubInstr>(dst, left, right));
+		return dst;
+	case OperatorType::MULTIPLY:
+		PushInstr(m_arena.Alloc<MulInstr>(dst, left, right));
+		return dst;
+	case OperatorType::DIVIDE:
+		PushInstr(m_arena.Alloc<DivInstr>(dst, left, right));
+		return dst;
+	case OperatorType::NONE:
+	default:
+		// TODO: better error
+		assert(false && "unsupported expression operator has been used");
 	}
 
 	assert(false && "UNREACHABLE");

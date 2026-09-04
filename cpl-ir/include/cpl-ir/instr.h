@@ -15,6 +15,8 @@ enum class InstrOp
 	STORE,
 	LOAD,
 	PTR,
+	ADD, SUB, MUL, DIV, NEG,
+	RET,
 	COUNT_INSTR_OPS,
 };
 

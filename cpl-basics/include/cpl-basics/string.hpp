@@ -6,6 +6,7 @@
 #include <functional>
 #include <limits>
 #include <ostream>
+#include <format>
 #include <string_view>
 
 #if __cplusplus >= 202002L
@@ -207,6 +208,33 @@ namespace std
 			) const noexcept
 		{
 			return std::hash<std::string_view>{}(value.View());
+		}
+	};
+
+	template<typename SizeT, typename CharT>
+	struct formatter<::BasicString<SizeT>, CharT>
+		: formatter<basic_string_view<CharT>, CharT>
+	{
+		template<typename FormatContext>
+		auto format(
+			const ::BasicString<SizeT>& value,
+			FormatContext& ctx
+		) const
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				return formatter<basic_string_view<char>, char>::format(
+					value.View(),
+					ctx
+				);
+			}
+			else
+			{
+				static_assert(
+					std::is_same_v<CharT, char>,
+					"BasicString currently only supports char formatting"
+				);
+			}
 		}
 	};
 }

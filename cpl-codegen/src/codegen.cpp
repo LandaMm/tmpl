@@ -10,6 +10,8 @@ class GeneratorAllocatorHandler : public AllocatorHandler
 {
 public:
 	GeneratorAllocatorHandler(FileStreamWriter* output) : m_output(output) { }
+
+	using Slot = std::variant<RegSlot, StackSlot>;
 private:
 	void Write(const String& what)
 	{
@@ -20,17 +22,104 @@ private:
 	{
 		m_output->Write(what + "\n");
 	}
+
+	MemSize GetSlotSize(const Slot& slot)
+	{
+		if (std::holds_alternative<RegSlot>(slot))
+		{
+			return std::get<RegSlot>(slot).size;
+		}
+		else if (std::holds_alternative<StackSlot>(slot))
+		{
+			return std::get<StackSlot>(slot).size;
+		}
+
+		assert(false && "UNHANDLED SLOT KIND");
+		return {};
+	}
+
+	// TODO: think if global values should have their own slot kind
+	// for example like StackSlot but DataSlot(name: str)
+	String GetValueSizeName(const IRGenerate::Type* typ)
+	{
+		auto layout = IRGenerate::TypeResolver::ResolveTypeSize(typ);
+		switch (layout.size.Bits())
+		{
+		case 8:
+			return "byte";
+		case 16:
+			return "word";
+		case 32:
+			return "dword";
+		case 64:
+			return "qword";
+		default:
+			// TODO: better error maybe
+			assert(false && "unsupported type size");
+		}
+
+		return {};
+	}
+
+	String GetStackSlotSizeName(const StackSlot& stackSlot)
+	{
+		switch (stackSlot.size.Bits())
+		{
+		case 8:
+			return "byte";
+		case 16:
+			return "word";
+		case 32:
+			return "dword";
+		case 64:
+			return "qword";
+		default:
+			// TODO: better error maybe
+			assert(false && "invalid stack slot size");
+		}
+
+		return {};
+	}
+
+	String GetSlotOperand(const Slot& slot)
+	{
+		if (std::holds_alternative<RegSlot>(slot))
+		{
+			return std::get<RegSlot>(slot).name;
+		}
+		else if (std::holds_alternative<StackSlot>(slot))
+		{
+			const auto& stackSlot = std::get<StackSlot>(slot);
+			return std::format("{} [rbp-{}]", GetStackSlotSizeName(stackSlot), stackSlot.offset.Bytes());
+		}
+
+		assert(false && "UNHANDLED SLOT KIND");
+		return {};
+	}
+
+	void MoveSlots(const Slot& from, const Slot& to)
+	{
+		auto lSize = GetSlotSize(from);
+		auto rSize = GetSlotSize(to);
+		Write("\t");
+		Write(rSize > lSize ? "movzx" : "mov");
+		Write(" ");
+		Write(GetSlotOperand(to));
+		Write(", ");
+		Write(GetSlotOperand(from));
+		WriteLn("");
+	}
 public:
 	void OnNewStackSlot(const StackSlot& slot) override {
 		WriteLn("\t;; new stack slot");
-		WriteLn(std::format("\tsub rsp, {}", slot.size));
+		WriteLn(std::format("\tsub rsp, {}", slot.size.Bytes()));
 	}
 	void OnSpill(const RegSlot& from, const StackSlot& to) override {
 		WriteLn("\t;; register spill");
-		WriteLn(std::format("\tmov [rbp-{}], {}", to.offset, from.name.c_str()));
-		WriteLn(std::format("\txor {}, {}", from.name.c_str(), from.name.c_str()));
+		MoveSlots(from, to);
 	}
 	void OnFreeReg(const RegSlot& reg) override {
+		// TODO: think if we need to do anything here
 		WriteLn(std::format("\t;; free {} reg", reg.name.c_str()));
 		WriteLn(std::format("\txor {}, {}", reg.name.c_str(), reg.name.c_str()));
 	}
@@ -38,67 +127,21 @@ public:
 	{
 		WriteLn("\t;; global load");
 		Write("\tmov ");
-		if (std::holds_alternative<RegSlot>(slot))
-		{
-			Write(std::get<RegSlot>(slot).name.c_str());
-		}
-		else
-		{
-			Write(std::format("[rbp-{}]", std::get<StackSlot>(slot).offset));
-		}
-		WriteLn(std::format(", [rel {}]", value->Name().c_str()));
+		Write(GetSlotOperand(slot));
+		WriteLn(std::format(", {} [rel {}]", GetValueSizeName(value->Typ()), value->Name().c_str()));
 	}
 	void OnMove(const std::variant<RegSlot, StackSlot>& from, const std::variant<RegSlot, StackSlot>& to) override {
 		WriteLn("\t;; moving");
-		if (std::holds_alternative<RegSlot>(from) && std::holds_alternative<RegSlot>(to))
-		{
-			auto fromReg = std::get<RegSlot>(from);
-			auto toReg = std::get<RegSlot>(to);
-			if (fromReg.size < toReg.size)
-			{
-				Write("\tmovzx");
-			}
-			else
-			{
-				Write("\tmov");
-			}
-		}
-		else
-		{
-			Write("\tmov");
-		}
-		Write(" ");
-		if (std::holds_alternative<RegSlot>(to))
-		{
-			Write(std::get<RegSlot>(to).name.c_str());
-		}
-		else
-		{
-			Write(std::format("[rbp-{}]", std::get<StackSlot>(to).offset));
-		}
-		Write(", ");
-		if (std::holds_alternative<RegSlot>(from))
-		{
-			Write(std::get<RegSlot>(from).name.c_str());
-		}
-		else
-		{
-			Write(std::format("[rbp-{}]", std::get<StackSlot>(from).offset));
-		}
-		WriteLn("");
+		MoveSlots(from, to);
 	}
 	void OnImmediateStore(const std::variant<RegSlot, StackSlot>& to, const IRGenerate::ImmediateValue* value) override {
 		WriteLn("\t;; immediate store");
-		if (std::holds_alternative<RegSlot>(to))
-		{
-			auto& reg = std::get<RegSlot>(to);
-			WriteLn(std::format("\tmov {}, {}", reg.name.c_str(), value->ImmValue()));
-		}
-		else // StackSlot
-		{
-			auto& stack = std::get<StackSlot>(to);
-			WriteLn(std::format("\tmov [rbp-{}], {}", stack.offset, value->ImmValue()));
-		}
+		WriteLn(std::format("\tmov {}, {}", GetSlotOperand(to), value->ImmValue()));
+	}
+	void OnStackRelease(MemSize offset) override
+	{
+		WriteLn("\t;; release stack by offset");
+		WriteLn(std::format("\tadd rsp, {}", offset.Bytes()));
 	}
 private:
 	FileStreamWriter* m_output;
@@ -111,59 +154,61 @@ Generator::Generator(FileStreamWriter* output, const IRGenerate::IR* ir)
 
 	m_handler = new GeneratorAllocatorHandler(m_output);
 
-	RegisterDistributor* distributor = new RegisterDistributor({
+	RegisterDistributor* distributor = m_arena.Alloc<RegisterDistributor>(std::initializer_list<RegGroup>{
 		RegGroup{
 			"RAX",
 			{
-				Reg{"al", 8},
-				Reg{"ax", 16},
-				Reg{"eax", 32},
-				Reg{"rax", 64},
+				Reg{"al", MemSize::FromBits(8)},
+				Reg{"ax", MemSize::FromBits(16)},
+				Reg{"eax", MemSize::FromBits(32)},
+				Reg{"rax", MemSize::FromBits(64)},
 			}
 		},
 
 		RegGroup{
 			"RCX",
 			{
-				Reg{"cl", 8},
-				Reg{"cx", 16},
-				Reg{"ecx", 32},
-				Reg{"rcx", 64},
+				Reg{"cl", MemSize::FromBits(8)},
+				Reg{"cx", MemSize::FromBits(16)},
+				Reg{"ecx", MemSize::FromBits(32)},
+				Reg{"rcx", MemSize::FromBits(64)},
 			}
 		},
 
 		RegGroup{
 			"RDX",
 			{
-				Reg{"dl", 8},
-				Reg{"dx", 16},
-				Reg{"edx", 32},
-				Reg{"rdx", 64},
+				Reg{"dl", MemSize::FromBits(8)},
+				Reg{"dx", MemSize::FromBits(16)},
+				Reg{"edx", MemSize::FromBits(32)},
+				Reg{"rdx", MemSize::FromBits(64)},
 			}
 		},
 
 		RegGroup{
 			"R9",
 			{
-				Reg{"r9b", 8},
-				Reg{"r9w", 16},
-				Reg{"r9d", 32},
-				Reg{"r9", 64},
+				Reg{"r9b", MemSize::FromBits(8)},
+				Reg{"r9w", MemSize::FromBits(16)},
+				Reg{"r9d", MemSize::FromBits(32)},
+				Reg{"r9", MemSize::FromBits(64)},
 			}
 		},
 
 		RegGroup{
 			"R8",
 			{
-				Reg{"r8b", 8},
-				Reg{"r8w", 16},
-				Reg{"r8d", 32},
-				Reg{"r8", 64},
+				Reg{"r8b", MemSize::FromBits(8)},
+				Reg{"r8w", MemSize::FromBits(16)},
+				Reg{"r8d", MemSize::FromBits(32)},
+				Reg{"r8", MemSize::FromBits(64)},
 			}
 		},
 	});
 
-	m_allocator = new BasicSlotAllocator(distributor, m_handler);
+	StackDistributor* stackDistro = m_arena.Alloc<StackDistributor>(m_handler);
+
+	m_allocator = new BasicSlotAllocator(distributor, stackDistro, m_handler);
 }
 
 void Generator::Generate()
@@ -205,36 +250,9 @@ void Generator::Generate()
 			m_allocator->LoadValueInReg(param->destination, parameterRegs[i]);
 		}
 
-		// Stack-Alignment (16 bytes for Windows)
-#if 0
-		{
-			// return address + old stack frame (8 + 8) = 16 % 16 = 0
-			Uint32 bytesAllocated = 0;
-			for (const auto& instr : function->Body()->Body())
-			{
-				if (const AllocaInstr* alloca = instr->As<AllocaInstr>())
-				{
-					auto typeSize = TypeResolver::ResolveTypeSize(alloca->Typ());
-					bytesAllocated += typeSize.size / 8;
-				}
-				/*
-				else if (const CallInstr* call = instr->As<CallInstr>())
-				{
-					auto typeSize = TypeResolver::ResolveTypeSize(call->RetType());
-					bytesAllocated += typeSize.size / 8;
-				}
-				*/
-			}
-			Uint32 additionalBytes = bytesAllocated < 16 ? 16 - bytesAllocated : bytesAllocated % 16;
-			if (additionalBytes > 0)
-			{
-				m_allocator->GetNewStackSlotFromSize(additionalBytes * 8);
-			}
-		}
-#endif
-
 		GenerateBasicBlock(function->Body());
 
+		// TODO: repetitive code
 		WriteLn("\tmov rsp, rbp");
 		WriteLn("\tpop rbp");
 		WriteLn("\tret");
@@ -277,7 +295,7 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 				if (std::holds_alternative<RegSlot>(slot.storage))
 					WriteLn(std::format(" -> {}", std::get<RegSlot>(slot.storage).name.c_str()));
 				else // StackSlot
-					WriteLn(std::format(" -> [rbp-{}]", std::get<StackSlot>(slot.storage).offset));
+					WriteLn(std::format(" -> [rbp-{}]", std::get<StackSlot>(slot.storage).offset.Bytes()));
 			}
 			// m_allocator->StoreLocal(dest);
 		}
@@ -292,7 +310,7 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			if (src.groupName.Empty()) assert(false);
 			WriteLn("\t;; store");
 			WriteLn(std::format("\tmov {}, {}", slot.name.c_str(), src.name.c_str()));
-			m_allocator->FreeReg(src);
+			m_allocator->FreeValueWithReg(src);
 		}
 		break;
 	case InstrOp::CALL:
@@ -300,41 +318,48 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			auto call = instr->As<CallInstr>();
 			assert(call->Args().Size() <= 4 && "only up to 4 arguments are supported for function call");
 			// Array<String> parameterRegs = { "ecx", "edx", "r8d", "r9d" };
-			Array<String> callerSaveRegs = { "RAX", "RCX", "RDX", "R8", "R9", "R10", "R11" };
-			for (const auto& callerSaveReg : callerSaveRegs)
-			{
-				m_allocator->SpillRegGroup(callerSaveReg);
-			}
+			constexpr MemSize PARAMETER_MIN_SIZE = MemSize::FromBits(32);
 			Array<String> parameterRegs = { "RCX", "RDX", "R8", "R9" };
 			Array<RegSlot> argRegs;
 			WriteLn("\t;; funcall");
 			WriteLn("\t;; arguments");
 			// Windows 4 x 8-byte shadow space
-			for (size_t i = 0; i < call->Args().Size(); ++i)
+			for (size_t i = 0; i < parameterRegs.Size(); ++i)
 			{
-				argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i], parameterRegs[i]));
+				m_allocator->SpillRegGroup(parameterRegs[i]);
+				if (i < call->Args().Size())
+					argRegs.Push(m_allocator->LoadValueInReg(call->Args()[i], RegTarget(parameterRegs[i], PARAMETER_MIN_SIZE)));
 			}
 
-			RegSlot result = m_allocator->LoadValueInReg(call->Dest(), "RAX");
+			// Safely free the RAX register for return value
+			// m_allocator->SpillRegGroup("RAX");
+			m_allocator->LoadValueInReg(call->Dest(), RegTarget("RAX", MemSize::FromBits(32)));
 
-			// 16-byte alignment
-			Uint32 currentOffset = m_allocator->GetStackOffset();
-			Uint32 remainingBytes = (16 - (currentOffset % 16)) % 16;
+			// Caller Saved Registers
+			{
+				Array<String> callerSaveRegs = { "R10", "R11" };
+				for (const auto& callerSaveReg : callerSaveRegs)
+				{
+					m_allocator->SpillRegGroup(callerSaveReg);
+				}
+			}
 
+			const auto alignment = m_allocator->AlignStack(16);
 			// 32-byte shadow space on Windows
-			m_allocator->GetNewStackSlotFromSize((32 + remainingBytes) * 8);
+			const auto& shadowSpace = m_allocator->AllocateTempStackSlot(MemSize::FromBits(32) * 8);
 
 			WriteLn("\t;; call");
+			WriteLn("\txor rax, rax");
 			WriteLn(std::format("\tcall {}", call->CallSymbol()->Name().c_str()));
 
 			// remove 32-byte shadow space on Windows
-			m_allocator->SetExplicitOffset(m_allocator->GetStackOffset() - 32 - remainingBytes);
-			WriteLn(std::format("\tadd rsp, {}", 32 + remainingBytes));
+			m_allocator->ReleaseTempStackSlot(shadowSpace);
+			if (alignment) m_allocator->ReleaseTempStackSlot(alignment.value());
 
 			// free argument registers
 			for (auto &reg : argRegs)
 			{
-				m_allocator->FreeReg(reg);
+				m_allocator->FreeValueWithReg(reg);
 			}
 		}
 		break;
@@ -351,7 +376,7 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 				if (std::holds_alternative<RegSlot>(srcSlot.storage))
 					WriteLn(std::format(" -> {}", std::get<RegSlot>(srcSlot.storage).name.c_str()));
 				else // StackSlot
-					WriteLn(std::format(" -> [rbp-{}]", std::get<StackSlot>(srcSlot.storage).offset));
+					WriteLn(std::format(" -> [rbp-{}]", std::get<StackSlot>(srcSlot.storage).offset.Bytes()));
 			}
 			// TODO: repetitive code
 			{
@@ -382,7 +407,7 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 				auto local = src->As<LocalValue>();
 				const Slot& slot = m_allocator->StoreOrUpdateValue(local, StackDestination{std::nullopt});
 				assert(std::holds_alternative<StackSlot>(slot.storage) && "SHOULD BE STORED ON THE STACK");
-				WriteLn(std::format("\tlea {}, [rbp-{}]", dstReg.name.c_str(), std::get<StackSlot>(slot.storage).offset));
+				WriteLn(std::format("\tlea {}, [rbp-{}]", dstReg.name.c_str(), std::get<StackSlot>(slot.storage).offset.Bytes()));
 			}
 			break;
 			case ValueKind::UNKNOWN:
@@ -393,10 +418,80 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 			}
 		}
 		break;
+	case InstrOp::ADD:
+	{
+		auto add = instr->As<AddInstr>();
+		auto dest = m_allocator->LoadValueInReg(add->Dest());
+		auto left = m_allocator->LoadValueInReg(add->Left());
+		auto right = m_allocator->LoadValueInReg(add->Right());
+		m_handler->OnMove(left, dest);
+		WriteLn(std::format("\tadd {}, {}", dest.name.c_str(), right.name.c_str()));
+		m_allocator->FreeValueWithReg(left);
+		m_allocator->FreeValueWithReg(right);
+	}
+	break;
+	case InstrOp::SUB:
+	{
+		auto sub = instr->As<SubInstr>();
+		auto dest = m_allocator->LoadValueInReg(sub->Dest());
+		auto left = m_allocator->LoadValueInReg(sub->Left());
+		auto right = m_allocator->LoadValueInReg(sub->Right());
+		m_handler->OnMove(left, dest);
+		WriteLn(std::format("\tsub {}, {}", dest.name.c_str(), right.name.c_str()));
+		m_allocator->FreeValueWithReg(left);
+		m_allocator->FreeValueWithReg(right);
+	}
+	break;
+	case InstrOp::MUL:
+	{
+		auto mul = instr->As<MulInstr>();
+		auto dest = m_allocator->LoadValueInReg(mul->Dest());
+		auto left = m_allocator->LoadValueInReg(mul->Left());
+		auto right = m_allocator->LoadValueInReg(mul->Right());
+		m_handler->OnMove(left, dest);
+		WriteLn(std::format("\timul {}, {}", dest.name.c_str(), right.name.c_str()));
+		m_allocator->FreeValueWithReg(left);
+		m_allocator->FreeValueWithReg(right);
+	}
+	break;
+	case InstrOp::DIV:
+	{
+		auto div = instr->As<DivInstr>();
+		auto left = m_allocator->LoadValueInReg(div->Left());
+		auto right = m_allocator->LoadValueInReg(div->Right());
+		auto dest = m_allocator->LoadValueInReg(div->Dest(), RegTarget("RAX"));
+		m_handler->OnMove(left, dest);
+		WriteLn("\tcdq");
+		WriteLn(std::format("\tidiv {}", right.name.c_str()));
+		m_allocator->FreeValueWithReg(left);
+		m_allocator->FreeValueWithReg(right);
+	}
+	break;
+	case InstrOp::NEG:
+	{
+		auto neg = instr->As<NegInstr>();
+		auto target = m_allocator->LoadValueInReg(neg->Target());
+		auto dest = m_allocator->LoadValueInReg(neg->Dest());
+		m_handler->OnMove(target, dest);
+		WriteLn(std::format("\tneg {}", dest.name));
+		m_allocator->FreeValueWithReg(target);
+	}
+	break;
+	case InstrOp::RET:
+	{
+		auto ret = instr->As<RetInstr>();
+		m_allocator->LoadValueInReg(ret->RetValue(), RegTarget("RAX", MemSize::FromBits(32)));
+		// TODO: repetitive code
+		WriteLn("\tmov rsp, rbp");
+		WriteLn("\tpop rbp");
+		WriteLn("\tret");
+	}
+	break;
 	case InstrOp::NONE:
 	default:
 		// TODO: better error
-		WriteLn(std::format("\tTODO: instr op {}", static_cast<int>(instr->Type())));
+		assert(false && "unsupported instruction type encountered");
+		WriteLn(std::format("\t;; TODO: instr op {}", static_cast<int>(instr->Type())));
 		break;
 	}
 }
@@ -417,10 +512,6 @@ void Generator::GenerateData()
 				auto value = localVariable->InitialValue();
 
 				IRGenerate::TypeLayout layout = IRGenerate::TypeResolver::ResolveTypeSize(localVariable->Typ());
-
-				int step = 1;
-
-				step = layout.size / 8;
 
 				switch (value->Kind())
 				{

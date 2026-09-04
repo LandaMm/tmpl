@@ -1,13 +1,15 @@
 #import "examples/std.mt"
 #import "examples/01_exit.mt"
 #import "examples/02_hello.mt"
-#import "examples/03_malloc.mt"
+#import "examples/03_readfile.mt"
+#import "examples/04_expression.mt"
 
 main :: (argc: int, argv: **char) -> void {
-	printf("argc = %d\n\0", argc);
-	printf("converting string '+420' results in %d\n\0", strtol("+420", argv, 10));
+	x := 69;
+	printf("x(i32) = %d\n\0", x);
 	e02_hello();
 	path := "CMakeLists.txt\0";
-	e03_malloc(path, 500);
+	e03_readfile(path, 500);
+	printf("e04_expression result: %d\n\0", e04_expression());
 	exit(argc);
 }

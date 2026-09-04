@@ -5,17 +5,18 @@
 
 #include <cpl-basics/def.hpp>
 #include <cpl-basics/string.hpp>
+#include <cpl-basics/memsize.hpp>
 
 namespace IRGenerate
 {
 
 struct TypeLayout
 {
-	Uint32 size, align;
+	MemSize size, align;
 };
 
 // TODO: FIXME: pointer size depending on the target system arch
-constexpr TypeLayout POINTER_SIZE = {64, 64};
+constexpr TypeLayout POINTER_SIZE = {MemSize::FromBits(64), MemSize::FromBits(64)};
 
 enum class TypeClass
 {

@@ -9,6 +9,7 @@
 #include <cpl-parser/parser.h>
 #include <cpl-parser/node/function.hpp>
 #include <cpl-parser/node/var_declaration.hpp>
+#include <cpl-parser/node/expression.hpp>
 #include <cpl-parser/node/type.hpp>
 
 #include "type.hpp"
@@ -46,6 +47,7 @@ public:
 	inline const std::deque<Scope*>& Scopes() const noexcept { return m_scopes; }
 private:
 	const Value* EvaluateNode(Node* node);
+	const Value* EvaluateExpression(Nodes::ExpressionNode* expr);
 	void GenerateFunction(Nodes::FunctionDeclaration* fn);
 	const Value* GenerateVariableDeclaration(Nodes::VariableDeclaration* var);
 	void GenerateTypeDeclaration(Nodes::TypeDeclaration* typ);

@@ -26,6 +26,12 @@ void RegisterDistributor::FreeReg(const RegSlot& reg)
 	m_freeRegs.Push(reg.groupName);
 }
 
+void RegisterDistributor::FreeReg(const String& group)
+{
+	if (m_regGroups.find(group) == m_regGroups.end()) return;
+	m_freeRegs.Push(group);
+}
+
 const RegGroup& RegisterDistributor::GetGroupByName(const String& groupName)
 {
 	return m_regGroups.at(groupName);
@@ -41,16 +47,16 @@ void RegisterDistributor::TakeFreeRegGroup(const RegGroup& group)
 	m_freeRegs = newFreeRegs;
 }
 
-std::optional<RegSlot> RegisterDistributor::GetSpecificFreeRegForType(const String& groupName, const IRGenerate::Type* typ)
+std::optional<RegSlot> RegisterDistributor::GetSpecificFreeRegForType(const RegTarget& target, const IRGenerate::Type* typ)
 {
 	using namespace IRGenerate;
 
 	// TODO: Allocation Strategy
 	for (String& freeGroupName : m_freeRegs)
 	{
-		if (freeGroupName != groupName) continue;
+		if (freeGroupName != target.group) continue;
 		RegGroup& regGroup = m_regGroups[freeGroupName];
-		auto supportedReg = RegSupportingType(regGroup, typ);
+		auto supportedReg = RegSupportingType(regGroup, typ, target);
 		if (supportedReg) {
 			TakeFreeRegGroup(regGroup);
 			return RegSlot(supportedReg.value(), regGroup.name);
@@ -78,44 +84,108 @@ std::optional<RegSlot> RegisterDistributor::GetFreeRegForType(const IRGenerate::
 	return std::nullopt;
 }
 
-std::optional<Reg> RegisterDistributor::RegSupportingType(const RegGroup& group, const IRGenerate::Type* typ)
+std::optional<Reg> RegisterDistributor::RegSupportingType(const RegGroup& group, const IRGenerate::Type* typ, const std::optional<RegTarget>& target)
 {
 	for (const Reg& reg : group.regs)
 	{
-		if (RegSupportingType(reg, typ)) return reg;
+		if (RegSupportingType(reg, typ, target)) return reg;
 	}
 	return std::nullopt;
 }
 
-bool RegisterDistributor::RegSupportingType(const Reg& regSlot, const IRGenerate::Type* typ)
+bool RegisterDistributor::RegSupportingType(const Reg& regSlot, const IRGenerate::Type* typ, const std::optional<RegTarget>& target)
 {
 	auto typeSize = IRGenerate::TypeResolver::ResolveTypeSize(typ);
+	if (target.has_value() && target.value().minSize > regSlot.size) return false;
 	return regSlot.size >= typeSize.size;
 }
 
-BasicSlotAllocator::BasicSlotAllocator(RegisterDistributor* regDistro, AllocatorHandler* handler)
-	: m_regDistro(regDistro), m_handler(handler)
+void StackDistributor::ResetState()
+{
+	m_nextOffset = {};
+}
+
+std::optional<StackSlot> StackDistributor::Align(Uint32 bytes)
+{
+	// byte alignment
+	MemSize currentOffset = GetStackOffset();
+
+	// Allocate remaining bytes
+	MemSize alignment = GetStackOffset() % MemSize::FromBytes(bytes);
+	if (alignment != MemSize::FromBits(0))
+		return GetNewStackSlotFromSize(alignment);
+
+	return std::nullopt;
+}
+
+void StackDistributor::ReleaseStackSlot(const StackList::iterator& it)
+{
+	assert(it != m_stack.end());
+	if (std::next(it) == m_stack.end())
+	{
+		m_nextOffset -= it->size;
+		m_handler->OnStackRelease(it->size);
+		m_stack.erase(it);
+	}
+	else
+	{
+		it->taken = false;
+	}
+}
+
+std::list<StackSlot>::iterator StackDistributor::FindStackSlot(const StackSlot& slot)
+{
+	for (auto it = m_stack.begin(); it != m_stack.end(); ++it)
+	{
+		if (it->offset == slot.offset) return it;
+	}
+
+	return m_stack.end();
+}
+
+StackSlot StackDistributor::GetNewStackSlotFromValue(const IRGenerate::Value* value)
+{
+	IRGenerate::TypeLayout layout = IRGenerate::TypeResolver::ResolveTypeSize(value->Typ());
+	return GetNewStackSlotFromSize(layout.size);
+}
+
+StackSlot StackDistributor::GetNewStackSlotFromSize(MemSize size)
+{
+	assert(size != MemSize::FromBits(0));
+	for (auto it = m_stack.begin(); it != m_stack.end(); ++it)
+	{
+		if (!it->taken && it->size == size)
+		{
+			it->taken = true;
+			return *it;
+		}
+	}
+
+	m_nextOffset += size;
+	StackSlot slot(m_nextOffset, size, true);
+	m_handler->OnNewStackSlot(slot);
+	m_stack.push_back(slot);
+	return slot;
+}
+
+BasicSlotAllocator::BasicSlotAllocator(RegisterDistributor* regDistro, StackDistributor* stackDistro, AllocatorHandler* handler)
+	: m_regDistro(regDistro), m_stackDistro(stackDistro), m_handler(handler)
 {
 }
 
 void BasicSlotAllocator::ResetState()
 {
 	m_regDistro->ResetState();
+	m_stackDistro->ResetState();
 
 	m_slots.clear();
-	m_nextOffset = 0;
 }
 
-void BasicSlotAllocator::SetExplicitOffset(Uint32 offset)
-{
-	m_nextOffset = offset;
-}
-
-const RegSlot BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value, std::optional<String> regGroup)
+const RegSlot BasicSlotAllocator::LoadValueInReg(const IRGenerate::Value* value, std::optional<RegTarget> targetReg)
 {
 	using namespace IRGenerate;
 
-	RegSlot targetRegister = regGroup ? GetSpecificRegGroup(regGroup.value(), value) : GetAnyReg(value);
+	RegSlot targetRegister = targetReg ? GetSpecificRegGroup(targetReg.value(), value) : GetAnyReg(value);
 
 	RegDestination destination = RegDestination{ targetRegister };
 
@@ -175,6 +245,21 @@ String BasicSlotAllocator::GetSlotKey(const IRGenerate::Value* value)
 	}
 }
 
+std::optional<StackSlot> BasicSlotAllocator::AlignStack(Uint32 bytes)
+{
+	return m_stackDistro->Align(bytes);
+}
+
+StackSlot BasicSlotAllocator::AllocateTempStackSlot(MemSize size)
+{
+	return m_stackDistro->GetNewStackSlotFromSize(size);
+}
+
+void BasicSlotAllocator::ReleaseTempStackSlot(const StackSlot& tempSlot)
+{
+	m_stackDistro->ReleaseStackSlot(m_stackDistro->FindStackSlot(tempSlot));
+}
+
 void BasicSlotAllocator::SpillRegGroup(const String& groupName)
 {
 	for (auto& [key, slot] : m_slots)
@@ -183,12 +268,13 @@ void BasicSlotAllocator::SpillRegGroup(const String& groupName)
 		{
 			RegSlot moveReg = std::get<RegSlot>(slot.storage);
 
-			StackSlot newSlot = GetNewStackSlotFromSize(moveReg.size);
+			StackSlot newSlot = m_stackDistro->GetNewStackSlotFromSize(moveReg.size);
 			m_handler->OnSpill(moveReg, newSlot);
 
 			InsertValueSlot(slot.value, newSlot, true);
 
 			// add register to freeRegs
+			m_handler->OnFreeReg(moveReg);
 			m_regDistro->FreeReg(moveReg);
 		}
 	}
@@ -231,7 +317,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 			}
 			else
 			{
-				InsertValueSlot(value, GetNewStackSlotFromValue(value));
+				InsertValueSlot(value, m_stackDistro->GetNewStackSlotFromValue(value));
 			}
 		}
 		else if constexpr (std::is_same_v<T, RegDestination>)
@@ -251,7 +337,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 
 					// move from register to the register
 					m_handler->OnMove(slot.storage, dest.reg);
-					FreeReg(std::get<RegSlot>(slot.storage));
+					FreeValueWithReg(std::get<RegSlot>(slot.storage));
 					InsertValueSlot(value, dest.reg);
 				}
 				else
@@ -282,7 +368,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 			}
 			else
 			{
-				InsertValueSlot(value, GetNewStackSlotFromValue(value));
+				InsertValueSlot(value, m_stackDistro->GetNewStackSlotFromValue(value));
 			}
 		}
 		else
@@ -294,7 +380,7 @@ const Slot& BasicSlotAllocator::StoreOrUpdateValue(const IRGenerate::Value* valu
 	return GetSlotByKey(GetSlotKey(value));
 }
 
-void BasicSlotAllocator::FreeReg(const RegSlot& reg)
+void BasicSlotAllocator::FreeValueWithReg(const RegSlot& reg)
 {
 	for (auto& [key, slot] : m_slots)
 	{
@@ -358,24 +444,29 @@ RegSlot BasicSlotAllocator::GetAnyReg(const IRGenerate::Value* targetValue)
 	return {};
 }
 
-RegSlot BasicSlotAllocator::GetSpecificRegGroup(const String& groupName, const IRGenerate::Value* targetValue)
+RegSlot BasicSlotAllocator::GetSpecificRegGroup(const RegTarget& target, const IRGenerate::Value* targetValue)
 {
 	if (ValueIsStored(targetValue))
 	{
 		auto &slot = GetSlotByKey(GetSlotKey(targetValue));
-		if (std::holds_alternative<RegSlot>(slot.storage) && std::get<RegSlot>(slot.storage).groupName == groupName) return std::get<RegSlot>(slot.storage);
+		if (std::holds_alternative<RegSlot>(slot.storage))
+		{
+			const auto& regSlot = std::get<RegSlot>(slot.storage);
+			if (regSlot.groupName == target.group && regSlot.size >= target.minSize)
+				return regSlot;
+		}
 	}
 
-	std::optional<RegSlot> reg = m_regDistro->GetSpecificFreeRegForType(groupName, targetValue->Typ());
+	std::optional<RegSlot> reg = m_regDistro->GetSpecificFreeRegForType(target, targetValue->Typ());
 	if (reg.has_value())
 	{
 		return reg.value();
 	}
 
 	// Register is occupied, search for value holding it and spill
-	SpillRegGroup(groupName);
+	SpillRegGroup(target.group);
 
-	reg = m_regDistro->GetSpecificFreeRegForType(groupName, targetValue->Typ());
+	reg = m_regDistro->GetSpecificFreeRegForType(target, targetValue->Typ());
 	assert(reg.has_value() && "SHOULD BE FREE AND AVAILABLE AFTER SPILLING");
 
 	return reg.value();
@@ -389,44 +480,6 @@ bool BasicSlotAllocator::ValueIsStored(const IRGenerate::Value* value)
 Slot& BasicSlotAllocator::GetSlotByKey(String slotKey)
 {
 	return m_slots.at(slotKey);
-}
-
-#if 0
-const StackSlot BasicSlotAllocator::GetLocal(const IRGenerate::LocalValue* local)
-{
-	if (m_locals.find(local->Name()) == m_locals.end())
-	{
-		return StoreLocal(local);
-	}
-	else
-	{
-		return m_locals.at(local->Name());
-	}
-}
-
-const StackSlot& BasicSlotAllocator::StoreLocal(const IRGenerate::LocalValue* local)
-{
-	if (m_locals.find(local->Name()) != m_locals.end())
-	{
-		assert(false && "SHOULD BE UNREACHABLE TO REDECLARE LOCAL");
-	}
-	m_locals[local->Name()] = GetNewStackSlotFromValue(local);
-	return m_locals.at(local->Name());
-}
-#endif
-
-StackSlot BasicSlotAllocator::GetNewStackSlotFromValue(const IRGenerate::Value* value)
-{
-	IRGenerate::TypeLayout layout = IRGenerate::TypeResolver::ResolveTypeSize(value->Typ());
-	return GetNewStackSlotFromSize(layout.size);
-}
-
-StackSlot BasicSlotAllocator::GetNewStackSlotFromSize(Uint32 size)
-{
-	m_nextOffset += size / 8;
-	StackSlot slot = { m_nextOffset, size / 8 };
-	m_handler->OnNewStackSlot(slot);
-	return slot;
 }
 
 } // namespace Codegen
