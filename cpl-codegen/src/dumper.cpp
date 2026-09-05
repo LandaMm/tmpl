@@ -1,5 +1,7 @@
 #include "cpl-codegen/dumper.h"
 
+#include <format>
+
 void dump_type_name(const IRGenerate::Type* typ, FileStreamWriter* stream)
 {
 	using namespace IRGenerate;
@@ -366,13 +368,15 @@ void dump_ir(const IRGenerate::IR* ir, FileStreamWriter* stream)
 			stream->Write(String(") -> "));
 			dump_type_name(funcDesc->RetType(), stream);
 
-			if (value->Body())
+			stream->Write("\n");
+
+			for (const auto& fnBlock : value->Blocks())
 			{
-				stream->Write(String(":\n"));
-				dump_block(value->Body(), stream);
+				stream->Write(std::format("{}:\n", fnBlock->Id()));
+				dump_block(fnBlock, stream);
 			}
 
-			stream->Write(String("\n"));
+			stream->Write("\n");
 		}
 	}
 

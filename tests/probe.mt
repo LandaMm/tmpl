@@ -1,8 +1,10 @@
-
 puts :: (buf: *i8) -> void #foreign;
+printf :: (fmt: *i8, arg: i32) -> void #foreign;
 
 main :: () -> i32 {
-	puts("Hello, World!\0");
+	while (true) {
+		puts("Hello, World!\0");
+	}
 	return 0;
 }
 

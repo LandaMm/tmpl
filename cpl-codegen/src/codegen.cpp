@@ -250,7 +250,10 @@ void Generator::Generate()
 			m_allocator->LoadValueInReg(param->destination, parameterRegs[i]);
 		}
 
-		GenerateBasicBlock(function->Body());
+		for (const auto& fnBlock : function->Blocks())
+		{
+			GenerateBasicBlock(fnBlock);
+		}
 
 		// TODO: repetitive code
 		WriteLn("\tmov rsp, rbp");

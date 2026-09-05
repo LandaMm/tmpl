@@ -68,20 +68,28 @@ private:
 	const Symbol* FindSymbol(const String& name) const noexcept;
 	const Type* FindType(const String& name) const noexcept;
 private:
+#if 0
 	[[nodiscard]] inline BasicBlock* CurrentBlock() const noexcept {
 		if (m_blocks.empty())
 			return nullptr;
 		return m_blocks.front();
 	}
+#endif
+	[[nodiscard]] inline Function* CurrentFn() const noexcept {
+		return m_currentFn;
+	}
 	inline TempValueID BlockNextTempValueId() const noexcept
 	{
 		// TODO: better error
-		assert(CurrentBlock() && "no block is set for retrieving new temp id");
-		return CurrentBlock()->NextTempValueId();
+		assert(CurrentFn() && "no function is set for retrieving new temp id");
+		assert(CurrentFn()->CurrentBlock() && "current function does not have any block for retrieving new temp id");
+		return CurrentFn()->CurrentBlock()->NextTempValueId();
 	}
-	void StartBlock(BasicBlock* block);
+	// void StartBlock(BasicBlock* block);
+	void StartFunction(Function* fn);
 	void PushInstr(Instr* instr);
-	BasicBlock* EndBlock();
+	Function* EndFunction();
+	// BasicBlock* EndBlock();
 private:
 	ArenaAllocator<> m_arena;
 	Nodes::ProgramNode* m_rootNode;
@@ -92,7 +100,8 @@ private:
 	std::map<String, StringLiteral> m_stringLiterals;
 
 	std::deque<Scope*> m_scopes;
-	std::deque<BasicBlock*> m_blocks;
+	// std::deque<BasicBlock*> m_blocks;
+	Function* m_currentFn;
 
 	TempValueID m_tempValueCounter = 0;
 	StringLiteralId m_stringCounter = 0;

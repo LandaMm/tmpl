@@ -8,6 +8,7 @@
 #include <cpl-parser/node/assign.hpp>
 #include <cpl-parser/node/unary.hpp>
 #include <cpl-parser/node/return.hpp>
+#include <cpl-parser/node/loop.hpp>
 
 #include "cpl-ir/instr/call.hpp"
 #include "cpl-ir/instr/alloca.hpp"
@@ -48,7 +49,7 @@ void IR::GenerateIR()
 
 	/////////////////////////////////////
 
-	StartBlock(m_arena.Alloc<BasicBlock>());
+	// StartBlock(m_arena.Alloc<BasicBlock>());
 
 	for (size_t i = 0; i < m_rootNode->Size(); ++i)
 	{
@@ -79,11 +80,11 @@ void IR::GenerateIR()
 		}
 	}
 
-	EndBlock();
+	// EndBlock();
 
 	// Safe Guarding
 	// 1. Make sure no pending block exists
-	assert(m_blocks.empty());
+	assert(m_currentFn == nullptr);
 }
 
 const Value* IR::EvaluateNode(Node* node)
@@ -280,6 +281,13 @@ const Value* IR::EvaluateNode(Node* node)
 		PushInstr(m_arena.Alloc<CallInstr>(dst, symbol, std::move(args), funcDesc->RetType()));
 		return dst;
 	}
+	case NT::While:
+	{
+		auto loop = node->As<Nodes::WhileNode>();
+		assert(loop);
+		assert(false && "WHILE LOOP NOT IMPLEMENTED");
+	}
+	break;
 	case NT::Expression:
 		return EvaluateExpression(node->As<Nodes::ExpressionNode>());
 	default:
@@ -330,23 +338,23 @@ const Value* IR::EvaluateExpression(Nodes::ExpressionNode* expr)
 	return nullptr;
 }
 
-void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
+void IR::GenerateFunction(Nodes::FunctionDeclaration* fnNode)
 {
 	using NT = AST::NodeType;
 
-	bool external = fn->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN;
+	bool external = fnNode->GetSymbolFlag() == Nodes::SymbolFlag::FOREIGN;
 
-	Node* fnName = fn->GetName();
+	Node* fnName = fnNode->GetName();
 	assert(fnName->GetType() == NT::Identifier && "Currently only simple names are supported as function name.");
 	auto symbolName = fnName->As<Nodes::IdentifierNode>()->GetName();
 
-	auto retType = ParseType(fn->GetReturnType());
+	auto retType = ParseType(fnNode->GetReturnType());
 
 	Array<FunctionType::Param> paramTypes;
 	Array<FunctionParam*> fnParams;
-	for (size_t i = 0; i < fn->GetParamsSize(); ++i)
+	for (size_t i = 0; i < fnNode->GetParamsSize(); ++i)
 	{
-		auto param = fn->GetParam(i);
+		auto param = fnNode->GetParam(i);
 		auto paramName = param->GetName()->GetName();
 		const Type* paramType = ParseType(param->GetType());
 		paramTypes.Emplace(FunctionType::Param{ paramName, paramType });
@@ -368,18 +376,22 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fn)
 
 		InsertScope(fnScope);
 
-		StartBlock(m_arena.Alloc<NamedBlock>(symbolName));
-		auto body = fn->GetBody();
+		Function* fn = m_arena.Alloc<Function>(symbolName, std::move(fnParams), funcType, fnScope);
+
+		fn->AddBlock(m_arena.Alloc<BasicBlock>());
+
+		StartFunction(fn);
+		auto body = fnNode->GetBody();
 		for (size_t i = 0; i < body->GetSize(); ++i)
 		{
 			// TODO: we can do expression based thingy like in Rust
 			EvaluateNode(body->GetItem(i));
 		}
-		NamedBlock* block = reinterpret_cast<NamedBlock*>(EndBlock());
 
+		assert(fn == EndFunction() && "ENCOUNTERED AN UNEXPECTED FUNCTION");
 		assert(fnScope == EndScope() && "ENCOUNTERED AN UNEXPECTED SCOPE");
 
-		CurrentScope()->AddFunction(symbolName, m_arena.Alloc<Function>(symbolName, std::move(fnParams), funcType, block, fnScope));
+		CurrentScope()->AddFunction(symbolName, fn);
 	}
 }
 
@@ -475,11 +487,19 @@ String IR::CreateStringLiteral(const String& str)
 	return std::format("@str.{}", stringId);
 }
 
+#if 0
 void IR::StartBlock(BasicBlock* block)
 {
 	m_blocks.push_front(block);
 }
+#endif
 
+void IR::StartFunction(Function* fn)
+{
+	m_currentFn = fn;
+}
+
+#if 0
 BasicBlock* IR::EndBlock()
 {
 	// TODO: better error
@@ -488,12 +508,23 @@ BasicBlock* IR::EndBlock()
 	m_blocks.pop_front();
 	return temp;
 }
+#endif
+
+Function* IR::EndFunction()
+{
+	// TODO: better error
+	assert(CurrentFn() && "no function to end");
+	Function* temp = CurrentFn();
+	m_currentFn = nullptr;
+	return temp;
+}
 
 void IR::PushInstr(Instr* instr)
 {
 	// TODO: better error
-	assert(CurrentBlock() && "no block specified to write instructions into");
-	CurrentBlock()->AddInstr(instr);
+	assert(CurrentFn() && "no function specified to write instructions into");
+	assert(CurrentFn()->CurrentBlock() && "no block specified to write instructions into");
+	CurrentFn()->CurrentBlock()->AddInstr(instr);
 }
 
 void IR::InsertScope(Scope* newScope)
