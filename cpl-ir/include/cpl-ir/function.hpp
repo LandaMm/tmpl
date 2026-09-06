@@ -36,13 +36,16 @@ public:
 	[[nodiscard]] inline const Scope* FunctionScope() const noexcept { return m_fnScope; }
 	[[nodiscard]] inline const Array<FunctionParam*>& Params() const noexcept { return m_params; }
 public:
-	inline void AddBlock(BasicBlock* block) { m_blocks.Push(block); }
+	template<typename SizeT = Uint32>
+	inline BasicBlock* CreateBlock(ArenaAllocator<SizeT>& arena) { return arena.Alloc<BasicBlock>(m_blockNextId++); }
+	inline void PushBlock(BasicBlock* block) { m_blocks.Push(block); }
 private:
 	String m_name;
 	Array<BasicBlock*> m_blocks;
 	Array<FunctionParam*> m_params;
 	const FunctionType* m_funcType;
 	Scope* m_fnScope;
+	BlockIdType m_blockNextId = 0;
 };
 
 }

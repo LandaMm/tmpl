@@ -17,6 +17,9 @@ enum class InstrOp
 	PTR,
 	ADD, SUB, MUL, DIV, NEG,
 	RET,
+	JMP,
+	JMP_IF,
+	BRANCH,
 	COUNT_INSTR_OPS,
 };
 

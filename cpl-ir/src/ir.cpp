@@ -17,6 +17,7 @@
 #include "cpl-ir/instr/ptr.hpp"
 #include "cpl-ir/instr/arithmetic.hpp"
 #include "cpl-ir/instr/return.hpp"
+#include "cpl-ir/instr/branch.hpp"
 
 namespace IRGenerate
 {
@@ -285,7 +286,29 @@ const Value* IR::EvaluateNode(Node* node)
 	{
 		auto loop = node->As<Nodes::WhileNode>();
 		assert(loop);
-		assert(false && "WHILE LOOP NOT IMPLEMENTED");
+		assert(CurrentFn());
+
+		auto fn = CurrentFn();
+
+		// Condition block
+		BasicBlock* condBlock = fn->CreateBlock(m_arena);
+
+		PushInstr(m_arena.Alloc<JmpInstr>(condBlock->Id()));
+		fn->PushBlock(condBlock);
+
+		BasicBlock* bodyBlock = fn->CreateBlock(m_arena);
+		BasicBlock* endBlock = fn->CreateBlock(m_arena);
+
+		const Value* condition = EvaluateNode(loop->GetCondition());
+		PushInstr(m_arena.Alloc<BranchInstr>(bodyBlock->Id(), endBlock->Id(), condition));
+		fn->PushBlock(bodyBlock);
+
+		GenerateStatements(loop->GetBody());
+
+		PushInstr(m_arena.Alloc<JmpInstr>(condBlock->Id()));
+		fn->PushBlock(endBlock);
+
+		return nullptr;
 	}
 	break;
 	case NT::Expression:
@@ -338,6 +361,15 @@ const Value* IR::EvaluateExpression(Nodes::ExpressionNode* expr)
 	return nullptr;
 }
 
+void IR::GenerateStatements(Statements::StatementsBody* body)
+{
+	for (size_t i = 0; i < body->GetSize(); ++i)
+	{
+		// TODO: we can do expression based thingy like in Rust
+		EvaluateNode(body->GetItem(i));
+	}
+}
+
 void IR::GenerateFunction(Nodes::FunctionDeclaration* fnNode)
 {
 	using NT = AST::NodeType;
@@ -378,15 +410,11 @@ void IR::GenerateFunction(Nodes::FunctionDeclaration* fnNode)
 
 		Function* fn = m_arena.Alloc<Function>(symbolName, std::move(fnParams), funcType, fnScope);
 
-		fn->AddBlock(m_arena.Alloc<BasicBlock>());
+		fn->PushBlock(fn->CreateBlock(m_arena));
 
 		StartFunction(fn);
 		auto body = fnNode->GetBody();
-		for (size_t i = 0; i < body->GetSize(); ++i)
-		{
-			// TODO: we can do expression based thingy like in Rust
-			EvaluateNode(body->GetItem(i));
-		}
+		GenerateStatements(body);
 
 		assert(fn == EndFunction() && "ENCOUNTERED AN UNEXPECTED FUNCTION");
 		assert(fnScope == EndScope() && "ENCOUNTERED AN UNEXPECTED SCOPE");

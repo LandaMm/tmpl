@@ -7,6 +7,7 @@
 #include <cpl-ir/instr/ptr.hpp>
 #include <cpl-ir/instr/arithmetic.hpp>
 #include <cpl-ir/instr/return.hpp>
+#include <cpl-ir/instr/branch.hpp>
 #include <cpl-ir/ir.h>
 
 void dump_type_name(const IRGenerate::Type* typ, FileStreamWriter* stream);

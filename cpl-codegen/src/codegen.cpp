@@ -494,6 +494,29 @@ void Generator::GenerateInstr(const IRGenerate::Instr* instr)
 		WriteLn("\tret");
 	}
 	break;
+	case InstrOp::JMP:
+	{
+		auto jmp = instr->As<JmpInstr>();
+		WriteLn(std::format("\tjmp .L{}", jmp->BlockId()));
+	}
+	break;
+	case InstrOp::JMP_IF:
+	{
+		auto jmpIf = instr->As<JmpIfInstr>();
+		auto cond = m_allocator->LoadValueInReg(jmpIf->Condition());
+		WriteLn(std::format("\ttest {}, {}", cond.name, cond.name));
+		WriteLn(std::format("\tjne .L{}", jmpIf->BlockId()));
+	}
+	break;
+	case InstrOp::BRANCH:
+	{
+		auto branch = instr->As<BranchInstr>();
+		auto cond = m_allocator->LoadValueInReg(branch->Condition());
+		WriteLn(std::format("\ttest {}, {}", cond.name, cond.name));
+		WriteLn(std::format("\tje .L{}", branch->FalseBlockId()));
+		WriteLn(std::format("\tjmp .L{}", branch->TrueBlockId()));
+	}
+	break;
 	case InstrOp::NONE:
 	default:
 		// TODO: better error

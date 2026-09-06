@@ -15,7 +15,7 @@ using BlockIdType = Uint32;
 class CPL_EXPORT BasicBlock
 {
 public:
-	explicit BasicBlock();
+	explicit BasicBlock(BlockIdType id);
 
 	BasicBlock(const BasicBlock&) = delete;
 	BasicBlock& operator=(const BasicBlock&) = delete;
@@ -30,20 +30,8 @@ public:
 private:
 	Array<Instr*> m_body;
 	BlockIdType m_id;
-private:
-	static BlockIdType m_counter;
 private: // for TemporalValue
 	TempValueID m_tempValueCounter = 0;
-};
-
-class CPL_EXPORT NamedBlock : public BasicBlock
-{
-public:
-	explicit NamedBlock(const String &name);
-public:
-	const String& GetName() const noexcept;
-private:
-	String m_name;
 };
 
 } // namespace IRGenerate

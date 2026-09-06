@@ -47,6 +47,7 @@ public:
 	inline const std::deque<Scope*>& Scopes() const noexcept { return m_scopes; }
 private:
 	const Value* EvaluateNode(Node* node);
+	void GenerateStatements(Statements::StatementsBody* body);
 	const Value* EvaluateExpression(Nodes::ExpressionNode* expr);
 	void GenerateFunction(Nodes::FunctionDeclaration* fn);
 	const Value* GenerateVariableDeclaration(Nodes::VariableDeclaration* var);

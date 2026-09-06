@@ -31,6 +31,7 @@ add_library(cpl-ir
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/ptr.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/arithmetic.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/return.hpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/instr/branch.hpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/block.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/cpl-ir/ir.h"
 )
